@@ -1,0 +1,28 @@
+#version 460 core
+
+#extension GL_EXT_debug_printf:enable
+
+layout(binding=0)uniform sampler2D image;
+layout(binding=1)writeonly uniform image2D dest_image;
+
+layout(binding=2)uniform UniformNumber{
+  float num;
+}uniform_number;
+
+layout(push_constant) uniform PushTimer {
+  float time;
+} push_timer;
+
+layout(local_size_x=8U,local_size_y=8U)in;
+
+void main(){
+  vec2 pos = gl_GlobalInvocationID.xy / 512.0f;
+
+  vec4 color = textureLod(image, pos, 0.0f);
+  vec4 blend_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+  vec4 mix = mix(color, blend_color, abs(sin(pos.x + uniform_number.num * push_timer.time)));
+  imageStore(dest_image, ivec2(gl_GlobalInvocationID.xy), mix);
+
+  //debugPrintfEXT("pixel: (%f, %f, %f)\n", mix.r, mix.g, mix.b);
+}

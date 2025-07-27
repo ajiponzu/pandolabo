@@ -1,0 +1,32 @@
+# Doxygenプロジェクト設定
+
+PROJECT_NAME           = "Pandolabo"
+PROJECT_VERSION        = "1.0.0"
+PROJECT_BRIEF          = "C++ Static Library"
+
+# 入力設定
+INPUT                  = include/ src/ docs/
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hpp *.cpp *.md
+
+# 出力設定
+OUTPUT_DIRECTORY       = docs/
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+
+# 抽出設定
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+
+# ドキュメント設定
+USE_MDFILE_AS_MAINPAGE = README.md
+MARKDOWN_SUPPORT       = YES
+
+# グラフ設定
+HAVE_DOT               = NO
+UML_LOOK               = YES
+
+# その他設定
+QUIET                  = NO
+WARNINGS               = YES

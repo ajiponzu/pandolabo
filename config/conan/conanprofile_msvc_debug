@@ -1,0 +1,17 @@
+[settings]
+os=Windows
+arch=x86_64
+compiler=msvc
+compiler.version=194
+compiler.runtime=static
+compiler.runtime_type=Debug
+compiler.cppstd=20
+build_type=Debug
+
+[buildenv]
+CC=cl
+CXX=cl
+
+[conf]
+tools.system.package_manager:mode=install
+tools.system.package_manager:sudo=False

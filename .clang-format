@@ -1,0 +1,88 @@
+---
+# Pandolabo プロジェクト用 clang-format 設定
+# Google スタイルをベースにプロジェクト固有の調整を追加
+
+BasedOnStyle: Google
+Language: Cpp
+
+# インデント設定
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+IndentCaseLabels: true
+IndentPPDirectives: BeforeHash
+IndentRequires: true
+
+# 行幅設定
+ColumnLimit: 120
+
+# ブレース設定
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+
+# 関数・メソッド設定
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+
+# パラメータ設定
+BinPackArguments: false
+BinPackParameters: false
+AlignAfterOpenBracket: Align
+AllowAllParametersOfDeclarationOnNextLine: false
+
+# コンストラクタ初期化設定
+BreakConstructorInitializers: BeforeColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
+
+# スペース設定
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceInEmptyParentheses: false
+
+# その他の設定
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+SortIncludes: true
+SortUsingDeclarations: true
+
+# C++20 対応
+Standard: c++20
+
+# アクセス修飾子のインデント
+AccessModifierOffset: -1
+
+# ポインタ・参照の位置
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# コメント設定
+ReflowComments: true
+CommentPragmas: '^ IWYU pragma:'
+
+# マクロ設定
+MacroBlockBegin: ''
+MacroBlockEnd: ''
+
+# その他
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+DerivePointerAlignment: false
+ExperimentalAutoDetectBinPacking: false
+FixNamespaceComments: true
+...

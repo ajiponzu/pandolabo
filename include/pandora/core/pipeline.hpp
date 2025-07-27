@@ -1,0 +1,279 @@
+/*
+ * pipeline.hpp - Pipeline and pipeline configuration for Pandolabo core module
+ *
+ * This header contains classes for managing graphics and compute pipelines,
+ * including pipeline state configurations and shader management.
+ */
+
+#pragma once
+
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+#include <vulkan/vulkan.hpp>
+
+#include "gpu.hpp"
+#include "module_connection/gpu_ui.hpp"
+#include "rendering_structures.hpp"
+#include "rendering_types.hpp"
+#include "types.hpp"
+
+// Forward declarations
+namespace pandora::core {
+class Renderpass;
+}
+
+namespace pandora::core::gpu {
+class Context;
+class ShaderModule;
+class DescriptionUnit;
+class DescriptorSetLayout;
+}  // namespace pandora::core::gpu
+
+namespace pandora::core {
+
+namespace pipeline {
+
+/// @brief Vertex input configuration for graphics pipelines
+/// Manages vertex buffer bindings and attribute descriptions that define
+/// how vertex data is fed into the vertex shader stage
+class VertexInput {
+ public:
+  vk::PipelineVertexInputStateCreateInfo m_info{};                ///< Vulkan vertex input state
+  std::vector<vk::VertexInputBindingDescription> m_bindings;      ///< Vertex buffer binding descriptions
+  std::vector<vk::VertexInputAttributeDescription> m_attributes;  ///< Vertex attribute descriptions
+
+  VertexInput() = default;
+  ~VertexInput() = default;
+
+  /// @brief Add a vertex buffer binding
+  /// @param binding Binding index for this vertex buffer
+  /// @param stride Size in bytes between consecutive vertex elements
+  /// @param input_rate Whether data is per-vertex or per-instance
+  void appendBinding(const uint32_t binding, const uint32_t stride, const VertexInputRate input_rate);
+
+  /// @brief Add a vertex attribute description
+  /// @param location Shader input location for this attribute
+  /// @param binding Vertex buffer binding this attribute comes from
+  /// @param format Data format of the attribute
+  /// @param offset Byte offset of this attribute within the vertex
+  void appendAttribute(const uint32_t location, const uint32_t binding, const DataFormat format, const uint32_t offset);
+};
+
+/// @brief Input assembly configuration for graphics pipelines
+/// Controls how vertices are assembled into primitives (points, lines, triangles)
+/// and whether primitive restart is enabled for indexed drawing
+class InputAssembly {
+ public:
+  vk::PipelineInputAssemblyStateCreateInfo m_info{};  ///< Vulkan input assembly state
+
+  InputAssembly() = default;
+  ~InputAssembly() = default;
+
+  /// @brief Set primitive topology type
+  /// @param topology How vertices are assembled (triangles, lines, points, etc.)
+  void setTopology(const PrimitiveTopology topology);
+
+  /// @brief Enable or disable primitive restart
+  /// @param is_enabled Whether to enable primitive restart with special index values
+  void setRestart(const bool is_enabled);
+};
+
+/// @brief Tessellation stage configuration for graphics pipelines
+/// Configures the tessellation control and evaluation shader stages
+/// for subdividing patches into more detailed geometry
+class Tessellation {
+ public:
+  vk::PipelineTessellationStateCreateInfo m_info{};  ///< Vulkan tessellation state
+
+  Tessellation() = default;
+  ~Tessellation() = default;
+
+  /// @brief Set number of control points per patch
+  /// @param count Number of vertices that define each tessellation patch
+  void setPatchControlPoints(const uint32_t count);
+};
+
+/// @brief Viewport and scissor state configuration for graphics pipelines
+/// Defines the viewport transformation from normalized device coordinates to framebuffer
+/// coordinates and optional scissor rectangle for pixel clipping
+class ViewportState {
+ public:
+  vk::PipelineViewportStateCreateInfo m_info{};  ///< Vulkan viewport state
+  vk::Viewport m_viewport;                       ///< Viewport transformation parameters
+  vk::Rect2D m_scissor;                          ///< Scissor test rectangle
+
+  ViewportState() = default;
+  ~ViewportState() = default;
+
+  /// @brief Set viewport transformation parameters
+  /// @param size Width and height of the viewport
+  /// @param min_depth Minimum depth value (typically 0.0)
+  /// @param max_depth Maximum depth value (typically 1.0)
+  void setViewport(const gpu_ui::GraphicalSize<float_t>& size, const float_t min_depth, const float_t max_depth);
+
+  /// @brief Set scissor test rectangle
+  /// @param size Width and height of the scissor rectangle
+  void setScissor(const gpu_ui::GraphicalSize<uint32_t>& size);
+};
+
+/// @brief Rasterization state configuration for graphics pipelines
+/// Controls how geometry is converted to fragments, including polygon mode,
+/// culling, depth bias, and line width settings
+class Rasterization {
+ public:
+  vk::PipelineRasterizationStateCreateInfo m_info{};  ///< Vulkan rasterization state
+
+  Rasterization() = default;
+  ~Rasterization() = default;
+
+  /// @brief Enable or disable depth bias
+  /// @param is_enabled Whether to apply depth bias to fragments
+  void setDepthBiasEnabled(const bool is_enabled);
+
+  /// @brief Configure depth bias parameters
+  /// @param constant_factor Constant depth bias factor
+  /// @param clamp Maximum depth bias clamp value
+  /// @param slope_factor Slope-dependent depth bias factor
+  void setDepthBias(const float_t constant_factor, const float_t clamp, const float_t slope_factor);
+
+  /// @brief Enable or disable rasterizer discard
+  /// @param is_enabled Whether to discard primitives before rasterization
+  void setRasterizerDiscard(const bool is_enabled);
+
+  /// @brief Set polygon rendering mode
+  /// @param polygon_mode How to render polygons (fill, line, point)
+  void setPolygonMode(const PolygonMode polygon_mode);
+
+  /// @brief Set face culling mode
+  /// @param cull_mode Which faces to cull (none, front, back, front+back)
+  void setCullMode(const CullMode cull_mode);
+
+  /// @brief Set front face winding order
+  /// @param front_face Whether front faces are clockwise or counter-clockwise
+  void setFrontFace(const FrontFace front_face);
+
+  /// @brief Set line width for line primitives
+  /// @param line_width Width of rasterized lines in pixels
+  void setLineWidth(const float_t line_width);
+};
+
+class Multisample {
+ public:
+  vk::PipelineMultisampleStateCreateInfo m_info{};
+
+  Multisample() = default;
+  ~Multisample() = default;
+
+  void setSampleCount(const std::unique_ptr<gpu::Context>& ptr_context);
+  void setSampleShading(const bool is_enabled);
+  void setMinSampleShading(const float_t min_sample_shading);
+};
+
+class DepthStencil {
+ public:
+  vk::PipelineDepthStencilStateCreateInfo m_info{};
+
+  DepthStencil() = default;
+  ~DepthStencil() = default;
+
+  void setDepthTest(const bool is_enabled);
+  void setDepthWrite(const bool is_enabled);
+  void setDepthCompareOp(const CompareOp compare_op);
+  void setDepthBoundsTest(const bool is_enabled);
+  void setStencilTest(const bool is_enabled);
+  void setFrontStencilOp(const StencilOpState& state);
+  void setBackStencilOp(const StencilOpState& state);
+};
+
+class ColorBlend {
+ public:
+  vk::PipelineColorBlendStateCreateInfo m_info{};
+  std::vector<vk::PipelineColorBlendAttachmentState> m_attachments;
+
+  ColorBlend() = default;
+  ~ColorBlend() = default;
+
+  void setLogicOp(const bool is_enabled, const LogicOp logic_op);
+  void appendAttachment(const ColorBlendAttachment& attachment);
+};
+
+class DynamicState {
+ public:
+  vk::PipelineDynamicStateCreateInfo m_info{};
+  std::vector<vk::DynamicState> m_states;
+
+  DynamicState() = default;
+  ~DynamicState() = default;
+
+  void appendState(const DynamicOption option);
+};
+
+struct GraphicInfo {
+  VertexInput vertex_input{};
+  InputAssembly input_assembly{};
+  Tessellation tessellation{};
+  ViewportState viewport_state{};
+  Rasterization rasterization{};
+  Multisample multisample{};
+  DepthStencil depth_stencil{};
+  ColorBlend color_blend{};
+  DynamicState dynamic_state{};
+};
+
+}  // namespace pipeline
+
+/// @brief Vulkan pipeline and pipeline layout wrapper
+/// Encapsulates Vulkan pipeline creation and management.
+/// In the Pandolabo project, pipeline and pipeline layout are managed together
+/// as they are tightly coupled and separation is not necessary for most use cases.
+class Pipeline {
+ protected:
+  vk::UniquePipeline m_ptrPipeline;              ///< Vulkan pipeline object
+  vk::UniquePipelineLayout m_ptrPipelineLayout;  ///< Vulkan pipeline layout
+  QueueFamilyType m_queueFamilyType{};           ///< Queue family type for this pipeline
+  vk::PipelineBindPoint m_bindPoint{};           ///< Pipeline bind point (graphics or compute)
+
+ public:
+  Pipeline(const std::unique_ptr<gpu::Context>& ptr_context,
+           const gpu::DescriptionUnit& description_unit,
+           const gpu::DescriptorSetLayout& descriptor_set_layout,
+           const PipelineBind bind_point);
+  ~Pipeline();
+
+  const auto& getPipeline() const {
+    return m_ptrPipeline.get();
+  }
+  const auto& getPipelineLayout() const {
+    return m_ptrPipelineLayout.get();
+  }
+  const auto getQueueFamilyType() const {
+    return m_queueFamilyType;
+  }
+  const auto getBindPoint() const {
+    return m_bindPoint;
+  }
+
+  /// @brief Construct pipeline for compute shader
+  /// @param ptr_context Vulkan context for device operations
+  /// @param shader_module Compute shader module
+  void constructComputePipeline(const std::unique_ptr<gpu::Context>& ptr_context,
+                                const gpu::ShaderModule& shader_module);
+
+  /// @brief Construct pipeline for graphics rendering
+  /// @param ptr_context Vulkan context for device operations
+  /// @param shader_module_map Map of shader modules by name
+  /// @param module_keys Keys order for shader stages (vertex, fragment, etc.)
+  /// @param ptr_graphic_info Graphics pipeline configuration
+  /// @param render_pass Render pass for this pipeline
+  /// @param subpass_index Subpass index using this pipeline
+  void constructGraphicsPipeline(const std::unique_ptr<gpu::Context>& ptr_context,
+                                 const std::unordered_map<std::string, gpu::ShaderModule>& shader_module_map,
+                                 const std::vector<std::string>& module_keys,
+                                 const std::unique_ptr<pipeline::GraphicInfo>& ptr_graphic_info,
+                                 const Renderpass& render_pass,
+                                 const uint32_t subpass_index);
+};
+
+}  // namespace pandora::core

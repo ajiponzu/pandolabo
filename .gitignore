@@ -1,0 +1,105 @@
+# Build directories
+build/
+out/
+debug/
+release/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Visual Studio
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+*.suo
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+*.sbr
+*.scc
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+# Executables
+*.exe
+*.out
+*.app
+*.dSYM
+
+# Object files
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+
+# IDE
+.vscode/settings.json
+*.swp
+*.swo
+*~
+.vscode
+.venv
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# Testing
+Testing/
+CTestTestfile.cmake
+
+# Package files
+*.tar.gz
+*.zip
+*.7z
+
+# Documentation
+docs/html/
+docs/latex/
+
+# Logs
+*.log
+
+# Conan generated files (keep conanfile.txt and profiles)
+conan_toolchain.cmake
+*-config.cmake
+*-config-version.cmake
+*-release-x86_64-data.cmake
+*-Target-release.cmake
+*Targets.cmake
+cmakedeps_macros.cmake
+conandeps_legacy.cmake
+conanbuild*.bat
+conanrun*.bat
+deactivate_*.bat
+CMakePresets.json
+CMakeUserPresets.json
+
+# Keep essential Conan files:
+# conanfile.txt
+# conanprofile_*

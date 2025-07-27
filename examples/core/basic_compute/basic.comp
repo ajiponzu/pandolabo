@@ -1,0 +1,25 @@
+#version 460 core
+//#extension GL_EXT_debug_printf:enable
+
+layout(binding=0)readonly buffer Input{
+  uint data[];
+}input_buffer;
+
+layout(binding=1)buffer Output{
+  uint data[];
+}output_buffer;
+
+layout(binding=2)uniform UniformNumber{
+  float number;
+}uniform_number;
+
+layout(local_size_x=256U,local_size_y=1,local_size_z=1)in;
+
+void main()
+{
+  int index=int(gl_GlobalInvocationID.x);
+
+  output_buffer.data[index]=uint(index+uniform_number.number);
+
+  //debugPrintfEXT("uniform__:%f\n index:%d\n input:%d\n output:%d\n",uniform_number.number,index,input_buffer.data[index],output_buffer.data[index]);
+}
