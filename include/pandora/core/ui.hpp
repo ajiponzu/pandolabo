@@ -150,7 +150,13 @@ class Window {
   }
 
   Window(const std::string& title, const int32_t width, const int32_t height);
+
+  // Rule of Five
   ~Window();
+  Window(const Window&) = delete;
+  Window& operator=(const Window&) = delete;
+  Window(Window&&) = default;
+  Window& operator=(Window&&) = default;
 
   const auto& getMouse() const {
     return s_mouseMap.at(reinterpret_cast<uint64_t>(m_ptrWindow));

@@ -39,24 +39,13 @@ class ShaderModule {
  public:
   ShaderModule() = default;
   ShaderModule(const std::unique_ptr<Context>& ptr_context, const std::vector<uint32_t>& spirv_binary);
+
+  // Rule of Five
   ~ShaderModule();
-
-  ShaderModule(ShaderModule&& other) noexcept {
-    m_ptrShaderModule = std::move(other.m_ptrShaderModule);
-    m_entryPointName = std::move(other.m_entryPointName);
-    m_descriptorInfoMap = std::move(other.m_descriptorInfoMap);
-    m_pushConstantRangeMap = std::move(other.m_pushConstantRangeMap);
-    m_shaderStageFlag = other.m_shaderStageFlag;
-  };
-  ShaderModule& operator=(ShaderModule&& other) noexcept {
-    m_ptrShaderModule = std::move(other.m_ptrShaderModule);
-    m_entryPointName = std::move(other.m_entryPointName);
-    m_descriptorInfoMap = std::move(other.m_descriptorInfoMap);
-    m_pushConstantRangeMap = std::move(other.m_pushConstantRangeMap);
-    m_shaderStageFlag = other.m_shaderStageFlag;
-
-    return *this;
-  };
+  ShaderModule(const ShaderModule&) = delete;
+  ShaderModule& operator=(const ShaderModule&) = delete;
+  ShaderModule(ShaderModule&&) = default;
+  ShaderModule& operator=(ShaderModule&&) = default;
 
   const auto& getModule() const {
     return m_ptrShaderModule.get();
@@ -88,6 +77,8 @@ class DescriptionUnit {
  public:
   DescriptionUnit(const std::unordered_map<std::string, ShaderModule>& shader_module_map,
                   const std::vector<std::string>& module_keys);
+
+  // Rule of Zero
   ~DescriptionUnit();
 
   const auto& getDescriptorInfoMap() const {

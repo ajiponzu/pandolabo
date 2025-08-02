@@ -24,6 +24,8 @@ namespace pandora::core::gpu {
 /// @details This class wraps Vulkan physical and logical devices.
 /// When GPU resources, memory, or other operations are created, this class is used.
 /// Management and operation authority is mainly under Context class.
+///
+/// Rule of Five
 class Device {
  private:
   vk::PhysicalDevice m_physicalDevice;
@@ -49,7 +51,13 @@ class Device {
          const std::unique_ptr<debug::Messenger>& ptr_messenger
 #endif
   );
+
+  // Rule of Five
   ~Device();
+  Device(const Device&) = delete;
+  Device& operator=(const Device&) = delete;
+  Device(Device&&) = default;
+  Device& operator=(Device&&) = default;
 
   /// @brief Get physical device handle
   /// @return Reference to Vulkan physical device

@@ -44,6 +44,7 @@ class VertexInput {
   std::vector<vk::VertexInputBindingDescription> m_bindings;      ///< Vertex buffer binding descriptions
   std::vector<vk::VertexInputAttributeDescription> m_attributes;  ///< Vertex attribute descriptions
 
+  // Rule of Zero
   VertexInput() = default;
   ~VertexInput() = default;
 
@@ -68,6 +69,7 @@ class InputAssembly {
  public:
   vk::PipelineInputAssemblyStateCreateInfo m_info{};  ///< Vulkan input assembly state
 
+  // Rule of Zero
   InputAssembly() = default;
   ~InputAssembly() = default;
 
@@ -87,6 +89,7 @@ class Tessellation {
  public:
   vk::PipelineTessellationStateCreateInfo m_info{};  ///< Vulkan tessellation state
 
+  // Rule of Zero
   Tessellation() = default;
   ~Tessellation() = default;
 
@@ -104,6 +107,7 @@ class ViewportState {
   vk::Viewport m_viewport;                       ///< Viewport transformation parameters
   vk::Rect2D m_scissor;                          ///< Scissor test rectangle
 
+  // Rule of Zero
   ViewportState() = default;
   ~ViewportState() = default;
 
@@ -125,6 +129,7 @@ class Rasterization {
  public:
   vk::PipelineRasterizationStateCreateInfo m_info{};  ///< Vulkan rasterization state
 
+  // Rule of Zero
   Rasterization() = default;
   ~Rasterization() = default;
 
@@ -159,10 +164,14 @@ class Rasterization {
   void setLineWidth(const float_t line_width);
 };
 
+/// @brief Multisample anti-aliasing configuration for graphics pipelines
+/// Controls multisampling parameters for anti-aliasing, including sample count,
+/// sample shading, and coverage/alpha-to-coverage operations
 class Multisample {
  public:
   vk::PipelineMultisampleStateCreateInfo m_info{};
 
+  // Rule of Zero
   Multisample() = default;
   ~Multisample() = default;
 
@@ -171,10 +180,14 @@ class Multisample {
   void setMinSampleShading(const float_t min_sample_shading);
 };
 
+/// @brief Depth and stencil testing configuration for graphics pipelines
+/// Controls depth testing, depth writing, stencil testing, and depth bounds testing
+/// for per-fragment depth and stencil operations
 class DepthStencil {
  public:
   vk::PipelineDepthStencilStateCreateInfo m_info{};
 
+  // Rule of Zero
   DepthStencil() = default;
   ~DepthStencil() = default;
 
@@ -187,11 +200,15 @@ class DepthStencil {
   void setBackStencilOp(const StencilOpState& state);
 };
 
+/// @brief Color blending configuration for graphics pipelines
+/// Controls per-attachment color blending operations, logic operations,
+/// and blend constants for fragment color output
 class ColorBlend {
  public:
   vk::PipelineColorBlendStateCreateInfo m_info{};
   std::vector<vk::PipelineColorBlendAttachmentState> m_attachments;
 
+  // Rule of Zero
   ColorBlend() = default;
   ~ColorBlend() = default;
 
@@ -199,17 +216,24 @@ class ColorBlend {
   void appendAttachment(const ColorBlendAttachment& attachment);
 };
 
+/// @brief Dynamic state configuration for graphics pipelines
+/// Specifies which pipeline states can be changed dynamically at command buffer
+/// recording time without recreating the entire pipeline
 class DynamicState {
  public:
   vk::PipelineDynamicStateCreateInfo m_info{};
   std::vector<vk::DynamicState> m_states;
 
+  // Rule of Zero
   DynamicState() = default;
   ~DynamicState() = default;
 
   void appendState(const DynamicOption option);
 };
 
+/// @brief Graphics pipeline configuration structure
+/// Aggregates all graphics pipeline state configurations into a single structure
+/// for convenient pipeline creation and management
 struct GraphicInfo {
   VertexInput vertex_input{};
   InputAssembly input_assembly{};
@@ -240,7 +264,13 @@ class Pipeline {
            const gpu::DescriptionUnit& description_unit,
            const gpu::DescriptorSetLayout& descriptor_set_layout,
            const PipelineBind bind_point);
+
+  // Rule of Five
   ~Pipeline();
+  Pipeline(const Pipeline&) = delete;
+  Pipeline& operator=(const Pipeline&) = delete;
+  Pipeline(Pipeline&&) = default;
+  Pipeline& operator=(Pipeline&&) = default;
 
   const auto& getPipeline() const {
     return m_ptrPipeline.get();

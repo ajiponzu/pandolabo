@@ -121,7 +121,13 @@ class DescriptorSetLayout {
   /// @param ptr_context Vulkan context for device operations
   /// @param description_unit Description unit containing binding information
   DescriptorSetLayout(const std::unique_ptr<Context>& ptr_context, const DescriptionUnit& description_unit);
+
+  // Rule of Five
   ~DescriptorSetLayout();
+  DescriptorSetLayout(const DescriptorSetLayout&) = delete;
+  DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
+  DescriptorSetLayout(DescriptorSetLayout&&) = default;
+  DescriptorSetLayout& operator=(DescriptorSetLayout&&) = default;
 
   /// @brief Get Vulkan descriptor set layout handle
   /// @return Reference to Vulkan descriptor set layout
@@ -151,7 +157,13 @@ class DescriptorSet {
   /// @param ptr_context Vulkan context for device operations
   /// @param description_set_layout Layout template defining resource structure
   DescriptorSet(const std::unique_ptr<Context>& ptr_context, const DescriptorSetLayout& description_set_layout);
+
+  // Rule of Five
   ~DescriptorSet();
+  DescriptorSet(const DescriptorSet&) = delete;
+  DescriptorSet& operator=(const DescriptorSet&) = delete;
+  DescriptorSet(DescriptorSet&&) = default;
+  DescriptorSet& operator=(DescriptorSet&&) = default;
 
   /// @brief Get Vulkan descriptor set handle
   /// @return Reference to Vulkan descriptor set

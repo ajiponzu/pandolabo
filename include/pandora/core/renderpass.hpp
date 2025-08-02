@@ -248,7 +248,13 @@ class Renderpass {
   Renderpass(const std::unique_ptr<gpu::Context>& ptr_context,
              const AttachmentList& attachment_list,
              const SubpassGraph& subpass_graph);
+
+  // Rule of Five
   ~Renderpass();
+  Renderpass(const Renderpass&) = delete;
+  Renderpass& operator=(const Renderpass&) = delete;
+  Renderpass(Renderpass&&) = default;
+  Renderpass& operator=(Renderpass&&) = default;
 
   /// @brief Get underlying Vulkan render pass handle
   /// @return Vulkan render pass handle
@@ -274,21 +280,13 @@ class Framebuffer {
               const Renderpass& render_pass,
               const gpu_ui::GraphicalSize<uint32_t>& size,
               const AttachmentList& attachments);
+
+  // Rule of Five
   ~Framebuffer();
-
-  /// @brief Move constructor
-  /// @param other Framebuffer to move from
-  Framebuffer(Framebuffer&& other) noexcept {
-    m_ptrFramebuffer = std::move(other.m_ptrFramebuffer);
-  }
-
-  /// @brief Move assignment operator
-  /// @param other Framebuffer to move from
-  /// @return Reference to this framebuffer
-  Framebuffer& operator=(Framebuffer&& other) noexcept {
-    m_ptrFramebuffer = std::move(other.m_ptrFramebuffer);
-    return *this;
-  }
+  Framebuffer(const Framebuffer&) = delete;
+  Framebuffer& operator=(const Framebuffer&) = delete;
+  Framebuffer(Framebuffer&&) = default;
+  Framebuffer& operator=(Framebuffer&&) = default;
 
   /// @brief Get underlying Vulkan framebuffer handle
   /// @return Vulkan framebuffer handle
@@ -320,6 +318,13 @@ class RenderKit {
             const SubpassGraph& subpass_graph,
             const gpu_ui::GraphicalSize<uint32_t>& size,
             const bool is_presented);
+
+  // Rule of Five
+  ~RenderKit() = default;
+  RenderKit(const RenderKit&) = delete;
+  RenderKit& operator=(const RenderKit&) = delete;
+  RenderKit(RenderKit&&) = default;
+  RenderKit& operator=(RenderKit&&) = default;
 
   /// @brief Get the render pass
   /// @return Reference to the managed render pass

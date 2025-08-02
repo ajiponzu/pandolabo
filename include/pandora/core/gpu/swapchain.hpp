@@ -39,7 +39,13 @@ class Swapchain {
   /// @param ptr_device GPU device wrapper pointer
   /// @param ptr_surface GPU-window surface wrapper pointer
   Swapchain(const std::unique_ptr<Device>& ptr_device, const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
+
+  // Rule of Five
   ~Swapchain();
+  Swapchain(const Swapchain&) = delete;
+  Swapchain& operator=(const Swapchain&) = delete;
+  Swapchain(Swapchain&&) = default;
+  Swapchain& operator=(Swapchain&&) = default;
 
   /// @brief Recreate swapchain
   /// @details Used when window is resized, moved, etc.

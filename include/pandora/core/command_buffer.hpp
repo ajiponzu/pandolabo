@@ -52,6 +52,7 @@ class CommandBeginInfo {
   CommandBufferUsage usage = CommandBufferUsage::OneTimeSubmit;  ///< How the command buffer will be used
   uint32_t subpass_index = 0U;                                   ///< Subpass index for inheritance
 
+  // Rule of Zero
   CommandBeginInfo() = default;
 
   void setRenderPass(const Renderpass& renderpass) {
@@ -74,7 +75,6 @@ class CommandBeginInfo {
 /// Provides the fundamental interface for recording GPU commands into a Vulkan
 /// command buffer. This class serves as the base for specialized command buffer
 /// types (transfer, compute, graphics) and manages the underlying Vulkan command buffer.
-///
 /// @note This is not an abstract class - it can be instantiated directly for basic operations
 class CommandBuffer {
  protected:
@@ -90,6 +90,13 @@ class CommandBuffer {
       : m_commandBuffer(ptr_command_buffer.get()), m_isSecondary(is_secondary) {}
 
  public:
+  // Rule of Five
+  CommandBuffer() = default;
+  ~CommandBuffer() = default;
+  CommandBuffer(const CommandBuffer&) = delete;
+  CommandBuffer& operator=(const CommandBuffer&) = delete;
+  CommandBuffer(CommandBuffer&&) = default;
+  CommandBuffer& operator=(CommandBuffer&&) = default;
   /// @brief Begin recording commands into the command buffer
   /// @param begin_info Configuration for how the command buffer should be started
   /// @note This function must be called before recording any commands
@@ -152,6 +159,13 @@ class TransferCommandBuffer : public CommandBuffer {
       : CommandBuffer(ptr_command_buffer, is_secondary) {}
 
  public:
+  // Rule of Five
+  TransferCommandBuffer() = default;
+  ~TransferCommandBuffer() = default;
+  TransferCommandBuffer(const TransferCommandBuffer&) = delete;
+  TransferCommandBuffer& operator=(const TransferCommandBuffer&) = delete;
+  TransferCommandBuffer(TransferCommandBuffer&&) = default;
+  TransferCommandBuffer& operator=(TransferCommandBuffer&&) = default;
   /// @brief Copy data between buffers
   /// Performs buffer-to-buffer copy operations, typically used for transferring
   /// data from CPU staging buffers to GPU device-local buffers.
@@ -218,6 +232,13 @@ class ComputeCommandBuffer : public TransferCommandBuffer {
       : TransferCommandBuffer(ptr_command_buffer, is_secondary) {}
 
  public:
+  // Rule of Five
+  ComputeCommandBuffer() = default;
+  ~ComputeCommandBuffer() = default;
+  ComputeCommandBuffer(const ComputeCommandBuffer&) = delete;
+  ComputeCommandBuffer& operator=(const ComputeCommandBuffer&) = delete;
+  ComputeCommandBuffer(ComputeCommandBuffer&&) = default;
+  ComputeCommandBuffer& operator=(ComputeCommandBuffer&&) = default;
   /// @brief Execute compute shader with specified work group size
   /// @param work_group_size Work group dimensions calculated from resource size
   ///                       and local_size declarations in the compute shader
@@ -235,6 +256,13 @@ class GraphicCommandBuffer : public ComputeCommandBuffer {
       : ComputeCommandBuffer(ptr_command_buffer, is_secondary) {}
 
  public:
+  // Rule of Five
+  GraphicCommandBuffer() = default;
+  ~GraphicCommandBuffer() = default;
+  GraphicCommandBuffer(const GraphicCommandBuffer&) = delete;
+  GraphicCommandBuffer& operator=(const GraphicCommandBuffer&) = delete;
+  GraphicCommandBuffer(GraphicCommandBuffer&&) = default;
+  GraphicCommandBuffer& operator=(GraphicCommandBuffer&&) = default;
   /* Dynamic state setters */
   /// @brief Set scissor rectangle for clipping
   /// @param size Scissor rectangle dimensions
@@ -315,7 +343,13 @@ class CommandDriver {
   /// @param ptr_context Vulkan context for device operations
   /// @param queue_family Queue family type to use for commands
   CommandDriver(const std::unique_ptr<gpu::Context>& ptr_context, const QueueFamilyType queue_family);
+
+  // Rule of Five
   ~CommandDriver();
+  CommandDriver(const CommandDriver&) = delete;
+  CommandDriver& operator=(const CommandDriver&) = delete;
+  CommandDriver(CommandDriver&&) = default;
+  CommandDriver& operator=(CommandDriver&&) = default;
 
   /// @brief Destroy all secondary command buffers
   void destroySecondary() {

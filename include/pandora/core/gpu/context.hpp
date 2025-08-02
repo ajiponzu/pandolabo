@@ -41,7 +41,13 @@ class Context {
   /// @brief Construct Context with optional window surface
   /// @param ptr_window_surface Window surface for presentation (optional)
   Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface = nullptr);
+
+  // Rule of Five
   ~Context();
+  Context(const Context&) = delete;
+  Context& operator=(const Context&) = delete;
+  Context(Context&&) = default;
+  Context& operator=(Context&&) = default;
 
   /// @brief Get Vulkan instance
   /// @return Reference to Vulkan instance

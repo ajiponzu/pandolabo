@@ -139,7 +139,13 @@ class TimelineSemaphore {
   /// @brief Construct timeline semaphore
   /// @param ptr_context GPU context pointer for device access
   TimelineSemaphore(const std::unique_ptr<Context>& ptr_context);
+
+  // Rule of Five
   ~TimelineSemaphore();
+  TimelineSemaphore(const TimelineSemaphore&) = delete;
+  TimelineSemaphore& operator=(const TimelineSemaphore&) = delete;
+  TimelineSemaphore(TimelineSemaphore&&) = default;
+  TimelineSemaphore& operator=(TimelineSemaphore&&) = default;
 
   /// @brief Get underlying Vulkan semaphore handle
   /// @return Const reference to the Vulkan semaphore
@@ -213,7 +219,13 @@ class SolidBinarySemaphore {
   /// @brief Construct binary semaphore
   /// @param ptr_context Vulkan context for device operations
   SolidBinarySemaphore(const std::unique_ptr<Context>& ptr_context);
+
+  // Rule of Five
   ~SolidBinarySemaphore();
+  SolidBinarySemaphore(const SolidBinarySemaphore&) = delete;
+  SolidBinarySemaphore& operator=(const SolidBinarySemaphore&) = delete;
+  SolidBinarySemaphore(SolidBinarySemaphore&&) = default;
+  SolidBinarySemaphore& operator=(SolidBinarySemaphore&&) = default;
 
   /// @brief Get binary semaphore reference
   /// @return Binary semaphore wrapper for this solid semaphore
