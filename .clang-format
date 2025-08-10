@@ -61,8 +61,8 @@ NamespaceIndentation: None
 SortIncludes: true
 SortUsingDeclarations: true
 
-# C++20 対応
-Standard: c++20
+# C++23 対応
+Standard: c++23
 
 # アクセス修飾子のインデント
 AccessModifierOffset: -1

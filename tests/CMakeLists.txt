@@ -9,8 +9,15 @@ file(GLOB_RECURSE TEST_SOURCES "*.cpp")
 # テスト実行ファイルを作成
 add_executable(tests ${TEST_SOURCES})
 
-# C++20標準を設定
-target_compile_features(tests PRIVATE cxx_std_20)
+# WindowsでC++23を使用する場合、特別な設定
+if(WIN32 AND DEFINED PANDOLABO_CXX_STANDARD AND PANDOLABO_CXX_STANDARD STREQUAL "23")
+    # 明示的にコンパイラフラグのみ使用（CXX_STANDARDプロパティは設定しない）
+    target_compile_options(tests PRIVATE /std:c++23preview)
+    message(STATUS "Applied C++23 preview settings to tests target")
+else()
+    # C++20標準を設定
+    target_compile_features(tests PRIVATE cxx_std_20)
+endif()
 
 # Catch2ライブラリをリンク
 target_link_libraries(tests PRIVATE

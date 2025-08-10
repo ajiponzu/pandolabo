@@ -26,15 +26,13 @@ class PandolaboBuilder:
             "yellow": "\033[93m",
             "red": "\033[91m",
             "cyan": "\033[96m",
-            "default": "\033[0m"
+            "default": "\033[0m",
         }
-        print(
-            f"{colors.get(color, colors['default'])}{message}{colors['default']}")
+        print(f"{colors.get(color, colors['default'])}{message}{colors['default']}")
 
     def run_command(self, cmd, check=False):
         """コマンド実行"""
-        self.log(
-            f"実行中: {' '.join(cmd) if isinstance(cmd, list) else cmd}", "cyan")
+        self.log(f"実行中: {' '.join(cmd) if isinstance(cmd, list) else cmd}", "cyan")
         if isinstance(cmd, str):
             cmd = cmd.split()
         try:
@@ -85,10 +83,12 @@ class PandolaboBuilder:
         # Conan依存関係インストール
         self.log("🔗 Conan依存関係をインストール中...", "yellow")
         conan_install_cmd = [
-            conan_cmd, "install", ".",
+            conan_cmd,
+            "install",
+            ".",
             f"--profile={profile}",
             "--build=missing",
-            "--output-folder=conan"
+            "--output-folder=conan",
         ]
 
         if not self.run_command(conan_install_cmd):
@@ -99,12 +99,14 @@ class PandolaboBuilder:
         cmake_cmd = [
             "cmake",
             "-DCMAKE_TOOLCHAIN_FILE=conan/build/generators/conan_toolchain.cmake",
-            "-B", "build"
+            "-B",
+            "build",
         ]
 
         if self.is_windows:
-            cmake_cmd.extend(["-G", "Visual Studio 17 2022",
-                             "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"])
+            cmake_cmd.extend(
+                ["-G", "Visual Studio 17 2022", "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"]
+            )
         else:
             cmake_cmd.extend(["-G", "Ninja"])
 
@@ -140,7 +142,7 @@ class PandolaboBuilder:
             Path("CMakeUserPresets.json"),
             Path("conanbuild.bat"),
             Path("conanrun.bat"),
-            Path("conandata.yml")
+            Path("conandata.yml"),
         ]
 
         # ディレクトリを削除
@@ -154,6 +156,7 @@ class PandolaboBuilder:
                         def remove_readonly(func, path, _):
                             os.chmod(path, stat.S_IWRITE)
                             func(path)
+
                         shutil.rmtree(dir_path, onerror=remove_readonly)
                     else:
                         shutil.rmtree(dir_path)
@@ -193,7 +196,10 @@ class PandolaboBuilder:
             self.log(f"🚀 Example ({self.config}) を実行中...", "green")
             return self.run_command([example_path])
         else:
-            self.log(f"❌ Example ({self.config}) が見つかりません。先にビルドしてください。", "red")
+            self.log(
+                f"❌ Example ({self.config}) が見つかりません。先にビルドしてください。",
+                "red",
+            )
             return False
 
 
@@ -214,21 +220,31 @@ def main():
   python build.py rebuild                      - クリーン + セットアップ
   python build.py run --config Debug           - Example実行 (Debug)
   python build.py all --config Debug           - setup + build + run (Debug)
-        """
+        """,
     )
 
     parser.add_argument(
         "command",
-        choices=["setup", "build", "lib", "examples",
-                 "tests", "clean", "rebuild", "run", "all"],
-        help="実行するコマンド"
+        choices=[
+            "setup",
+            "build",
+            "lib",
+            "examples",
+            "tests",
+            "clean",
+            "rebuild",
+            "run",
+            "all",
+        ],
+        help="実行するコマンド",
     )
 
     parser.add_argument(
-        "--config", "-c",
+        "--config",
+        "-c",
         choices=["Debug", "Release", "RelWithDebInfo", "MinSizeRel"],
         default="Release",
-        help="ビルド設定 (デフォルト: Release)"
+        help="ビルド設定 (デフォルト: Release)",
     )
 
     args = parser.parse_args()
@@ -257,9 +273,11 @@ def main():
         elif args.command == "run":
             success = builder.run_example()
         elif args.command == "all":
-            success = (builder.setup_environment() and
-                       builder.build() and
-                       builder.run_example())
+            success = (
+                builder.setup_environment()
+                and builder.build()
+                and builder.run_example()
+            )
         else:
             builder.log(f"❓ 不明なコマンド: {args.command}", "red")
             return 1

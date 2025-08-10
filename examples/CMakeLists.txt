@@ -38,6 +38,13 @@ endforeach()
 
 add_executable(basic_usage ${EXAMPLE_SOURCES} ${EXAMPLE_HEADERS})
 
+# WindowsでC++23を使用する場合、特別な設定
+if(WIN32 AND DEFINED PANDOLABO_CXX_STANDARD AND PANDOLABO_CXX_STANDARD STREQUAL "23")
+    # 明示的にコンパイラフラグのみ使用（CXX_STANDARDプロパティは設定しない）
+    target_compile_options(basic_usage PRIVATE /std:c++23preview)
+    message(STATUS "Applied C++23 preview settings to basic_usage target")
+endif()
+
 # プラットフォーム別設定
 if(WIN32)
     # Windows: MSVC標準設定（追加設定不要）

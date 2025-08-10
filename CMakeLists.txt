@@ -28,14 +28,28 @@ project(pandolabo VERSION 1.0.0 LANGUAGES CXX)
 
 # プラットフォーム別C++標準設定
 if(WIN32)
-    # Windows: MSVC + C++20 (安定版)
+    # Windows: MSVC + C++標準バージョン
     if(NOT MSVC)
         message(FATAL_ERROR "Windows builds require MSVC compiler. Please use Visual Studio or MSVC tools.")
     endif()
-    set(CMAKE_CXX_STANDARD 20)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    set(CMAKE_CXX_EXTENSIONS OFF)
-    message(STATUS "Using MSVC with C++20 on Windows")
+
+    # C++標準をユーザーが指定可能にする（デフォルトは23）
+    set(PANDOLABO_CXX_STANDARD "23" CACHE STRING "C++ standard version (20, 23)")
+    set_property(CACHE PANDOLABO_CXX_STANDARD PROPERTY STRINGS "20" "23")
+
+    # C++23プレビューサポート
+    if(PANDOLABO_CXX_STANDARD STREQUAL "23")
+        # C++23の場合はCMAKE_CXX_STANDARDを設定せず、直接コンパイラフラグを使用
+        # これにより、CMakeがstdcpplatest(/std:c++latest)を設定するのを防ぐ
+        add_compile_options(/std:c++23preview)
+        message(STATUS "Using MSVC with C++23 preview on Windows")
+    else()
+        # C++20の場合は通常のCMAKE_CXX_STANDARD設定を使用
+        set(CMAKE_CXX_STANDARD ${PANDOLABO_CXX_STANDARD})
+        set(CMAKE_CXX_STANDARD_REQUIRED ON)
+        set(CMAKE_CXX_EXTENSIONS OFF)
+        message(STATUS "Using MSVC with C++${PANDOLABO_CXX_STANDARD} on Windows")
+    endif()
 else()
     # Linux/macOS: Clang + 最新C++バージョン
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -76,12 +90,21 @@ else()
 endif()
 
 # Conan統合の設定
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/build/conan_toolchain.cmake")
-    include(${CMAKE_CURRENT_SOURCE_DIR}/build/conan_toolchain.cmake)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/conan/build/generators/conan_toolchain.cmake")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/conan/build/generators/conan_toolchain.cmake)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/build/conan_deps.cmake")
     include(${CMAKE_CURRENT_SOURCE_DIR}/build/conan_deps.cmake)
+endif()
+
+# WindowsでC++23を使用する場合、ConanのCMAKE_CXX_STANDARD設定をオーバーライド
+if(WIN32 AND PANDOLABO_CXX_STANDARD STREQUAL "23")
+    # ConanのCMAKE_CXX_STANDARD 23設定をクリアしてstdcpplatest防止
+    unset(CMAKE_CXX_STANDARD)
+    unset(CMAKE_CXX_STANDARD_REQUIRED)
+    unset(CMAKE_CXX_EXTENSIONS)
+    message(STATUS "Overriding Conan C++ standard setting for C++23 preview")
 endif()
 
 # パッケージの検索
@@ -106,7 +129,24 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE HEADERS "include/*.hpp")
 
 # 静的ライブラリの作成
-add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
+# ライブラリターゲットの追加
+add_library(${PROJECT_NAME} ${SOURCES})
+
+# WindowsでC++23を使用する場合、特別な設定
+if(WIN32 AND PANDOLABO_CXX_STANDARD STREQUAL "23")
+    # ターゲットのC++標準設定をクリアして、明示的にコンパイラフラグのみ使用
+    target_compile_options(${PROJECT_NAME} PRIVATE /std:c++23preview)
+    message(STATUS "Applied C++23 preview settings to ${PROJECT_NAME} target")
+else()
+    # 他の場合は通常のCMAKE_CXX_STANDARD設定を使用
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        CXX_STANDARD ${PANDOLABO_CXX_STANDARD}
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+    )
+    # C++標準の設定をターゲットに適用（最低C++20、自動検出でC++26も可能）
+    target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+endif()
 
 # インクルードディレクトリの公開
 target_include_directories(${PROJECT_NAME}
@@ -114,9 +154,6 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-
-# C++標準の設定をターゲットに適用（最低C++20、自動検出でC++26も可能）
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 # Vulkan.hpp動的ディスパッチローダー設定
 target_compile_definitions(${PROJECT_NAME} PUBLIC

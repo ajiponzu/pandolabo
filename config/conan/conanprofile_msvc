@@ -4,7 +4,7 @@ arch=x86_64
 compiler=msvc
 compiler.version=194
 compiler.runtime=static
-compiler.cppstd=20
+compiler.cppstd=23
 build_type=Release
 
 [buildenv]
@@ -14,3 +14,6 @@ CXX=cl
 [conf]
 tools.system.package_manager:mode=install
 tools.system.package_manager:sudo=False
+
+# C++23プレビュー対応コンパイラフラグ
+tools.cmake.cmaketoolchain:generator=Visual Studio 17 2022

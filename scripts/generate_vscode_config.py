@@ -16,12 +16,16 @@ from pathlib import Path
 def get_conan_home():
     """Conanホームディレクトリを取得"""
     try:
-        result = subprocess.run(['.venv/Scripts/conan.exe', 'config', 'home'],
-                                capture_output=True, text=True, cwd='.')
+        result = subprocess.run(
+            [".venv/Scripts/conan.exe", "config", "home"],
+            capture_output=True,
+            text=True,
+            cwd=".",
+        )
         return result.stdout.strip()
     except:
         # フォールバック
-        return os.path.expanduser('~/.conan2')
+        return os.path.expanduser("~/.conan2")
 
 
 def get_conan_include_paths():
@@ -39,11 +43,11 @@ def get_conan_include_paths():
 
     # 基本的なConanパッケージパスパターン
     base_patterns = [
-        f"{conan_home}/p/*/p/include",           # パッケージのメインinclude
-        f"{conan_home}/p/*/s/src/include",       # ソースビルドのinclude
-        f"{conan_home}/p/*/s/*/include",         # その他のinclude
-        f"{conan_home}/p/b/*/p/include",         # ビルド成果物のinclude
-        f"{conan_home}/p/b/*/b/src/include",     # ビルド中のsrcのinclude
+        f"{conan_home}/p/*/p/include",  # パッケージのメインinclude
+        f"{conan_home}/p/*/s/src/include",  # ソースビルドのinclude
+        f"{conan_home}/p/*/s/*/include",  # その他のinclude
+        f"{conan_home}/p/b/*/p/include",  # ビルド成果物のinclude
+        f"{conan_home}/p/b/*/b/src/include",  # ビルド中のsrcのinclude
     ]
 
     excluded_paths = []
@@ -67,14 +71,15 @@ def has_header_files(directory):
     if not os.path.exists(directory):
         return False
 
-    header_extensions = ['.h', '.hpp', '.hxx', '.h++', '.hh']
+    header_extensions = [".h", ".hpp", ".hxx", ".h++", ".hh"]
 
     # ディレクトリ直下とサブディレクトリ（1階層）をチェック
     for root, dirs, files in os.walk(directory):
         # 深すぎる階層は避ける（パフォーマンス対策）
         if root != directory:
-            dirs[:] = [d for d in dirs if not d.startswith(
-                '.')][:3]  # 最大3つのサブディレクトリ
+            dirs[:] = [d for d in dirs if not d.startswith(".")][
+                :3
+            ]  # 最大3つのサブディレクトリ
 
         for file in files:
             if any(file.lower().endswith(ext) for ext in header_extensions):
@@ -102,12 +107,11 @@ def generate_settings_json():
             "string": "cpp",
             "iostream": "cpp",
             "vector": "cpp",
-            "memory": "cpp"
+            "memory": "cpp",
         },
         "files.trimTrailingWhitespace": True,
         "files.insertFinalNewline": True,
         "files.trimFinalNewlines": True,
-
         # エディタ設定
         "editor.formatOnSave": True,
         "editor.formatOnType": True,
@@ -121,12 +125,10 @@ def generate_settings_json():
         "editor.renderWhitespace": "boundary",
         "editor.bracketPairColorization.enabled": True,
         "editor.guides.bracketPairs": "active",
-
         # C/C++フォーマット設定
         "C_Cpp.formatting": "clangFormat",
         "C_Cpp.clang_format_style": "file",
-        "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 120, AlignAfterOpenBracket: Align, AllowShortFunctionsOnASingleLine: Empty, AllowShortIfStatementsOnASingleLine: false, AllowShortLoopsOnASingleLine: false, BinPackArguments: false, BinPackParameters: false, BreakBeforeBraces: Attach, BreakConstructorInitializers: BeforeColon, ConstructorInitializerAllOnOneLineOrOnePerLine: true, IndentCaseLabels: true, KeepEmptyLinesAtTheStartOfBlocks: false, NamespaceIndentation: None, SpaceAfterCStyleCast: false, SpaceBeforeParens: ControlStatements, SpacesInParentheses: false, Standard: c++20 }",
-
+        "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 120, AlignAfterOpenBracket: Align, AllowShortFunctionsOnASingleLine: Empty, AllowShortIfStatementsOnASingleLine: false, AllowShortLoopsOnASingleLine: false, BinPackArguments: false, BinPackParameters: false, BreakBeforeBraces: Attach, BreakConstructorInitializers: BeforeColon, ConstructorInitializerAllOnOneLineOrOnePerLine: true, IndentCaseLabels: true, KeepEmptyLinesAtTheStartOfBlocks: false, NamespaceIndentation: None, SpaceAfterCStyleCast: false, SpaceBeforeParens: ControlStatements, SpacesInParentheses: false, Standard: c++23 }",
         # C/C++基本設定
         "C_Cpp.intelliSenseEngine": "default",
         "C_Cpp.errorSquiggles": "enabled",
@@ -134,53 +136,51 @@ def generate_settings_json():
         "C_Cpp.suggestSnippets": True,
         "C_Cpp.workspaceParsingPriority": "highest",
         "C_Cpp.enhancedColorization": "enabled",
-
         # CMake設定
         "cmake.configureOnOpen": False,
         "cmake.showOptionsMovedNotification": False,
-
         # その他のフォーマッタ設定
         "[cpp]": {
             "editor.defaultFormatter": "ms-vscode.cpptools",
             "editor.formatOnSave": True,
-            "editor.tabSize": 2
+            "editor.tabSize": 2,
         },
         "[c]": {
             "editor.defaultFormatter": "ms-vscode.cpptools",
             "editor.formatOnSave": True,
-            "editor.tabSize": 2
+            "editor.tabSize": 2,
         },
         "[json]": {
             "editor.defaultFormatter": "esbenp.prettier-vscode",
             "editor.formatOnSave": True,
-            "editor.tabSize": 2
+            "editor.tabSize": 2,
         },
         "[python]": {
             "editor.defaultFormatter": "ms-python.black-formatter",
             "editor.formatOnSave": True,
-            "editor.tabSize": 4
+            "editor.tabSize": 4,
         },
         "[markdown]": {
             "editor.formatOnSave": True,
             "editor.tabSize": 2,
-            "editor.wordWrap": "on"
-        }
+            "editor.wordWrap": "on",
+        },
     }
 
     if is_windows:
         # Windows/MSVC設定
         settings = {
             **common_format_settings,
-            "C_Cpp.default.cppStandard": "c++20",
+            "C_Cpp.default.cppStandard": "c++23",
             "C_Cpp.default.cStandard": "c17",
             "C_Cpp.default.compilerPath": "cl.exe",
-            "C_Cpp.default.intelliSenseMode": "windows-msvc-x64"
+            "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
         }
     else:
         # Linux/macOS/Clang設定
         settings = {
             **common_format_settings,
-            "C_Cpp.default.cppStandard": "c++26",
+            "C_Cpp.default.cppStandard": "c++23",
             "C_Cpp.default.cStandard": "c23",
             "C_Cpp.default.compilerPath": "clang++",
             "C_Cpp.default.intelliSenseMode": "clang-x64",
@@ -190,7 +190,7 @@ def generate_settings_json():
             ],
             "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
                 "modernize-concat-nested-namespaces"
-            ]
+            ],
         }
 
     return settings
@@ -216,22 +216,17 @@ def generate_tasks_json():
                         "${workspaceFolder}/scripts/build.ps1",
                         "build",
                         "-Configuration",
-                        "Release"
+                        "Release",
                     ],
-                    "group": {
-                        "kind": "build",
-                        "isDefault": True
-                    },
+                    "group": {"kind": "build", "isDefault": True},
                     "problemMatcher": "$msCompile",
                     "presentation": {
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
+                    "options": {"cwd": "${workspaceFolder}"},
                 },
                 {
                     "label": "🐛 Build (Debug)",
@@ -244,7 +239,7 @@ def generate_tasks_json():
                         "${workspaceFolder}/scripts/build.ps1",
                         "build",
                         "-Configuration",
-                        "Debug"
+                        "Debug",
                     ],
                     "group": "build",
                     "problemMatcher": "$msCompile",
@@ -252,11 +247,9 @@ def generate_tasks_json():
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
+                    "options": {"cwd": "${workspaceFolder}"},
                 },
                 {
                     "label": "📚 Build Library (Release)",
@@ -269,7 +262,7 @@ def generate_tasks_json():
                         "${workspaceFolder}/scripts/build.ps1",
                         "lib",
                         "-Configuration",
-                        "Release"
+                        "Release",
                     ],
                     "group": "build",
                     "problemMatcher": "$msCompile",
@@ -277,11 +270,9 @@ def generate_tasks_json():
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
+                    "options": {"cwd": "${workspaceFolder}"},
                 },
                 {
                     "label": "📚 Build Library (Debug)",
@@ -294,7 +285,7 @@ def generate_tasks_json():
                         "${workspaceFolder}/scripts/build.ps1",
                         "lib",
                         "-Configuration",
-                        "Debug"
+                        "Debug",
                     ],
                     "group": "build",
                     "problemMatcher": "$msCompile",
@@ -302,11 +293,9 @@ def generate_tasks_json():
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
+                    "options": {"cwd": "${workspaceFolder}"},
                 },
                 {
                     "label": "🧪 Build Tests",
@@ -319,7 +308,7 @@ def generate_tasks_json():
                         "${workspaceFolder}/scripts/build.ps1",
                         "tests",
                         "-Configuration",
-                        "Release"
+                        "Release",
                     ],
                     "group": "test",
                     "problemMatcher": "$msCompile",
@@ -327,11 +316,9 @@ def generate_tasks_json():
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
+                    "options": {"cwd": "${workspaceFolder}"},
                 },
                 {
                     "label": "🚀 Run Example (Release)",
@@ -344,7 +331,7 @@ def generate_tasks_json():
                         "${workspaceFolder}/scripts/build.ps1",
                         "run",
                         "-Configuration",
-                        "Release"
+                        "Release",
                     ],
                     "group": "test",
                     "problemMatcher": "$msCompile",
@@ -352,11 +339,9 @@ def generate_tasks_json():
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
+                    "options": {"cwd": "${workspaceFolder}"},
                 },
                 {
                     "label": "🚀 Run Example (Debug)",
@@ -369,7 +354,7 @@ def generate_tasks_json():
                         "${workspaceFolder}/scripts/build.ps1",
                         "run",
                         "-Configuration",
-                        "Debug"
+                        "Debug",
                     ],
                     "group": "test",
                     "problemMatcher": "$msCompile",
@@ -377,11 +362,9 @@ def generate_tasks_json():
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
+                    "options": {"cwd": "${workspaceFolder}"},
                 },
                 {
                     "label": "🧹 Clean",
@@ -392,7 +375,7 @@ def generate_tasks_json():
                         "Bypass",
                         "-File",
                         "${workspaceFolder}/scripts/build.ps1",
-                        "clean"
+                        "clean",
                     ],
                     "group": "build",
                     "problemMatcher": "$msCompile",
@@ -400,11 +383,9 @@ def generate_tasks_json():
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
+                    "options": {"cwd": "${workspaceFolder}"},
                 },
                 {
                     "label": "🎨 Format All C++ Files",
@@ -414,7 +395,7 @@ def generate_tasks_json():
                         "-ExecutionPolicy",
                         "Bypass",
                         "-Command",
-                        "Get-ChildItem -Recurse -Include *.cpp,*.hpp,*.h,*.c,*.cc,*.cxx | ForEach-Object { Write-Host \"Formatting: $($_.FullName)\"; clang-format -i -style=file $_.FullName }"
+                        'Get-ChildItem -Recurse -Include *.cpp,*.hpp,*.h,*.c,*.cc,*.cxx | ForEach-Object { Write-Host "Formatting: $($_.FullName)"; clang-format -i -style=file $_.FullName }',
                     ],
                     "group": "build",
                     "problemMatcher": [],
@@ -422,11 +403,9 @@ def generate_tasks_json():
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
+                    "options": {"cwd": "${workspaceFolder}"},
                 },
                 {
                     "label": "🎨 Format Current File",
@@ -436,7 +415,7 @@ def generate_tasks_json():
                         "-ExecutionPolicy",
                         "Bypass",
                         "-Command",
-                        "if ('${file}' -match '\\.(cpp|hpp|h|c|cc|cxx)$') { Write-Host 'Formatting: ${file}'; clang-format -i -style=file '${file}' } else { Write-Host 'Not a C++ file: ${file}' }"
+                        "if ('${file}' -match '\\.(cpp|hpp|h|c|cc|cxx)$') { Write-Host 'Formatting: ${file}'; clang-format -i -style=file '${file}' } else { Write-Host 'Not a C++ file: ${file}' }",
                     ],
                     "group": "build",
                     "problemMatcher": [],
@@ -444,13 +423,11 @@ def generate_tasks_json():
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
-                }
-            ]
+                    "options": {"cwd": "${workspaceFolder}"},
+                },
+            ],
         }
     else:
         # Linux/macOS用タスク - build.shを使用（存在する場合）
@@ -462,22 +439,17 @@ def generate_tasks_json():
                     "type": "shell",
                     "command": "${workspaceFolder}/scripts/build.sh",
                     "args": [],
-                    "group": {
-                        "kind": "build",
-                        "isDefault": True
-                    },
+                    "group": {"kind": "build", "isDefault": True},
                     "problemMatcher": "$gcc",
                     "presentation": {
                         "echo": True,
                         "reveal": "always",
                         "focus": False,
-                        "panel": "shared"
+                        "panel": "shared",
                     },
-                    "options": {
-                        "cwd": "${workspaceFolder}"
-                    }
+                    "options": {"cwd": "${workspaceFolder}"},
                 }
-            ]
+            ],
         }
 
     return tasks
@@ -503,7 +475,7 @@ def generate_launch_json():
                     "cwd": "${workspaceFolder}",
                     "environment": [],
                     "console": "integratedTerminal",
-                    "preLaunchTask": "🐛 Build (Debug)"
+                    "preLaunchTask": "🐛 Build (Debug)",
                 },
                 {
                     "name": "🐛 Debug Example (Debug)",
@@ -515,7 +487,7 @@ def generate_launch_json():
                     "cwd": "${workspaceFolder}",
                     "environment": [],
                     "console": "integratedTerminal",
-                    "preLaunchTask": "🐛 Build (Debug)"
+                    "preLaunchTask": "🐛 Build (Debug)",
                 },
                 # Release設定
                 {
@@ -528,7 +500,7 @@ def generate_launch_json():
                     "cwd": "${workspaceFolder}",
                     "environment": [],
                     "console": "integratedTerminal",
-                    "preLaunchTask": "🔨 Build (Release)"
+                    "preLaunchTask": "🔨 Build (Release)",
                 },
                 {
                     "name": "� Debug Example (Release)",
@@ -540,9 +512,9 @@ def generate_launch_json():
                     "cwd": "${workspaceFolder}",
                     "environment": [],
                     "console": "integratedTerminal",
-                    "preLaunchTask": "🔨 Build (Release)"
-                }
-            ]
+                    "preLaunchTask": "🔨 Build (Release)",
+                },
+            ],
         }
     else:
         # Linux/macOS/Clang用デバッグ設定
@@ -565,11 +537,11 @@ def generate_launch_json():
                         {
                             "description": "Enable pretty-printing for gdb",
                             "text": "-enable-pretty-printing",
-                            "ignoreFailures": True
+                            "ignoreFailures": True,
                         }
                     ],
                     "preLaunchTask": "🐛 Build (Debug)",
-                    "miDebuggerPath": "/usr/bin/gdb"
+                    "miDebuggerPath": "/usr/bin/gdb",
                 },
                 {
                     "name": "🐛 Debug Example (Debug)",
@@ -586,11 +558,11 @@ def generate_launch_json():
                         {
                             "description": "Enable pretty-printing for gdb",
                             "text": "-enable-pretty-printing",
-                            "ignoreFailures": True
+                            "ignoreFailures": True,
                         }
                     ],
                     "preLaunchTask": "🐛 Build (Debug)",
-                    "miDebuggerPath": "/usr/bin/gdb"
+                    "miDebuggerPath": "/usr/bin/gdb",
                 },
                 # Release設定
                 {
@@ -608,11 +580,11 @@ def generate_launch_json():
                         {
                             "description": "Enable pretty-printing for gdb",
                             "text": "-enable-pretty-printing",
-                            "ignoreFailures": True
+                            "ignoreFailures": True,
                         }
                     ],
                     "preLaunchTask": "🔨 Build (Release)",
-                    "miDebuggerPath": "/usr/bin/gdb"
+                    "miDebuggerPath": "/usr/bin/gdb",
                 },
                 {
                     "name": "� Debug Example (Release)",
@@ -629,13 +601,13 @@ def generate_launch_json():
                         {
                             "description": "Enable pretty-printing for gdb",
                             "text": "-enable-pretty-printing",
-                            "ignoreFailures": True
+                            "ignoreFailures": True,
                         }
                     ],
                     "preLaunchTask": "🔨 Build (Release)",
-                    "miDebuggerPath": "/usr/bin/gdb"
-                }
-            ]
+                    "miDebuggerPath": "/usr/bin/gdb",
+                },
+            ],
         }
 
     return launch
@@ -648,54 +620,51 @@ def generate_extensions_json():
             # C/C++開発
             "ms-vscode.cpptools",
             "ms-vscode.cpptools-extension-pack",
-
             # Python開発
             "ms-python.python",
             "ms-python.vscode-pylance",
             "ms-python.black-formatter",
-
             # フォーマット・整形
             "esbenp.prettier-vscode",
             "bradlc.vscode-tailwindcss",
             "formulahendry.auto-rename-tag",
-
             # Git・バージョン管理
             "eamodio.gitlens",
             "mhutchie.git-graph",
-
             # AI・開発支援
             "github.copilot",
             "github.copilot-chat",
-
             # エディタ拡張
             "gruntfuggly.todo-tree",
             "shardulm94.trailing-spaces",
             "ms-vscode.hexeditor",
             "streetsidesoftware.code-spell-checker",
-
             # CMake・ビルド
             "twxs.cmake",
             "ms-vscode.cmake-tools",
-
             # ドキュメント
             "yzhang.markdown-all-in-one",
-            "davidanson.vscode-markdownlint"
+            "davidanson.vscode-markdownlint",
         ]
     }
 
     # プラットフォーム固有の拡張機能
     if platform.system() != "Windows":
-        extensions["recommendations"].extend([
-            # Linux/macOS向け開発ツール
-            "llvm-vs-code-extensions.vscode-clangd",
-            "vadimcn.vscode-lldb",
-            "webfreak.debug"
-        ])
+        extensions["recommendations"].extend(
+            [
+                # Linux/macOS向け開発ツール
+                "llvm-vs-code-extensions.vscode-clangd",
+                "vadimcn.vscode-lldb",
+                "webfreak.debug",
+            ]
+        )
     else:
-        extensions["recommendations"].extend([
-            # Windows向け開発ツール
-            "ms-vscode.powershell"
-        ])
+        extensions["recommendations"].extend(
+            [
+                # Windows向け開発ツール
+                "ms-vscode.powershell"
+            ]
+        )
 
     return extensions
 
@@ -768,8 +737,8 @@ NamespaceIndentation: None
 SortIncludes: true
 SortUsingDeclarations: true
 
-# C++20 対応
-Standard: c++20
+# C++23 対応
+Standard: c++23
 
 # アクセス修飾子のインデント
 AccessModifierOffset: -1
@@ -796,9 +765,9 @@ FixNamespaceComments: true
 """
 
     workspace_folder = Path.cwd()
-    clang_format_file = workspace_folder / '.clang-format'
+    clang_format_file = workspace_folder / ".clang-format"
 
-    with open(clang_format_file, 'w', encoding='utf-8') as f:
+    with open(clang_format_file, "w", encoding="utf-8") as f:
         f.write(clang_format_config)
 
     print(f"✅ Generated {clang_format_file}")
@@ -821,19 +790,14 @@ def generate_cpp_properties(debug_mode=True):
     is_windows = platform.system() == "Windows"
 
     # 基本のインクルードパス
-    include_paths = [
-        "${workspaceFolder}/include",
-        "${workspaceFolder}/src"
-    ]
+    include_paths = ["${workspaceFolder}/include", "${workspaceFolder}/src"]
 
     # Conanのインクルードパスを追加
     conan_include_paths = get_conan_include_paths()
     include_paths.extend(conan_include_paths)
 
     # 基本のdefines
-    base_defines = [
-        "VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"
-    ]
+    base_defines = ["VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"]
 
     # プラットフォーム固有のdefines
     if is_windows:
@@ -854,35 +818,35 @@ def generate_cpp_properties(debug_mode=True):
                 "includePath": include_paths,
                 "defines": all_defines,
                 "cStandard": "c17",
-                "cppStandard": "c++20"
+                "cppStandard": "c++23",
             }
         ],
-        "version": 4
+        "version": 4,
     }
 
     # プラットフォーム別設定
     if is_windows:
-        config["configurations"][0].update({
-            "compilerPath": "cl.exe",
-            "intelliSenseMode": "windows-msvc-x64"
-        })
+        config["configurations"][0].update(
+            {"compilerPath": "cl.exe", "intelliSenseMode": "windows-msvc-x64"}
+        )
     else:
-        config["configurations"][0].update({
-            "compilerPath": "/usr/bin/clang++",
-            "intelliSenseMode": "linux-clang-x64"
-        })
+        config["configurations"][0].update(
+            {"compilerPath": "/usr/bin/clang++", "intelliSenseMode": "linux-clang-x64"}
+        )
 
     # compile_commands.jsonが存在する場合は追加（全プラットフォーム対応）
     if compile_commands_exists:
-        config["configurations"][0]["compileCommands"] = "${workspaceFolder}/build/compile_commands.json"
+        config["configurations"][0][
+            "compileCommands"
+        ] = "${workspaceFolder}/build/compile_commands.json"
 
     # .vscodeディレクトリを作成
-    vscode_dir = workspace_folder / '.vscode'
+    vscode_dir = workspace_folder / ".vscode"
     vscode_dir.mkdir(exist_ok=True)
 
     # ファイルに書き出し
-    cpp_properties_file = vscode_dir / 'c_cpp_properties.json'
-    with open(cpp_properties_file, 'w', encoding='utf-8') as f:
+    cpp_properties_file = vscode_dir / "c_cpp_properties.json"
+    with open(cpp_properties_file, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2)
 
     print(f"✅ Generated {cpp_properties_file}")
@@ -895,10 +859,12 @@ def generate_cpp_properties(debug_mode=True):
         # compile_commands.jsonの状態を表示（Linux/macOS）
         if compile_commands_exists:
             print(
-                "📋 compile_commands.json found - IntelliSense will use precise build settings")
+                "📋 compile_commands.json found - IntelliSense will use precise build settings"
+            )
         else:
             print(
-                "⚠️  compile_commands.json not found - run 'cmake -S . -B build -G Ninja' to generate it")
+                "⚠️  compile_commands.json not found - run 'cmake -S . -B build -G Ninja' to generate it"
+            )
 
     return config
 
@@ -910,7 +876,7 @@ def generate_all_vscode_configs(debug_mode=True):
         debug_mode (bool): Trueの場合、デバッグ用マクロ(_DEBUG)を追加
     """
     workspace_folder = Path.cwd()
-    vscode_dir = workspace_folder / '.vscode'
+    vscode_dir = workspace_folder / ".vscode"
     vscode_dir.mkdir(exist_ok=True)
 
     is_windows = platform.system() == "Windows"
@@ -920,15 +886,15 @@ def generate_all_vscode_configs(debug_mode=True):
 
     # 各設定ファイルを生成
     configs = {
-        'settings.json': generate_settings_json(),
-        'tasks.json': generate_tasks_json(),
-        'launch.json': generate_launch_json(),
-        'extensions.json': generate_extensions_json()
+        "settings.json": generate_settings_json(),
+        "tasks.json": generate_tasks_json(),
+        "launch.json": generate_launch_json(),
+        "extensions.json": generate_extensions_json(),
     }
 
     for filename, config in configs.items():
         file_path = vscode_dir / filename
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=2)
         print(f"✅ Generated {filename}")
 
@@ -952,7 +918,8 @@ def generate_all_vscode_configs(debug_mode=True):
         print("   - Build tasks use build.ps1 PowerShell script")
         print("   - Optimized for MSVC compiler with direct Conan include paths")
         print(
-            "   - Uses c_cpp_properties.json for IntelliSense (no CMake Tools dependency)")
+            "   - Uses c_cpp_properties.json for IntelliSense (no CMake Tools dependency)"
+        )
     else:
         print("   - Build tasks use build.sh shell script")
         print("   - Optimized for Clang compiler with direct Conan include paths")
@@ -960,9 +927,14 @@ def generate_all_vscode_configs(debug_mode=True):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Generate VS Code configuration files for Pandolabo project')
-    parser.add_argument('--release', action='store_true',
-                        help='Generate configuration for Release mode (default: Debug mode)')
+    parser = argparse.ArgumentParser(
+        description="Generate VS Code configuration files for Pandolabo project"
+    )
+    parser.add_argument(
+        "--release",
+        action="store_true",
+        help="Generate configuration for Release mode (default: Debug mode)",
+    )
 
     args = parser.parse_args()
     debug_mode = not args.release  # --releaseが指定されていない場合はDebugモード
