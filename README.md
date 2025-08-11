@@ -15,7 +15,7 @@
 
 ## 🚀 自動セットアップ
 
-### 🖥️ Windows (MSVC + C++20)
+### 🖥️ Windows (MSVC + C++23)
 ```powershell
 # 🎯 ワンクリック環境構築 + ビルド + 実行
 .\scripts\build.ps1 all
@@ -69,7 +69,7 @@
 
 ### 📦 技術スタック
 - **グラフィックスAPI**: Vulkan 1.4+
-- **C++標準**: C++20 (Windows) / C++20+ (Linux/macOS)
+- **C++標準**: C++23 (Windows)
 - **パッケージマネージャー**: Conan 2.x
 - **ビルドシステム**: CMake 3.16+
 - **開発環境**: VS Code (推奨)
