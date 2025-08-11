@@ -10,28 +10,8 @@
 
 > すごいシステムです，みたいな書き方をしているドキュメントはAIが生成しました．あくまで備忘録です
 
-```bash
-# 🎯 ワンクリック環境構築 + ビルド + 実行
-./scripts/build.sh all
-
-# 📋 インタラクティブモード（対話式メニュー）
-./scripts/build.sh
-
-# 🔧 個別コマンド
-./scripts/build.sh setup       # 環境セットアップ (.venv + Conan)
-./scripts/build.sh build       # プロジェクト全体ビルド
-./scripts/build.sh examples    # サンプル実行
-./scripts/build.sh vscode      # VS Code設定生成
-./scripts/build.sh format      # C++コード一括フォーマット
-
-# 🎮 Debug/Release ビルド切り替え
-./scripts/build.sh build --config Debug          # デバッグビルド
-./scripts/build.sh build --config Release        # リリースビルド
-```y
-
 プラットフォーム適応型C++開発環境 with Vulkan.hpp
 - **Windows**: MSVC + C++20 (安定版)
-- **Linux/macOS**: Clang + C++20+ (多分動くはず．．．)
 
 ## 🚀 自動セットアップ
 
@@ -73,8 +53,8 @@
 - **PowerShell 5.1+** (Windows標準搭載)
 
 ### 🐧 Linux/macOS
-- **Clang 15+** (推奨: Clang 17+)
-- **Vulkan drivers** (各プラットフォーム用)
+- 念のため設定として考慮しているものの，おそらく動作しないと思います
+- 製作者の都合で必要になり次第，別途対応するかもしれません
 
 ## 🎯 プロジェクト概要
 
