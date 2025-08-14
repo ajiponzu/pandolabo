@@ -23,14 +23,17 @@ vk::ShaderStageFlagBits ShaderCompiler::getShaderStageFlagBits() const {
   const auto& entry_point = this->get_entry_point();
 
   switch (entry_point.model) {
-    case spv::ExecutionModelVertex:
-      return vk::ShaderStageFlagBits::eVertex;
-    case spv::ExecutionModelFragment:
-      return vk::ShaderStageFlagBits::eFragment;
-    case spv::ExecutionModelGLCompute:
-      return vk::ShaderStageFlagBits::eCompute;
+    using enum spv::ExecutionModel;
+    using enum vk::ShaderStageFlagBits;
+
+    case ExecutionModelVertex:
+      return eVertex;
+    case ExecutionModelFragment:
+      return eFragment;
+    case ExecutionModelGLCompute:
+      return eCompute;
     default:
-      return vk::ShaderStageFlagBits::eAll;
+      return eAll;
   }
 }
 
@@ -39,14 +42,17 @@ vk::ShaderStageFlags ShaderCompiler::getShaderStageFlags() const {
 
   const auto& entry_point = this->get_entry_point();
   switch (entry_point.model) {
-    case spv::ExecutionModelVertex:
-      flags |= vk::ShaderStageFlagBits::eVertex;
+    using enum spv::ExecutionModel;
+    using enum vk::ShaderStageFlagBits;
+
+    case ExecutionModelVertex:
+      flags |= eVertex;
       break;
-    case spv::ExecutionModelFragment:
-      flags |= vk::ShaderStageFlagBits::eFragment;
+    case ExecutionModelFragment:
+      flags |= eFragment;
       break;
-    case spv::ExecutionModelGLCompute:
-      flags |= vk::ShaderStageFlagBits::eCompute;
+    case ExecutionModelGLCompute:
+      flags |= eCompute;
       break;
   }
 
@@ -83,21 +89,17 @@ std::unordered_map<std::string, pandora::core::DescriptorInfo> ShaderCompiler::g
   const auto resources = this->get_shader_resources();
   const auto shader_stage_flags = getShaderStageFlags();
 
-  set_descriptor_infos(
-      descriptor_info_map, *this, resources.uniform_buffers, vk::DescriptorType::eUniformBuffer, shader_stage_flags);
-  set_descriptor_infos(
-      descriptor_info_map, *this, resources.separate_images, vk::DescriptorType::eSampledImage, shader_stage_flags);
-  set_descriptor_infos(
-      descriptor_info_map, *this, resources.separate_samplers, vk::DescriptorType::eSampler, shader_stage_flags);
-  set_descriptor_infos(descriptor_info_map,
-                       *this,
-                       resources.sampled_images,
-                       vk::DescriptorType::eCombinedImageSampler,
-                       shader_stage_flags);
-  set_descriptor_infos(
-      descriptor_info_map, *this, resources.storage_images, vk::DescriptorType::eStorageImage, shader_stage_flags);
-  set_descriptor_infos(
-      descriptor_info_map, *this, resources.storage_buffers, vk::DescriptorType::eStorageBuffer, shader_stage_flags);
+  {
+    using enum vk::DescriptorType;
+
+    set_descriptor_infos(descriptor_info_map, *this, resources.uniform_buffers, eUniformBuffer, shader_stage_flags);
+    set_descriptor_infos(descriptor_info_map, *this, resources.separate_images, eSampledImage, shader_stage_flags);
+    set_descriptor_infos(descriptor_info_map, *this, resources.separate_samplers, eSampler, shader_stage_flags);
+    set_descriptor_infos(
+        descriptor_info_map, *this, resources.sampled_images, eCombinedImageSampler, shader_stage_flags);
+    set_descriptor_infos(descriptor_info_map, *this, resources.storage_images, eStorageImage, shader_stage_flags);
+    set_descriptor_infos(descriptor_info_map, *this, resources.storage_buffers, eStorageBuffer, shader_stage_flags);
+  }
 
   return descriptor_info_map;
 }

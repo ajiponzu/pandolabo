@@ -61,8 +61,8 @@ NamespaceIndentation: None
 SortIncludes: true
 SortUsingDeclarations: true
 
-# C++23 対応
-Standard: c++23
+# C++標準設定 (clang-format 20.1.8 では c++20 が最新サポート)
+Standard: c++20
 
 # アクセス修飾子のインデント
 AccessModifierOffset: -1

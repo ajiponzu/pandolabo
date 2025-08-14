@@ -197,11 +197,13 @@ void pandora::core::gpu::Device::constructLogicalDevice(
 
 const uint32_t pandora::core::gpu::Device::getQueueFamilyIndex(const QueueFamilyType family_type) const {
   switch (family_type) {
-    case QueueFamilyType::Graphics:
+    using enum QueueFamilyType;
+
+    case Graphics:
       return get_optional_value(m_queueFamilyIndices.graphics);
-    case QueueFamilyType::Compute:
+    case Compute:
       return get_optional_value(m_queueFamilyIndices.compute);
-    case QueueFamilyType::Transfer:
+    case Transfer:
       return get_optional_value(m_queueFamilyIndices.transfer);
     default:
       return 0U;

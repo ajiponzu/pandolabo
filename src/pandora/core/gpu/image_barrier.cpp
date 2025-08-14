@@ -33,17 +33,20 @@ pandora::core::gpu::ImageBarrier::ImageBarrier(const Image& image,
     vk::ImageSubresourceRange subresource_range;
 
     switch (image_view_info.aspect) {
-      case ImageAspect::Color:
-        subresource_range.setAspectMask(vk::ImageAspectFlagBits::eColor);
+      using enum ImageAspect;
+      using enum vk::ImageAspectFlagBits;
+
+      case Color:
+        subresource_range.setAspectMask(eColor);
         break;
-      case ImageAspect::Depth:
-        subresource_range.setAspectMask(vk::ImageAspectFlagBits::eDepth);
+      case Depth:
+        subresource_range.setAspectMask(eDepth);
         break;
-      case ImageAspect::Stencil:
-        subresource_range.setAspectMask(vk::ImageAspectFlagBits::eStencil);
+      case Stencil:
+        subresource_range.setAspectMask(eStencil);
         break;
-      case ImageAspect::DepthStencil:
-        subresource_range.setAspectMask(vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil);
+      case DepthStencil:
+        subresource_range.setAspectMask(eDepth | eStencil);
         break;
       default:
         break;

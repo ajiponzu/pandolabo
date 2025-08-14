@@ -3,12 +3,15 @@
 
 static vk::ImageViewType get_image_view_type(const pandora::core::ImageDimension image_dimension) {
   switch (image_dimension) {
-    case pandora::core::ImageDimension::v1D:
-      return vk::ImageViewType::e1D;
-    case pandora::core::ImageDimension::v2D:
-      return vk::ImageViewType::e2D;
-    case pandora::core::ImageDimension::v3D:
-      return vk::ImageViewType::e3D;
+    using enum pandora::core::ImageDimension;
+    using enum vk::ImageViewType;
+
+    case v1D:
+      return e1D;
+    case v2D:
+      return e2D;
+    case v3D:
+      return e3D;
     default:
       return vk::ImageViewType(0U);
   }

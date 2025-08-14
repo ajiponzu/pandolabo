@@ -2,30 +2,32 @@
 #include "pandora/core/gpu/vk_helper.hpp"
 
 static vk::ImageUsageFlags get_transfer_usage(const pandora::core::TransferType transfer_type) {
-  using TransferType = pandora::core::TransferType;
-
   switch (transfer_type) {
-    case TransferType::TransferSrc:
-      return vk::ImageUsageFlagBits::eTransferSrc;
-    case TransferType::TransferDst:
-      return vk::ImageUsageFlagBits::eTransferDst;
-    case TransferType::TransferSrcDst:
-      return vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst;
+    using enum pandora::core::TransferType;
+    using enum vk::ImageUsageFlagBits;
+
+    case TransferSrc:
+      return eTransferSrc;
+    case TransferDst:
+      return eTransferDst;
+    case TransferSrcDst:
+      return eTransferSrc | eTransferDst;
     default:
       return vk::ImageUsageFlagBits(0U);
   }
 }
 
 static vk::ImageType get_image_type(pandora::core::ImageDimension dimension) {
-  using ImageDimension = pandora::core::ImageDimension;
-
   switch (dimension) {
-    case ImageDimension::v1D:
-      return vk::ImageType::e1D;
-    case ImageDimension::v2D:
-      return vk::ImageType::e2D;
-    case ImageDimension::v3D:
-      return vk::ImageType::e3D;
+    using enum pandora::core::ImageDimension;
+    using enum vk::ImageType;
+
+    case v1D:
+      return e1D;
+    case v2D:
+      return e2D;
+    case v3D:
+      return e3D;
     default:
       return vk::ImageType(0U);
   }

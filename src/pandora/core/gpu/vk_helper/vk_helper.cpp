@@ -1,311 +1,321 @@
 #include "pandora/core/gpu/vk_helper.hpp"
 
 vk::MemoryPropertyFlags vk_helper::getMemoryPropertyFlags(const pandora::core::MemoryUsage memory_usage) {
-  using MemoryUsage = pandora::core::MemoryUsage;
-
   switch (memory_usage) {
-    case MemoryUsage::GpuOnly:
-      return vk::MemoryPropertyFlagBits::eDeviceLocal;
-    case MemoryUsage::CpuOnly:
-      return vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-    case MemoryUsage::CpuToGpu:
-      return vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eDeviceLocal;
-    case MemoryUsage::GpuToCpu:
-      return vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCached;
+    using enum pandora::core::MemoryUsage;
+    using enum vk::MemoryPropertyFlagBits;
+
+    case GpuOnly:
+      return eDeviceLocal;
+    case CpuOnly:
+      return eHostVisible | eHostCoherent;
+    case CpuToGpu:
+      return eHostVisible | eDeviceLocal;
+    case GpuToCpu:
+      return eHostVisible | eHostCached;
     default:
-      return vk::MemoryPropertyFlagBits::eDeviceLocal;
+      return eDeviceLocal;
   }
 }
 
 vk::AccessFlagBits vk_helper::getAccessFlagBits(const pandora::core::AccessFlag access_flag) {
-  using AccessFlag = pandora::core::AccessFlag;
-
   switch (access_flag) {
-    case AccessFlag::IndirectCommandRead:
-      return vk::AccessFlagBits::eIndirectCommandRead;
-    case AccessFlag::IndexRead:
-      return vk::AccessFlagBits::eIndexRead;
-    case AccessFlag::VertexAttributeRead:
-      return vk::AccessFlagBits::eVertexAttributeRead;
-    case AccessFlag::UniformRead:
-      return vk::AccessFlagBits::eUniformRead;
-    case AccessFlag::InputAttachmentRead:
-      return vk::AccessFlagBits::eInputAttachmentRead;
-    case AccessFlag::ShaderRead:
-      return vk::AccessFlagBits::eShaderRead;
-    case AccessFlag::ShaderWrite:
-      return vk::AccessFlagBits::eShaderWrite;
-    case AccessFlag::ColorAttachmentRead:
-      return vk::AccessFlagBits::eColorAttachmentRead;
-    case AccessFlag::ColorAttachmentWrite:
-      return vk::AccessFlagBits::eColorAttachmentWrite;
-    case AccessFlag::DepthStencilAttachmentRead:
-      return vk::AccessFlagBits::eDepthStencilAttachmentRead;
-    case AccessFlag::DepthStencilAttachmentWrite:
-      return vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-    case AccessFlag::TransferRead:
-      return vk::AccessFlagBits::eTransferRead;
-    case AccessFlag::TransferWrite:
-      return vk::AccessFlagBits::eTransferWrite;
-    case AccessFlag::HostRead:
-      return vk::AccessFlagBits::eHostRead;
-    case AccessFlag::HostWrite:
-      return vk::AccessFlagBits::eHostWrite;
-    case AccessFlag::MemoryRead:
-      return vk::AccessFlagBits::eMemoryRead;
-    case AccessFlag::MemoryWrite:
-      return vk::AccessFlagBits::eMemoryWrite;
+    using enum pandora::core::AccessFlag;
+    using enum vk::AccessFlagBits;
+
+    case IndirectCommandRead:
+      return eIndirectCommandRead;
+    case IndexRead:
+      return eIndexRead;
+    case VertexAttributeRead:
+      return eVertexAttributeRead;
+    case UniformRead:
+      return eUniformRead;
+    case InputAttachmentRead:
+      return eInputAttachmentRead;
+    case ShaderRead:
+      return eShaderRead;
+    case ShaderWrite:
+      return eShaderWrite;
+    case ColorAttachmentRead:
+      return eColorAttachmentRead;
+    case ColorAttachmentWrite:
+      return eColorAttachmentWrite;
+    case DepthStencilAttachmentRead:
+      return eDepthStencilAttachmentRead;
+    case DepthStencilAttachmentWrite:
+      return eDepthStencilAttachmentWrite;
+    case TransferRead:
+      return eTransferRead;
+    case TransferWrite:
+      return eTransferWrite;
+    case HostRead:
+      return eHostRead;
+    case HostWrite:
+      return eHostWrite;
+    case MemoryRead:
+      return eMemoryRead;
+    case MemoryWrite:
+      return eMemoryWrite;
     default:
-      return vk::AccessFlagBits::eNone;
+      return eNone;
   }
 }
 
 vk::PipelineStageFlagBits vk_helper::getPipelineStageFlagBits(const pandora::core::PipelineStage stage) {
-  using PipelineStage = pandora::core::PipelineStage;
-
   switch (stage) {
-    case PipelineStage::TopOfPipe:
-      return vk::PipelineStageFlagBits::eTopOfPipe;
-    case PipelineStage::DrawIndirect:
-      return vk::PipelineStageFlagBits::eDrawIndirect;
-    case PipelineStage::VertexInput:
-      return vk::PipelineStageFlagBits::eVertexInput;
-    case PipelineStage::VertexShader:
-      return vk::PipelineStageFlagBits::eVertexShader;
-    case PipelineStage::TessellationControlShader:
-      return vk::PipelineStageFlagBits::eTessellationControlShader;
-    case PipelineStage::TessellationEvaluationShader:
-      return vk::PipelineStageFlagBits::eTessellationEvaluationShader;
-    case PipelineStage::GeometryShader:
-      return vk::PipelineStageFlagBits::eGeometryShader;
-    case PipelineStage::FragmentShader:
-      return vk::PipelineStageFlagBits::eFragmentShader;
-    case PipelineStage::EarlyFragmentTests:
-      return vk::PipelineStageFlagBits::eEarlyFragmentTests;
-    case PipelineStage::LateFragmentTests:
-      return vk::PipelineStageFlagBits::eLateFragmentTests;
-    case PipelineStage::ColorAttachmentOutput:
-      return vk::PipelineStageFlagBits::eColorAttachmentOutput;
-    case PipelineStage::ComputeShader:
-      return vk::PipelineStageFlagBits::eComputeShader;
-    case PipelineStage::Transfer:
-      return vk::PipelineStageFlagBits::eTransfer;
-    case PipelineStage::BottomOfPipe:
-      return vk::PipelineStageFlagBits::eBottomOfPipe;
-    case PipelineStage::Host:
-      return vk::PipelineStageFlagBits::eHost;
-    case PipelineStage::AllGraphics:
-      return vk::PipelineStageFlagBits::eAllGraphics;
-    case PipelineStage::AllCommands:
-      return vk::PipelineStageFlagBits::eAllCommands;
+    using enum pandora::core::PipelineStage;
+    using enum vk::PipelineStageFlagBits;
+
+    case TopOfPipe:
+      return eTopOfPipe;
+    case DrawIndirect:
+      return eDrawIndirect;
+    case VertexInput:
+      return eVertexInput;
+    case VertexShader:
+      return eVertexShader;
+    case TessellationControlShader:
+      return eTessellationControlShader;
+    case TessellationEvaluationShader:
+      return eTessellationEvaluationShader;
+    case GeometryShader:
+      return eGeometryShader;
+    case FragmentShader:
+      return eFragmentShader;
+    case EarlyFragmentTests:
+      return eEarlyFragmentTests;
+    case LateFragmentTests:
+      return eLateFragmentTests;
+    case ColorAttachmentOutput:
+      return eColorAttachmentOutput;
+    case ComputeShader:
+      return eComputeShader;
+    case Transfer:
+      return eTransfer;
+    case BottomOfPipe:
+      return eBottomOfPipe;
+    case Host:
+      return eHost;
+    case AllGraphics:
+      return eAllGraphics;
+    case AllCommands:
+      return eAllCommands;
     default:
-      return vk::PipelineStageFlagBits::eNone;
+      return eNone;
   }
 }
 
 vk::PipelineBindPoint vk_helper::getPipelineBindPoint(const pandora::core::PipelineBind bind_point) {
-  using PipelineBind = pandora::core::PipelineBind;
-
   switch (bind_point) {
-    case PipelineBind::Graphics:
-      return vk::PipelineBindPoint::eGraphics;
-    case PipelineBind::Compute:
-      return vk::PipelineBindPoint::eCompute;
-    case PipelineBind::RayTracing:
-      return vk::PipelineBindPoint::eRayTracingKHR;
+    using enum pandora::core::PipelineBind;
+    using enum vk::PipelineBindPoint;
+
+    case Graphics:
+      return eGraphics;
+    case Compute:
+      return eCompute;
+    case RayTracing:
+      return eRayTracingKHR;
     default:
-      return vk::PipelineBindPoint::eGraphics;
+      return eGraphics;
   }
 }
 
 vk::ImageUsageFlagBits vk_helper::getImageUsage(const pandora::core::ImageUsage image_usage) {
-  using ImageUsage = pandora::core::ImageUsage;
-
   switch (image_usage) {
-    case ImageUsage::Sampled:
-      return vk::ImageUsageFlagBits::eSampled;
-    case ImageUsage::Storage:
-      return vk::ImageUsageFlagBits::eStorage;
-    case ImageUsage::ColorAttachment:
-      return vk::ImageUsageFlagBits::eColorAttachment;
-    case ImageUsage::DepthStencilAttachment:
-      return vk::ImageUsageFlagBits::eDepthStencilAttachment;
-    case ImageUsage::TransientAttachment:
-      return vk::ImageUsageFlagBits::eTransientAttachment;
-    case ImageUsage::InputAttachment:
-      return vk::ImageUsageFlagBits::eInputAttachment;
+    using enum pandora::core::ImageUsage;
+    using enum vk::ImageUsageFlagBits;
+
+    case Sampled:
+      return eSampled;
+    case Storage:
+      return eStorage;
+    case ColorAttachment:
+      return eColorAttachment;
+    case DepthStencilAttachment:
+      return eDepthStencilAttachment;
+    case TransientAttachment:
+      return eTransientAttachment;
+    case InputAttachment:
+      return eInputAttachment;
     default:
-      return vk::ImageUsageFlagBits::eSampled;
+      return eSampled;
   }
 }
 
 vk::ImageLayout vk_helper::getImageLayout(const pandora::core::ImageLayout image_layout) {
-  using ImageLayout = pandora::core::ImageLayout;
-
   switch (image_layout) {
-    case ImageLayout::Undefined:
-      return vk::ImageLayout::eUndefined;
-    case ImageLayout::General:
-      return vk::ImageLayout::eGeneral;
-    case ImageLayout::ColorAttachmentOptimal:
-      return vk::ImageLayout::eColorAttachmentOptimal;
-    case ImageLayout::DepthStencilAttachmentOptimal:
-      return vk::ImageLayout::eDepthStencilAttachmentOptimal;
-    case ImageLayout::DepthStencilReadOnlyOptimal:
-      return vk::ImageLayout::eDepthStencilReadOnlyOptimal;
-    case ImageLayout::ShaderReadOnlyOptimal:
-      return vk::ImageLayout::eShaderReadOnlyOptimal;
-    case ImageLayout::TransferSrcOptimal:
-      return vk::ImageLayout::eTransferSrcOptimal;
-    case ImageLayout::TransferDstOptimal:
-      return vk::ImageLayout::eTransferDstOptimal;
-    case ImageLayout::Preinitialized:
-      return vk::ImageLayout::ePreinitialized;
-    case ImageLayout::PresentSrc:
-      return vk::ImageLayout::ePresentSrcKHR;
-    case ImageLayout::SharedPresent:
-      return vk::ImageLayout::eSharedPresentKHR;
-    case ImageLayout::DepthReadOnlyStencilAttachmentOptimal:
-      return vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal;
-    case ImageLayout::DepthAttachmentStencilReadOnlyOptimal:
-      return vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
+    using enum pandora::core::ImageLayout;
+    using enum vk::ImageLayout;
+
+    case Undefined:
+      return eUndefined;
+    case General:
+      return eGeneral;
+    case ColorAttachmentOptimal:
+      return eColorAttachmentOptimal;
+    case DepthStencilAttachmentOptimal:
+      return eDepthStencilAttachmentOptimal;
+    case DepthStencilReadOnlyOptimal:
+      return eDepthStencilReadOnlyOptimal;
+    case ShaderReadOnlyOptimal:
+      return eShaderReadOnlyOptimal;
+    case TransferSrcOptimal:
+      return eTransferSrcOptimal;
+    case TransferDstOptimal:
+      return eTransferDstOptimal;
+    case Preinitialized:
+      return ePreinitialized;
+    case PresentSrc:
+      return ePresentSrcKHR;
+    case SharedPresent:
+      return eSharedPresentKHR;
+    case DepthReadOnlyStencilAttachmentOptimal:
+      return eDepthReadOnlyStencilAttachmentOptimal;
+    case DepthAttachmentStencilReadOnlyOptimal:
+      return eDepthAttachmentStencilReadOnlyOptimal;
     default:
-      return vk::ImageLayout::eUndefined;
+      return eUndefined;
   }
 }
 
 vk::Format vk_helper::getFormat(const pandora::core::DataFormat format) {
-  using DataFormat = pandora::core::DataFormat;
-
   switch (format) {
-    case DataFormat::R8Unorm:
-      return vk::Format::eR8Unorm;
-    case DataFormat::R8Snorm:
-      return vk::Format::eR8Snorm;
-    case DataFormat::R8Uscaled:
-      return vk::Format::eR8Uscaled;
-    case DataFormat::R8Sscaled:
-      return vk::Format::eR8Sscaled;
-    case DataFormat::R8Uint:
-      return vk::Format::eR8Uint;
-    case DataFormat::R8Sint:
-      return vk::Format::eR8Sint;
-    case DataFormat::R8Srgb:
-      return vk::Format::eR8Srgb;
-    case DataFormat::R8G8Unorm:
-      return vk::Format::eR8G8Unorm;
-    case DataFormat::R8G8Snorm:
-      return vk::Format::eR8G8Snorm;
-    case DataFormat::R8G8Uscaled:
-      return vk::Format::eR8G8Uscaled;
-    case DataFormat::R8G8Sscaled:
-      return vk::Format::eR8G8Sscaled;
-    case DataFormat::R8G8Uint:
-      return vk::Format::eR8G8Uint;
-    case DataFormat::R8G8Sint:
-      return vk::Format::eR8G8Sint;
-    case DataFormat::R8G8Srgb:
-      return vk::Format::eR8G8Srgb;
-    case DataFormat::R8G8B8Unorm:
-      return vk::Format::eR8G8B8Unorm;
-    case DataFormat::R8G8B8Snorm:
-      return vk::Format::eR8G8B8Snorm;
-    case DataFormat::R8G8B8Uscaled:
-      return vk::Format::eR8G8B8Uscaled;
-    case DataFormat::R8G8B8Sscaled:
-      return vk::Format::eR8G8B8Sscaled;
-    case DataFormat::R8G8B8Uint:
-      return vk::Format::eR8G8B8Uint;
-    case DataFormat::R8G8B8Sint:
-      return vk::Format::eR8G8B8Sint;
-    case DataFormat::R8G8B8Srgb:
-      return vk::Format::eR8G8B8Srgb;
-    case DataFormat::R8G8B8A8Unorm:
-      return vk::Format::eR8G8B8A8Unorm;
-    case DataFormat::R8G8B8A8Snorm:
-      return vk::Format::eR8G8B8A8Snorm;
-    case DataFormat::R8G8B8A8Uscaled:
-      return vk::Format::eR8G8B8A8Uscaled;
-    case DataFormat::R8G8B8A8Sscaled:
-      return vk::Format::eR8G8B8A8Sscaled;
-    case DataFormat::R8G8B8A8Uint:
-      return vk::Format::eR8G8B8A8Uint;
-    case DataFormat::R8G8B8A8Sint:
-      return vk::Format::eR8G8B8A8Sint;
-    case DataFormat::R8G8B8A8Srgb:
-      return vk::Format::eR8G8B8A8Srgb;
-    case DataFormat::R32Sfloat:
-      return vk::Format::eR32Sfloat;
-    case DataFormat::R32G32Sfloat:
-      return vk::Format::eR32G32Sfloat;
-    case DataFormat::R32G32B32Sfloat:
-      return vk::Format::eR32G32B32Sfloat;
-    case DataFormat::R32G32B32A32Sfloat:
-      return vk::Format::eR32G32B32A32Sfloat;
-    case DataFormat::Depth:
-      return vk::Format::eD32Sfloat;
-    case DataFormat::DepthSfloatStencilUint:
-      return vk::Format::eD32SfloatS8Uint;
-    case DataFormat::Depth24UnormStencilUint:
-      return vk::Format::eD24UnormS8Uint;
+    using enum pandora::core::DataFormat;
+    using enum vk::Format;
+
+    case R8Unorm:
+      return eR8Unorm;
+    case R8Snorm:
+      return eR8Snorm;
+    case R8Uscaled:
+      return eR8Uscaled;
+    case R8Sscaled:
+      return eR8Sscaled;
+    case R8Uint:
+      return eR8Uint;
+    case R8Sint:
+      return eR8Sint;
+    case R8Srgb:
+      return eR8Srgb;
+    case R8G8Unorm:
+      return eR8G8Unorm;
+    case R8G8Snorm:
+      return eR8G8Snorm;
+    case R8G8Uscaled:
+      return eR8G8Uscaled;
+    case R8G8Sscaled:
+      return eR8G8Sscaled;
+    case R8G8Uint:
+      return eR8G8Uint;
+    case R8G8Sint:
+      return eR8G8Sint;
+    case R8G8Srgb:
+      return eR8G8Srgb;
+    case R8G8B8Unorm:
+      return eR8G8B8Unorm;
+    case R8G8B8Snorm:
+      return eR8G8B8Snorm;
+    case R8G8B8Uscaled:
+      return eR8G8B8Uscaled;
+    case R8G8B8Sscaled:
+      return eR8G8B8Sscaled;
+    case R8G8B8Uint:
+      return eR8G8B8Uint;
+    case R8G8B8Sint:
+      return eR8G8B8Sint;
+    case R8G8B8Srgb:
+      return eR8G8B8Srgb;
+    case R8G8B8A8Unorm:
+      return eR8G8B8A8Unorm;
+    case R8G8B8A8Snorm:
+      return eR8G8B8A8Snorm;
+    case R8G8B8A8Uscaled:
+      return eR8G8B8A8Uscaled;
+    case R8G8B8A8Sscaled:
+      return eR8G8B8A8Sscaled;
+    case R8G8B8A8Uint:
+      return eR8G8B8A8Uint;
+    case R8G8B8A8Sint:
+      return eR8G8B8A8Sint;
+    case R8G8B8A8Srgb:
+      return eR8G8B8A8Srgb;
+    case R32Sfloat:
+      return eR32Sfloat;
+    case R32G32Sfloat:
+      return eR32G32Sfloat;
+    case R32G32B32Sfloat:
+      return eR32G32B32Sfloat;
+    case R32G32B32A32Sfloat:
+      return eR32G32B32A32Sfloat;
+    case Depth:
+      return eD32Sfloat;
+    case DepthSfloatStencilUint:
+      return eD32SfloatS8Uint;
+    case Depth24UnormStencilUint:
+      return eD24UnormS8Uint;
     default:
-      return vk::Format::eUndefined;
+      return eUndefined;
   }
 }
 
 vk::SampleCountFlagBits vk_helper::getSampleCount(const pandora::core::ImageSampleCount sample_count) {
-  using ImageSampleCount = pandora::core::ImageSampleCount;
-
   switch (sample_count) {
-    case ImageSampleCount::v1:
-      return vk::SampleCountFlagBits::e1;
-    case ImageSampleCount::v2:
-      return vk::SampleCountFlagBits::e2;
-    case ImageSampleCount::v4:
-      return vk::SampleCountFlagBits::e4;
-    case ImageSampleCount::v8:
-      return vk::SampleCountFlagBits::e8;
-    case ImageSampleCount::v16:
-      return vk::SampleCountFlagBits::e16;
-    case ImageSampleCount::v32:
-      return vk::SampleCountFlagBits::e32;
-    case ImageSampleCount::v64:
-      return vk::SampleCountFlagBits::e64;
+    using enum pandora::core::ImageSampleCount;
+    using enum vk::SampleCountFlagBits;
+
+    case v1:
+      return e1;
+    case v2:
+      return e2;
+    case v4:
+      return e4;
+    case v8:
+      return e8;
+    case v16:
+      return e16;
+    case v32:
+      return e32;
+    case v64:
+      return e64;
     default:
       return vk::SampleCountFlagBits(0U);
   }
 }
 
 vk::ImageAspectFlags vk_helper::getImageAspectFlags(const pandora::core::ImageAspect image_aspect) {
-  using ImageAspect = pandora::core::ImageAspect;
-
   vk::ImageSubresourceRange subresource_range;
   switch (image_aspect) {
-    case ImageAspect::Color:
-      return vk::ImageAspectFlagBits::eColor;
-    case ImageAspect::Depth:
-      return vk::ImageAspectFlagBits::eDepth;
-    case ImageAspect::Stencil:
-      return vk::ImageAspectFlagBits::eStencil;
-    case ImageAspect::DepthStencil:
-      return vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil;
+    using enum pandora::core::ImageAspect;
+    using enum vk::ImageAspectFlagBits;
+
+    case Color:
+      return eColor;
+    case Depth:
+      return eDepth;
+    case Stencil:
+      return eStencil;
+    case DepthStencil:
+      return eDepth | eStencil;
     default:
-      return vk::ImageAspectFlagBits::eColor;
+      return eColor;
   }
 }
 
 vk::ShaderStageFlags vk_helper::getShaderStageFlagBits(const pandora::core::ShaderStage shader_stage) {
-  using ShaderStage = pandora::core::ShaderStage;
-
   switch (shader_stage) {
-    case ShaderStage::Vertex:
-      return vk::ShaderStageFlagBits::eVertex;
-    case ShaderStage::Fragment:
-      return vk::ShaderStageFlagBits::eFragment;
-    case ShaderStage::Compute:
-      return vk::ShaderStageFlagBits::eCompute;
+    using enum pandora::core::ShaderStage;
+    using enum vk::ShaderStageFlagBits;
+
+    case Vertex:
+      return eVertex;
+    case Fragment:
+      return eFragment;
+    case Compute:
+      return eCompute;
     default:
-      return vk::ShaderStageFlagBits::eAll;
+      return eAll;
   }
 }
 
@@ -318,77 +328,85 @@ vk::Extent3D vk_helper::getExtent3D(const pandora::core::gpu_ui::GraphicalSize<u
 }
 
 vk::AttachmentLoadOp vk_helper::getAttachmentLoadOp(const pandora::core::AttachmentLoadOp attachment_load_op) {
-  using AttachmentLoadOp = pandora::core::AttachmentLoadOp;
+  using enum pandora::core::AttachmentLoadOp;
+  using enum vk::AttachmentLoadOp;
 
   switch (attachment_load_op) {
-    case AttachmentLoadOp::Load:
-      return vk::AttachmentLoadOp::eLoad;
-    case AttachmentLoadOp::Clear:
-      return vk::AttachmentLoadOp::eClear;
-    case AttachmentLoadOp::DontCare:
-      return vk::AttachmentLoadOp::eDontCare;
+    case Load:
+      return eLoad;
+    case Clear:
+      return eClear;
+    case DontCare:
+      return eDontCare;
     default:
-      return vk::AttachmentLoadOp::eDontCare;
+      return eDontCare;
   }
 }
 
 vk::AttachmentStoreOp vk_helper::getAttachmentStoreOp(const pandora::core::AttachmentStoreOp attachment_store_op) {
-  using AttachmentStoreOp = pandora::core::AttachmentStoreOp;
-
   switch (attachment_store_op) {
-    case AttachmentStoreOp::Store:
-      return vk::AttachmentStoreOp::eStore;
-    case AttachmentStoreOp::DontCare:
-      return vk::AttachmentStoreOp::eDontCare;
+    using enum pandora::core::AttachmentStoreOp;
+    using enum vk::AttachmentStoreOp;
+
+    case Store:
+      return eStore;
+    case DontCare:
+      return eDontCare;
     default:
-      return vk::AttachmentStoreOp::eDontCare;
+      return eDontCare;
   }
 }
 
 // Pipeline-related conversions
 vk::CompareOp vk_helper::getCompareOp(const pandora::core::CompareOp compare_op) {
   switch (compare_op) {
-    case pandora::core::CompareOp::Never:
-      return vk::CompareOp::eNever;
-    case pandora::core::CompareOp::Less:
-      return vk::CompareOp::eLess;
-    case pandora::core::CompareOp::Equal:
-      return vk::CompareOp::eEqual;
-    case pandora::core::CompareOp::LessOrEqual:
-      return vk::CompareOp::eLessOrEqual;
-    case pandora::core::CompareOp::Greater:
-      return vk::CompareOp::eGreater;
-    case pandora::core::CompareOp::NotEqual:
-      return vk::CompareOp::eNotEqual;
-    case pandora::core::CompareOp::GreaterOrEqual:
-      return vk::CompareOp::eGreaterOrEqual;
-    case pandora::core::CompareOp::Always:
-      return vk::CompareOp::eAlways;
+    using enum pandora::core::CompareOp;
+    using enum vk::CompareOp;
+
+    case Never:
+      return eNever;
+    case Less:
+      return eLess;
+    case Equal:
+      return eEqual;
+    case LessOrEqual:
+      return eLessOrEqual;
+    case Greater:
+      return eGreater;
+    case NotEqual:
+      return eNotEqual;
+    case GreaterOrEqual:
+      return eGreaterOrEqual;
+    case Always:
+      return eAlways;
     default:
-      return vk::CompareOp::eAlways;
+      return eAlways;
   }
 }
 
 vk::StencilOp vk_helper::getStencilOp(const pandora::core::StencilOp stencil_op) {
   switch (stencil_op) {
-    case pandora::core::StencilOp::Keep:
-      return vk::StencilOp::eKeep;
-    case pandora::core::StencilOp::Zero:
-      return vk::StencilOp::eZero;
-    case pandora::core::StencilOp::Replace:
-      return vk::StencilOp::eReplace;
-    case pandora::core::StencilOp::IncrementAndClamp:
-      return vk::StencilOp::eIncrementAndClamp;
-    case pandora::core::StencilOp::DecrementAndClamp:
-      return vk::StencilOp::eDecrementAndClamp;
-    case pandora::core::StencilOp::Invert:
-      return vk::StencilOp::eInvert;
-    case pandora::core::StencilOp::IncrementAndWrap:
-      return vk::StencilOp::eIncrementAndWrap;
-    case pandora::core::StencilOp::DecrementAndWrap:
-      return vk::StencilOp::eDecrementAndWrap;
+    using enum pandora::core::StencilOp;
+    using enum vk::StencilOp;
+
+    case Keep:
+      return eKeep;
+    case Zero:
+      return eZero;
+    case Replace:
+      return eReplace;
+    case IncrementAndClamp:
+      return eIncrementAndClamp;
+    case DecrementAndClamp:
+      return eDecrementAndClamp;
+    case Invert:
+      return eInvert;
+    case IncrementAndWrap:
+      return eIncrementAndWrap;
+    case DecrementAndWrap:
+      return eDecrementAndWrap;
     default:
-      return vk::StencilOp::eKeep;
+      return eKeep;
   }
 }
 
@@ -407,63 +425,69 @@ vk::StencilOpState vk_helper::getStencilOpState(const pandora::core::StencilOpSt
 
 vk::BlendFactor vk_helper::getBlendFactor(const pandora::core::BlendFactor blend_factor) {
   switch (blend_factor) {
-    case pandora::core::BlendFactor::Zero:
-      return vk::BlendFactor::eZero;
-    case pandora::core::BlendFactor::One:
-      return vk::BlendFactor::eOne;
-    case pandora::core::BlendFactor::SrcColor:
-      return vk::BlendFactor::eSrcColor;
-    case pandora::core::BlendFactor::OneMinusSrcColor:
-      return vk::BlendFactor::eOneMinusSrcColor;
-    case pandora::core::BlendFactor::DstColor:
-      return vk::BlendFactor::eDstColor;
-    case pandora::core::BlendFactor::OneMinusDstColor:
-      return vk::BlendFactor::eOneMinusDstColor;
-    case pandora::core::BlendFactor::SrcAlpha:
-      return vk::BlendFactor::eSrcAlpha;
-    case pandora::core::BlendFactor::OneMinusSrcAlpha:
-      return vk::BlendFactor::eOneMinusSrcAlpha;
-    case pandora::core::BlendFactor::DstAlpha:
-      return vk::BlendFactor::eDstAlpha;
-    case pandora::core::BlendFactor::OneMinusDstAlpha:
-      return vk::BlendFactor::eOneMinusDstAlpha;
-    case pandora::core::BlendFactor::ConstantColor:
-      return vk::BlendFactor::eConstantColor;
-    case pandora::core::BlendFactor::OneMinusConstantColor:
-      return vk::BlendFactor::eOneMinusConstantColor;
-    case pandora::core::BlendFactor::ConstantAlpha:
-      return vk::BlendFactor::eConstantAlpha;
-    case pandora::core::BlendFactor::OneMinusConstantAlpha:
-      return vk::BlendFactor::eOneMinusConstantAlpha;
-    case pandora::core::BlendFactor::SrcAlphaSaturate:
-      return vk::BlendFactor::eSrcAlphaSaturate;
-    case pandora::core::BlendFactor::Src1Color:
-      return vk::BlendFactor::eSrc1Color;
-    case pandora::core::BlendFactor::OneMinusSrc1Color:
-      return vk::BlendFactor::eOneMinusSrc1Color;
-    case pandora::core::BlendFactor::Src1Alpha:
-      return vk::BlendFactor::eSrc1Alpha;
-    case pandora::core::BlendFactor::OneMinusSrc1Alpha:
-      return vk::BlendFactor::eOneMinusSrc1Alpha;
+    using enum pandora::core::BlendFactor;
+    using enum vk::BlendFactor;
+
+    case Zero:
+      return eZero;
+    case One:
+      return eOne;
+    case SrcColor:
+      return eSrcColor;
+    case OneMinusSrcColor:
+      return eOneMinusSrcColor;
+    case DstColor:
+      return eDstColor;
+    case OneMinusDstColor:
+      return eOneMinusDstColor;
+    case SrcAlpha:
+      return eSrcAlpha;
+    case OneMinusSrcAlpha:
+      return eOneMinusSrcAlpha;
+    case DstAlpha:
+      return eDstAlpha;
+    case OneMinusDstAlpha:
+      return eOneMinusDstAlpha;
+    case ConstantColor:
+      return eConstantColor;
+    case OneMinusConstantColor:
+      return eOneMinusConstantColor;
+    case ConstantAlpha:
+      return eConstantAlpha;
+    case OneMinusConstantAlpha:
+      return eOneMinusConstantAlpha;
+    case SrcAlphaSaturate:
+      return eSrcAlphaSaturate;
+    case Src1Color:
+      return eSrc1Color;
+    case OneMinusSrc1Color:
+      return eOneMinusSrc1Color;
+    case Src1Alpha:
+      return eSrc1Alpha;
+    case OneMinusSrc1Alpha:
+      return eOneMinusSrc1Alpha;
     default:
-      return vk::BlendFactor::eZero;
+      return eZero;
   }
 }
 
 vk::BlendOp vk_helper::getBlendOp(const pandora::core::BlendOp blend_op) {
   switch (blend_op) {
-    case pandora::core::BlendOp::Add:
-      return vk::BlendOp::eAdd;
-    case pandora::core::BlendOp::Subtract:
-      return vk::BlendOp::eSubtract;
-    case pandora::core::BlendOp::ReverseSubtract:
-      return vk::BlendOp::eReverseSubtract;
-    case pandora::core::BlendOp::Min:
-      return vk::BlendOp::eMin;
-    case pandora::core::BlendOp::Max:
-      return vk::BlendOp::eMax;
+    using enum pandora::core::BlendOp;
+    using enum vk::BlendOp;
+
+    case Add:
+      return eAdd;
+    case Subtract:
+      return eSubtract;
+    case ReverseSubtract:
+      return eReverseSubtract;
+    case Min:
+      return eMin;
+    case Max:
+      return eMax;
     default:
-      return vk::BlendOp::eAdd;
+      return eAdd;
   }
 }
 
@@ -472,17 +496,20 @@ vk::ColorComponentFlags vk_helper::getColorComponent(
   vk::ColorComponentFlags flags;
   for (const auto& component : color_components) {
     switch (component) {
-      case pandora::core::ColorComponent::R:
-        flags |= vk::ColorComponentFlagBits::eR;
+      using enum pandora::core::ColorComponent;
+      using enum vk::ColorComponentFlagBits;
+
+      case R:
+        flags |= eR;
         break;
-      case pandora::core::ColorComponent::G:
-        flags |= vk::ColorComponentFlagBits::eG;
+      case G:
+        flags |= eG;
         break;
-      case pandora::core::ColorComponent::B:
-        flags |= vk::ColorComponentFlagBits::eB;
+      case B:
+        flags |= eB;
         break;
-      case pandora::core::ColorComponent::A:
-        flags |= vk::ColorComponentFlagBits::eA;
+      case A:
+        flags |= eA;
         break;
       default:
         break;
@@ -495,28 +522,30 @@ vk::ColorComponentFlags vk_helper::getColorComponent(
 // Command buffer related conversions
 vk::CommandBufferUsageFlagBits vk_helper::getCommandBufferUsageFlagBits(
     const pandora::core::CommandBufferUsage usage_flags) {
-  using CommandBufferUsage = pandora::core::CommandBufferUsage;
-
   switch (usage_flags) {
-    case CommandBufferUsage::OneTimeSubmit:
-      return vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-    case CommandBufferUsage::RenderPassContinue:
-      return vk::CommandBufferUsageFlagBits::eRenderPassContinue;
-    case CommandBufferUsage::SimultaneousUse:
-      return vk::CommandBufferUsageFlagBits::eSimultaneousUse;
+    using enum pandora::core::CommandBufferUsage;
+    using enum vk::CommandBufferUsageFlagBits;
+
+    case OneTimeSubmit:
+      return eOneTimeSubmit;
+    case RenderPassContinue:
+      return eRenderPassContinue;
+    case SimultaneousUse:
+      return eSimultaneousUse;
     default:
       return vk::CommandBufferUsageFlagBits(0U);
   }
 }
 
 vk::SubpassContents vk_helper::getSubpassContents(const pandora::core::SubpassContents subpass_contents) {
-  using SubpassContents = pandora::core::SubpassContents;
-
   switch (subpass_contents) {
-    case SubpassContents::Inline:
-      return vk::SubpassContents::eInline;
-    case SubpassContents::SecondaryCommandBuffers:
-      return vk::SubpassContents::eSecondaryCommandBuffers;
+    using enum pandora::core::SubpassContents;
+    using enum vk::SubpassContents;
+
+    case Inline:
+      return eInline;
+    case SecondaryCommandBuffers:
+      return eSecondaryCommandBuffers;
     default:
       return vk::SubpassContents(0U);
   }
@@ -524,270 +553,283 @@ vk::SubpassContents vk_helper::getSubpassContents(const pandora::core::SubpassCo
 
 // Subpass related conversions
 vk::DependencyFlagBits vk_helper::getDependencyFlag(const pandora::core::DependencyFlag dependency_flag) {
-  using DependencyFlag = pandora::core::DependencyFlag;
-
   switch (dependency_flag) {
-    case DependencyFlag::ByRegion:
-      return vk::DependencyFlagBits::eByRegion;
-    case DependencyFlag::DeviceGroup:
-      return vk::DependencyFlagBits::eDeviceGroupKHR;
-    case DependencyFlag::ViewLocal:
-      return vk::DependencyFlagBits::eViewLocalKHR;
-    case DependencyFlag::Feedback:
-      return vk::DependencyFlagBits::eFeedbackLoopEXT;
+    using enum pandora::core::DependencyFlag;
+    using enum vk::DependencyFlagBits;
+
+    case ByRegion:
+      return eByRegion;
+    case DeviceGroup:
+      return eDeviceGroupKHR;
+    case ViewLocal:
+      return eViewLocalKHR;
+    case Feedback:
+      return eFeedbackLoopEXT;
     default:
-      return vk::DependencyFlagBits::eByRegion;
+      return eByRegion;
   }
 }
 
 // Pipeline state conversions
 vk::PrimitiveTopology vk_helper::getPrimitiveTopology(const pandora::core::PrimitiveTopology topology) {
-  using PrimitiveTopology = pandora::core::PrimitiveTopology;
-
   switch (topology) {
-    case PrimitiveTopology::PointList:
-      return vk::PrimitiveTopology::ePointList;
-    case PrimitiveTopology::LineList:
-      return vk::PrimitiveTopology::eLineList;
-    case PrimitiveTopology::LineStrip:
-      return vk::PrimitiveTopology::eLineStrip;
-    case PrimitiveTopology::TriangleList:
-      return vk::PrimitiveTopology::eTriangleList;
-    case PrimitiveTopology::TriangleStrip:
-      return vk::PrimitiveTopology::eTriangleStrip;
-    case PrimitiveTopology::TriangleFan:
-      return vk::PrimitiveTopology::eTriangleFan;
-    case PrimitiveTopology::LineListWithAdjacency:
-      return vk::PrimitiveTopology::eLineListWithAdjacency;
-    case PrimitiveTopology::LineStripWithAdjacency:
-      return vk::PrimitiveTopology::eLineStripWithAdjacency;
-    case PrimitiveTopology::TriangleListWithAdjacency:
-      return vk::PrimitiveTopology::eTriangleListWithAdjacency;
-    case PrimitiveTopology::TriangleStripWithAdjacency:
-      return vk::PrimitiveTopology::eTriangleStripWithAdjacency;
-    case PrimitiveTopology::PatchList:
-      return vk::PrimitiveTopology::ePatchList;
+    using enum pandora::core::PrimitiveTopology;
+    using enum vk::PrimitiveTopology;
+
+    case PointList:
+      return ePointList;
+    case LineList:
+      return eLineList;
+    case LineStrip:
+      return eLineStrip;
+    case TriangleList:
+      return eTriangleList;
+    case TriangleStrip:
+      return eTriangleStrip;
+    case TriangleFan:
+      return eTriangleFan;
+    case LineListWithAdjacency:
+      return eLineListWithAdjacency;
+    case LineStripWithAdjacency:
+      return eLineStripWithAdjacency;
+    case TriangleListWithAdjacency:
+      return eTriangleListWithAdjacency;
+    case TriangleStripWithAdjacency:
+      return eTriangleStripWithAdjacency;
+    case PatchList:
+      return ePatchList;
     default:
-      return vk::PrimitiveTopology::eTriangleList;
+      return eTriangleList;
   }
 }
 
 vk::PolygonMode vk_helper::getPolygonMode(const pandora::core::PolygonMode polygon_mode) {
-  using PolygonMode = pandora::core::PolygonMode;
-
   switch (polygon_mode) {
-    case PolygonMode::Fill:
-      return vk::PolygonMode::eFill;
-    case PolygonMode::Line:
-      return vk::PolygonMode::eLine;
-    case PolygonMode::Point:
-      return vk::PolygonMode::ePoint;
+    using enum pandora::core::PolygonMode;
+    using enum vk::PolygonMode;
+
+    case Fill:
+      return eFill;
+    case Line:
+      return eLine;
+    case Point:
+      return ePoint;
     default:
-      return vk::PolygonMode::eFill;
+      return eFill;
   }
 }
 
 vk::CullModeFlags vk_helper::getCullMode(const pandora::core::CullMode cull_mode) {
-  using CullMode = pandora::core::CullMode;
-
   switch (cull_mode) {
-    case CullMode::None:
-      return vk::CullModeFlagBits::eNone;
-    case CullMode::Front:
-      return vk::CullModeFlagBits::eFront;
-    case CullMode::Back:
-      return vk::CullModeFlagBits::eBack;
-    case CullMode::FrontAndBack:
-      return vk::CullModeFlagBits::eFrontAndBack;
+    using enum pandora::core::CullMode;
+    using enum vk::CullModeFlagBits;
+
+    case None:
+      return eNone;
+    case Front:
+      return eFront;
+    case Back:
+      return eBack;
+    case FrontAndBack:
+      return eFrontAndBack;
     default:
-      return vk::CullModeFlagBits::eNone;
+      return eNone;
   }
 }
 
 vk::FrontFace vk_helper::getFrontFace(const pandora::core::FrontFace front_face) {
-  using FrontFace = pandora::core::FrontFace;
-
   switch (front_face) {
-    case FrontFace::Clockwise:
-      return vk::FrontFace::eClockwise;
-    case FrontFace::CounterClockwise:
-      return vk::FrontFace::eCounterClockwise;
+    using enum pandora::core::FrontFace;
+    using enum vk::FrontFace;
+
+    case Clockwise:
+      return eClockwise;
+    case CounterClockwise:
+      return eCounterClockwise;
     default:
-      return vk::FrontFace::eCounterClockwise;
+      return eCounterClockwise;
   }
 }
 
 vk::LogicOp vk_helper::getLogicOp(const pandora::core::LogicOp logic_op) {
-  using LogicOp = pandora::core::LogicOp;
-
   switch (logic_op) {
-    case LogicOp::Clear:
-      return vk::LogicOp::eClear;
-    case LogicOp::And:
-      return vk::LogicOp::eAnd;
-    case LogicOp::AndReverse:
-      return vk::LogicOp::eAndReverse;
-    case LogicOp::Copy:
-      return vk::LogicOp::eCopy;
-    case LogicOp::AndInverted:
-      return vk::LogicOp::eAndInverted;
-    case LogicOp::NoOp:
-      return vk::LogicOp::eNoOp;
-    case LogicOp::Xor:
-      return vk::LogicOp::eXor;
-    case LogicOp::Or:
-      return vk::LogicOp::eOr;
-    case LogicOp::Nor:
-      return vk::LogicOp::eNor;
-    case LogicOp::Equivalent:
-      return vk::LogicOp::eEquivalent;
-    case LogicOp::Invert:
-      return vk::LogicOp::eInvert;
-    case LogicOp::OrReverse:
-      return vk::LogicOp::eOrReverse;
-    case LogicOp::CopyInverted:
-      return vk::LogicOp::eCopyInverted;
-    case LogicOp::OrInverted:
-      return vk::LogicOp::eOrInverted;
-    case LogicOp::Nand:
-      return vk::LogicOp::eNand;
-    case LogicOp::Set:
-      return vk::LogicOp::eSet;
+    using enum pandora::core::LogicOp;
+    using enum vk::LogicOp;
+
+    case Clear:
+      return eClear;
+    case And:
+      return eAnd;
+    case AndReverse:
+      return eAndReverse;
+    case Copy:
+      return eCopy;
+    case AndInverted:
+      return eAndInverted;
+    case NoOp:
+      return eNoOp;
+    case Xor:
+      return eXor;
+    case Or:
+      return eOr;
+    case Nor:
+      return eNor;
+    case Equivalent:
+      return eEquivalent;
+    case Invert:
+      return eInvert;
+    case OrReverse:
+      return eOrReverse;
+    case CopyInverted:
+      return eCopyInverted;
+    case OrInverted:
+      return eOrInverted;
+    case Nand:
+      return eNand;
+    case Set:
+      return eSet;
     default:
-      return vk::LogicOp::eCopy;
+      return eCopy;
   }
 }
 
 vk::DynamicState vk_helper::getDynamicState(const pandora::core::DynamicOption option) {
-  using DynamicOption = pandora::core::DynamicOption;
-
   switch (option) {
-    case DynamicOption::Viewport:
-      return vk::DynamicState::eViewport;
-    case DynamicOption::Scissor:
-      return vk::DynamicState::eScissor;
-    case DynamicOption::LineWidth:
-      return vk::DynamicState::eLineWidth;
-    case DynamicOption::DepthBias:
-      return vk::DynamicState::eDepthBias;
-    case DynamicOption::BlendConstants:
-      return vk::DynamicState::eBlendConstants;
-    case DynamicOption::DepthBounds:
-      return vk::DynamicState::eDepthBounds;
-    case DynamicOption::StencilCompareMask:
-      return vk::DynamicState::eStencilCompareMask;
-    case DynamicOption::StencilWriteMask:
-      return vk::DynamicState::eStencilWriteMask;
-    case DynamicOption::StencilReference:
-      return vk::DynamicState::eStencilReference;
+    using enum pandora::core::DynamicOption;
+    using enum vk::DynamicState;
+
+    case Viewport:
+      return eViewport;
+    case Scissor:
+      return eScissor;
+    case LineWidth:
+      return eLineWidth;
+    case DepthBias:
+      return eDepthBias;
+    case BlendConstants:
+      return eBlendConstants;
+    case DepthBounds:
+      return eDepthBounds;
+    case StencilCompareMask:
+      return eStencilCompareMask;
+    case StencilWriteMask:
+      return eStencilWriteMask;
+    case StencilReference:
+      return eStencilReference;
     default:
-      return vk::DynamicState::eViewport;
+      return eViewport;
   }
 }
 
 vk::VertexInputRate vk_helper::getVertexInputRate(const pandora::core::VertexInputRate input_rate) {
-  using VertexInputRate = pandora::core::VertexInputRate;
-
   switch (input_rate) {
-    case VertexInputRate::Vertex:
-      return vk::VertexInputRate::eVertex;
-    case VertexInputRate::Instance:
-      return vk::VertexInputRate::eInstance;
+    using enum pandora::core::VertexInputRate;
+    using enum vk::VertexInputRate;
+
+    case Vertex:
+      return eVertex;
+    case Instance:
+      return eInstance;
     default:
-      return vk::VertexInputRate::eVertex;
+      return eVertex;
   }
 }
 
 // Sampler related conversions
 vk::Filter vk_helper::getSamplerFilter(const pandora::core::SamplerFilter filter) {
-  using SamplerFilter = pandora::core::SamplerFilter;
-
   switch (filter) {
-    case SamplerFilter::Linear:
-      return vk::Filter::eLinear;
-    case SamplerFilter::Nearest:
-      return vk::Filter::eNearest;
-    case SamplerFilter::Cubic:
-      return vk::Filter::eCubicIMG;
+    using enum pandora::core::SamplerFilter;
+    using enum vk::Filter;
+
+    case Linear:
+      return eLinear;
+    case Nearest:
+      return eNearest;
+    case Cubic:
+      return eCubicIMG;
     default:
-      return vk::Filter::eLinear;
+      return eLinear;
   }
 }
 
 vk::SamplerMipmapMode vk_helper::getSamplerMipmapMode(const pandora::core::SamplerMipmapMode mipmap_mode) {
-  using SamplerMipmapMode = pandora::core::SamplerMipmapMode;
-
   switch (mipmap_mode) {
-    case SamplerMipmapMode::Linear:
-      return vk::SamplerMipmapMode::eLinear;
-    case SamplerMipmapMode::Nearest:
-      return vk::SamplerMipmapMode::eNearest;
+    using enum pandora::core::SamplerMipmapMode;
+    using enum vk::SamplerMipmapMode;
+
+    case Linear:
+      return eLinear;
+    case Nearest:
+      return eNearest;
     default:
-      return vk::SamplerMipmapMode::eLinear;
+      return eLinear;
   }
 }
 
 vk::SamplerAddressMode vk_helper::getSamplerAddressMode(const pandora::core::SamplerAddressMode address_mode) {
-  using SamplerAddressMode = pandora::core::SamplerAddressMode;
-
   switch (address_mode) {
-    case SamplerAddressMode::Repeat:
-      return vk::SamplerAddressMode::eRepeat;
-    case SamplerAddressMode::MirroredRepeat:
-      return vk::SamplerAddressMode::eMirroredRepeat;
-    case SamplerAddressMode::ClampToEdge:
-      return vk::SamplerAddressMode::eClampToEdge;
-    case SamplerAddressMode::ClampToBorder:
-      return vk::SamplerAddressMode::eClampToBorder;
-    case SamplerAddressMode::MirrorClampToEdge:
-      return vk::SamplerAddressMode::eMirrorClampToEdge;
+    using enum pandora::core::SamplerAddressMode;
+    using enum vk::SamplerAddressMode;
+
+    case Repeat:
+      return eRepeat;
+    case MirroredRepeat:
+      return eMirroredRepeat;
+    case ClampToEdge:
+      return eClampToEdge;
+    case ClampToBorder:
+      return eClampToBorder;
+    case MirrorClampToEdge:
+      return eMirrorClampToEdge;
     default:
-      return vk::SamplerAddressMode::eRepeat;
+      return eRepeat;
   }
 }
 
 vk::CompareOp vk_helper::getSamplerCompareOp(const pandora::core::SamplerCompareOp compare_op) {
-  using SamplerCompareOp = pandora::core::SamplerCompareOp;
-
   switch (compare_op) {
-    case SamplerCompareOp::Never:
-      return vk::CompareOp::eNever;
-    case SamplerCompareOp::Less:
-      return vk::CompareOp::eLess;
-    case SamplerCompareOp::Equal:
-      return vk::CompareOp::eEqual;
-    case SamplerCompareOp::LessOrEqual:
-      return vk::CompareOp::eLessOrEqual;
-    case SamplerCompareOp::Greater:
-      return vk::CompareOp::eGreater;
-    case SamplerCompareOp::NotEqual:
-      return vk::CompareOp::eNotEqual;
-    case SamplerCompareOp::GreaterOrEqual:
-      return vk::CompareOp::eGreaterOrEqual;
-    case SamplerCompareOp::Always:
-      return vk::CompareOp::eAlways;
+    using enum pandora::core::SamplerCompareOp;
+    using enum vk::CompareOp;
+
+    case Never:
+      return eNever;
+    case Less:
+      return eLess;
+    case Equal:
+      return eEqual;
+    case LessOrEqual:
+      return eLessOrEqual;
+    case Greater:
+      return eGreater;
+    case NotEqual:
+      return eNotEqual;
+    case GreaterOrEqual:
+      return eGreaterOrEqual;
+    case Always:
+      return eAlways;
     default:
-      return vk::CompareOp::eLess;
+      return eLess;
   }
 }
 
 vk::BorderColor vk_helper::getSamplerBorderColor(const pandora::core::SamplerBorderColor border_color) {
-  using SamplerBorderColor = pandora::core::SamplerBorderColor;
-
   switch (border_color) {
-    case SamplerBorderColor::FloatTransparentBlack:
-      return vk::BorderColor::eFloatTransparentBlack;
-    case SamplerBorderColor::IntTransparentBlack:
-      return vk::BorderColor::eIntTransparentBlack;
-    case SamplerBorderColor::FloatOpaqueBlack:
-      return vk::BorderColor::eFloatOpaqueBlack;
-    case SamplerBorderColor::IntOpaqueBlack:
-      return vk::BorderColor::eIntOpaqueBlack;
-    case SamplerBorderColor::FloatOpaqueWhite:
-      return vk::BorderColor::eFloatOpaqueWhite;
-    case SamplerBorderColor::IntOpaqueWhite:
-      return vk::BorderColor::eIntOpaqueWhite;
+    using enum pandora::core::SamplerBorderColor;
+    using enum vk::BorderColor;
+
+    case FloatTransparentBlack:
+      return eFloatTransparentBlack;
+    case IntTransparentBlack:
+      return eIntTransparentBlack;
+    case FloatOpaqueBlack:
+      return eFloatOpaqueBlack;
+    case IntOpaqueBlack:
+      return eIntOpaqueBlack;
+    case FloatOpaqueWhite:
+      return eFloatOpaqueWhite;
+    case IntOpaqueWhite:
+      return eIntOpaqueWhite;
     default:
-      return vk::BorderColor::eFloatTransparentBlack;
+      return eFloatTransparentBlack;
   }
 }
