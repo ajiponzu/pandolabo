@@ -47,11 +47,22 @@ endif()
 
 # プラットフォーム別設定
 if(WIN32)
-    # Windows: MSVC標準設定（追加設定不要）
+    # Windows: MSVC最適化設定
+    if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_CONFIGURATION_TYPES)
+        target_compile_options(basic_usage PRIVATE
+            $<$<CONFIG:Release>:/O2>
+            $<$<CONFIG:Debug>:/Od>
+        )
+        message(STATUS "Building example with MSVC optimization on Windows")
+    endif()
     message(STATUS "Building example with MSVC on Windows")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # Linux/macOS: Clang最適化設定
-    target_compile_options(basic_usage PRIVATE -O2 -Wall -Wextra)
+    target_compile_options(basic_usage PRIVATE
+        $<$<CONFIG:Release>:-O3>
+        $<$<CONFIG:Debug>:-O0>
+        -Wall -Wextra
+    )
     message(STATUS "Building example with Clang on ${CMAKE_SYSTEM_NAME}")
 endif()
 

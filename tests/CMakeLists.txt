@@ -19,6 +19,26 @@ else()
     target_compile_features(tests PRIVATE cxx_std_20)
 endif()
 
+# プラットフォーム別最適化設定
+if(WIN32)
+    # Windows: MSVC最適化設定
+    if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_CONFIGURATION_TYPES)
+        target_compile_options(tests PRIVATE
+            $<$<CONFIG:Release>:/O2>
+            $<$<CONFIG:Debug>:/Od>
+        )
+        message(STATUS "Building tests with MSVC optimization on Windows")
+    endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # Linux/macOS: Clang最適化設定
+    target_compile_options(tests PRIVATE
+        $<$<CONFIG:Release>:-O3>
+        $<$<CONFIG:Debug>:-O0>
+        -Wall -Wextra
+    )
+    message(STATUS "Building tests with Clang optimization on ${CMAKE_SYSTEM_NAME}")
+endif()
+
 # Catch2ライブラリをリンク
 target_link_libraries(tests PRIVATE
     Catch2::Catch2WithMain

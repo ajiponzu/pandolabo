@@ -74,12 +74,39 @@ endif()
 if(MSVC)
     add_compile_options(/W4)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+
+    # リリースビルド最適化設定
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
+
+    # デバッグビルド設定
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Od /Zi /RTC1")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Od /Zi /RTC1")
+
+    message(STATUS "MSVC optimization flags configured - Release: /O2 /Ob2, Debug: /Od")
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
+
+    # リリースビルド最適化設定
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -DNDEBUG")
+
+    # デバッグビルド設定
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
+
+    message(STATUS "Clang/GCC optimization flags configured - Release: -O3, Debug: -O0 -g")
 endif()
 
 # デバッグビルドでのシンボル情報
 set(CMAKE_DEBUG_POSTFIX "d")
+
+# デフォルトビルドタイプの設定
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
+    message(STATUS "Setting default build type to Release")
+endif()
 
 # VSCode IntelliSense用のコンパイルコマンドを生成（Clangの場合のみ）
 if(NOT WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -89,9 +116,14 @@ else()
     message(STATUS "Skipping compile_commands.json generation (MSVC on Windows uses different IntelliSense method)")
 endif()
 
-# Conan統合の設定
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/conan/build/generators/conan_toolchain.cmake")
-    include(${CMAKE_CURRENT_SOURCE_DIR}/conan/build/generators/conan_toolchain.cmake)
+# Conan統合の設定 - toolchainで指定された場合は自動インクルードをスキップ
+if(NOT CMAKE_TOOLCHAIN_FILE OR NOT CMAKE_TOOLCHAIN_FILE MATCHES "conan_toolchain")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/conan/build/generators/conan_toolchain.cmake")
+        include(${CMAKE_CURRENT_SOURCE_DIR}/conan/build/generators/conan_toolchain.cmake)
+        message(STATUS "Using default Conan toolchain (Release)")
+    endif()
+else()
+    message(STATUS "Using external Conan toolchain: ${CMAKE_TOOLCHAIN_FILE}")
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/build/conan_deps.cmake")

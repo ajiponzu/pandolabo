@@ -137,12 +137,20 @@ class PandolaboBuilder:
         self.log("🧹 ビルドディレクトリをクリーン中...", "yellow")
 
         # クリーンするディレクトリとファイル
-        directories_to_clean = [self.build_path, Path("conan")]
+        directories_to_clean = [
+            self.build_path,  # build
+            Path("build_debug"),  # Debug用ビルドディレクトリ
+            Path("conan"),  # Release用Conanディレクトリ
+            Path("conan_debug"),  # Debug用Conanディレクトリ
+        ]
         files_to_clean = [
             Path("CMakeUserPresets.json"),
             Path("conanbuild.bat"),
             Path("conanrun.bat"),
             Path("conandata.yml"),
+            # Debug用Conanファイルも追加
+            Path("conanbuild_debug.bat"),
+            Path("conanrun_debug.bat"),
         ]
 
         # ディレクトリを削除
