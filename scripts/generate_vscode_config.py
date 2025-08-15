@@ -128,7 +128,7 @@ def generate_settings_json():
         # C/C++フォーマット設定
         "C_Cpp.formatting": "clangFormat",
         "C_Cpp.clang_format_style": "file",
-        "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 120, AlignAfterOpenBracket: Align, AllowShortFunctionsOnASingleLine: Empty, AllowShortIfStatementsOnASingleLine: false, AllowShortLoopsOnASingleLine: false, BinPackArguments: false, BinPackParameters: false, BreakBeforeBraces: Attach, BreakConstructorInitializers: BeforeColon, ConstructorInitializerAllOnOneLineOrOnePerLine: true, IndentCaseLabels: true, KeepEmptyLinesAtTheStartOfBlocks: false, NamespaceIndentation: None, SpaceAfterCStyleCast: false, SpaceBeforeParens: ControlStatements, SpacesInParentheses: false, Standard: c++23 }",
+        "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 120, AlignAfterOpenBracket: Align, AllowShortFunctionsOnASingleLine: Empty, AllowShortIfStatementsOnASingleLine: false, AllowShortLoopsOnASingleLine: false, BinPackArguments: false, BinPackParameters: false, BreakBeforeBraces: Attach, BreakConstructorInitializers: BeforeColon, ConstructorInitializerAllOnOneLineOrOnePerLine: true, IndentCaseLabels: true, KeepEmptyLinesAtTheStartOfBlocks: false, NamespaceIndentation: None, SpaceAfterCStyleCast: false, SpaceBeforeParens: ControlStatements, SpacesInParentheses: false, Standard: c++20 }",
         # C/C++基本設定
         "C_Cpp.intelliSenseEngine": "default",
         "C_Cpp.errorSquiggles": "enabled",
@@ -171,7 +171,7 @@ def generate_settings_json():
         # Windows/MSVC設定
         settings = {
             **common_format_settings,
-            "C_Cpp.default.cppStandard": "c++23",
+            "C_Cpp.default.cppStandard": "c++20",
             "C_Cpp.default.cStandard": "c17",
             "C_Cpp.default.compilerPath": "cl.exe",
             "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
@@ -180,7 +180,7 @@ def generate_settings_json():
         # Linux/macOS/Clang設定
         settings = {
             **common_format_settings,
-            "C_Cpp.default.cppStandard": "c++23",
+            "C_Cpp.default.cppStandard": "c++20",
             "C_Cpp.default.cStandard": "c23",
             "C_Cpp.default.compilerPath": "clang++",
             "C_Cpp.default.intelliSenseMode": "clang-x64",
@@ -737,8 +737,8 @@ NamespaceIndentation: None
 SortIncludes: true
 SortUsingDeclarations: true
 
-# C++23 対応
-Standard: c++23
+# C++標準設定 (clang-format 20.1.8 では c++20 が最新サポート)
+Standard: c++20
 
 # アクセス修飾子のインデント
 AccessModifierOffset: -1
