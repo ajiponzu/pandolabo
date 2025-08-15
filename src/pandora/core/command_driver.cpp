@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ranges>
 
 #include "pandora/core/command_buffer.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
@@ -34,19 +35,17 @@ void pandora::core::CommandDriver::constructSecondary(const std::unique_ptr<gpu:
   const auto& ptr_vk_device = ptr_context->getPtrDevice()->getPtrLogicalDevice();
 
   for (uint32_t idx = 0U; idx < required_secondary_num; idx += 1U) {
-    {
-      vk::CommandPoolCreateInfo pool_info{{}, m_queueFamilyIndex};
-      pool_info.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
-
-      m_ptrSecondaryCommandPools.push_back(ptr_vk_device->createCommandPoolUnique(pool_info));
-    }
-
-    {
-      vk::CommandBufferAllocateInfo alloc_info{
-          m_ptrSecondaryCommandPools.back().get(), vk::CommandBufferLevel::eSecondary, 1U};
-
-      m_secondaryCommandBuffers.push_back(std::move(ptr_vk_device->allocateCommandBuffersUnique(alloc_info).front()));
-    }
+    m_ptrSecondaryCommandPools.push_back(
+        ptr_vk_device->createCommandPoolUnique(vk::CommandPoolCreateInfo()
+                                                   .setQueueFamilyIndex(m_queueFamilyIndex)
+                                                   .setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)));
+    m_secondaryCommandBuffers.push_back(
+        std::move(ptr_vk_device
+                      ->allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo()
+                                                         .setCommandPool(m_ptrSecondaryCommandPools.back().get())
+                                                         .setLevel(vk::CommandBufferLevel::eSecondary)
+                                                         .setCommandBufferCount(1U))
+                      .front()));
   }
 }
 
@@ -61,28 +60,27 @@ void pandora::core::CommandDriver::resetAllCommands() const {
 void pandora::core::CommandDriver::resetAllCommandPools(const std::unique_ptr<gpu::Context>& ptr_context) const {
   const auto& ptr_vk_device = ptr_context->getPtrDevice()->getPtrLogicalDevice();
 
-  for (size_t idx = 0U; idx < m_ptrSecondaryCommandPools.size(); idx += 1U) {
-    ptr_vk_device->resetCommandPool(m_ptrSecondaryCommandPools.at(idx).get(), vk::CommandPoolResetFlags());
+  for (const auto& command_pool : m_ptrSecondaryCommandPools) {
+    ptr_vk_device->resetCommandPool(command_pool.get());
   }
 
   ptr_vk_device->resetCommandPool(m_ptrCommandPool.get(), vk::CommandPoolResetFlags());
 }
 
 void pandora::core::CommandDriver::mergeSecondaryCommands() const {
-  std::vector<vk::CommandBuffer> command_buffers;
-  for (const auto& command_buffer : m_secondaryCommandBuffers) {
-    command_buffers.push_back(command_buffer.get());
-  }
+  using C = std::ranges::range_value_t<decltype(m_secondaryCommandBuffers)>;
 
-  m_ptrPrimaryCommandBuffer->executeCommands(command_buffers);
+  m_ptrPrimaryCommandBuffer->executeCommands(m_secondaryCommandBuffers |
+                                             std::views::transform([](const C& buf) { return buf.get(); }) |
+                                             std::ranges::to<std::vector<vk::CommandBuffer>>());
 }
 
 void pandora::core::CommandDriver::submit(const PipelineStage dst_stage, gpu::TimelineSemaphore& semaphore) const {
-  vk::SubmitInfo submit_info;
-  submit_info.setPNext(semaphore.getPtrTimelineSubmitInfo());
-  submit_info.setCommandBuffers(m_ptrPrimaryCommandBuffer.get());
-  submit_info.setWaitSemaphores(semaphore.getSemaphore());
-  submit_info.setSignalSemaphores(semaphore.getSemaphore());
+  auto submit_info = vk::SubmitInfo()
+                         .setPNext(semaphore.getPtrTimelineSubmitInfo())
+                         .setCommandBuffers(m_ptrPrimaryCommandBuffer.get())
+                         .setWaitSemaphores(semaphore.getSemaphore())
+                         .setSignalSemaphores(semaphore.getSemaphore());
 
   semaphore.setWaitStage(vk_helper::getPipelineStageFlagBits(dst_stage));
   submit_info.setWaitDstStageMask(semaphore.getBackWaitStage());
@@ -96,10 +94,10 @@ void pandora::core::CommandDriver::submit(const PipelineStage dst_stage, gpu::Ti
 void pandora::core::CommandDriver::submit(gpu::BinarySemaphore& wait_semaphore,
                                           const PipelineStage dst_stage,
                                           gpu::BinarySemaphore& signal_semaphore) const {
-  vk::SubmitInfo submit_info;
-  submit_info.setCommandBuffers(m_ptrPrimaryCommandBuffer.get());
-  submit_info.setWaitSemaphores(wait_semaphore.getSemaphore());
-  submit_info.setSignalSemaphores(signal_semaphore.getSemaphore());
+  auto submit_info = vk::SubmitInfo()
+                         .setCommandBuffers(m_ptrPrimaryCommandBuffer.get())
+                         .setWaitSemaphores(wait_semaphore.getSemaphore())
+                         .setSignalSemaphores(signal_semaphore.getSemaphore());
 
   const vk::PipelineStageFlags vk_stage_flags = vk_helper::getPipelineStageFlagBits(dst_stage);
   submit_info.setWaitDstStageMask(vk_stage_flags);
@@ -116,13 +114,11 @@ void pandora::core::CommandDriver::present(const std::unique_ptr<gpu::Context>& 
   const auto& ptr_swapchain = ptr_context->getPtrSwapchain();
   const auto image_index = ptr_swapchain->getImageIndex();
 
-  vk::PresentInfoKHR present_info;
-  present_info.setWaitSemaphores(wait_semaphore.getSemaphore());
-  present_info.setSwapchains(ptr_swapchain->getSwapchain());
-  present_info.setImageIndices(image_index);
-
   try {
-    static_cast<void>(m_queue.presentKHR(present_info));
+    static_cast<void>(m_queue.presentKHR(vk::PresentInfoKHR()
+                                             .setWaitSemaphores(wait_semaphore.getSemaphore())
+                                             .setSwapchains(ptr_swapchain->getSwapchain())
+                                             .setImageIndices(image_index)));
   } catch (const vk::SystemError&) {
     throw std::runtime_error("Failed to present image.");
   }

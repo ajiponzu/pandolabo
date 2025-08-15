@@ -1,6 +1,6 @@
 #include "basic_computing.hpp"
 
-#include <iostream>
+#include <print>
 #include <shared_mutex>
 #include <thread>
 
@@ -76,18 +76,18 @@ void samples::core::BasicComputing::run() {
       std::memcpy(reinterpret_cast<void*>(result.data()), result_mapped_address, result_buffer.getSize());
       result_buffer.unmapMemory(m_ptrContext);
 
-      for (size_t idx = 0U; idx < result.size(); idx += 1U) {
-        std::cout << "idx[" << idx << "]: " << result[idx] << std::endl;
+      for (size_t idx = 0U; const auto& item : result) {
+        std::println(stdout, "idx[{}]: {}", idx, item);
       }
     }
 
     m_ptrComputeCommandDriver->resetAllCommandPools(m_ptrContext);
     m_ptrTransferCommandDriver->resetAllCommandPools(m_ptrContext);
   } catch (const std::exception& e) {
-    std::cerr << "Exception caught: " << e.what() << std::endl;
+    std::println(stderr, "Exception caught: {}", e.what());
     throw;
   } catch (...) {
-    std::cerr << "Unknown exception caught" << std::endl;
+    std::println(stderr, "Unknown exception caught");
     throw;
   }
 }

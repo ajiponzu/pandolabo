@@ -5,14 +5,12 @@ pandora::core::gpu::DescriptorSet::DescriptorSet(const std::unique_ptr<Context>&
   const auto& ptr_vk_device = ptr_context->getPtrDevice()->getPtrLogicalDevice();
 
   m_ptrDescriptorPool = ptr_vk_device->createDescriptorPoolUnique(description_set_layout.getDescriptorPoolInfo());
-
-  {
-    vk::DescriptorSetAllocateInfo descriptor_set_allocate_info;
-    descriptor_set_allocate_info.setDescriptorPool(m_ptrDescriptorPool.get());
-    descriptor_set_allocate_info.setSetLayouts(description_set_layout.getDescriptorSetLayout());
-
-    m_ptrDescriptorSet = std::move(ptr_vk_device->allocateDescriptorSetsUnique(descriptor_set_allocate_info).front());
-  }
+  m_ptrDescriptorSet =
+      std::move(ptr_vk_device
+                    ->allocateDescriptorSetsUnique(vk::DescriptorSetAllocateInfo()
+                                                       .setDescriptorPool(m_ptrDescriptorPool.get())
+                                                       .setSetLayouts(description_set_layout.getDescriptorSetLayout()))
+                    .front());
 }
 
 pandora::core::gpu::DescriptorSet::~DescriptorSet() {}

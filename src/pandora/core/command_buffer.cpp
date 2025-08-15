@@ -1,6 +1,9 @@
 #include "pandora/core/command_buffer.hpp"
 
+#include <algorithm>
+#include <functional>
 #include <iostream>
+#include <ranges>
 
 #include "pandora/core/gpu/vk_helper.hpp"
 #include "pandora/core/pipeline.hpp"
@@ -69,16 +72,13 @@ void pandora::core::CommandBuffer::pushConstants(const Pipeline& pipeline,
                                                  const std::vector<ShaderStage>& dst_stages,
                                                  const uint32_t offset,
                                                  const std::vector<float_t>& data) const {
-  vk::ShaderStageFlags vk_stages;
-  for (const auto& stage : dst_stages) {
-    vk_stages |= vk_helper::getShaderStageFlagBits(stage);
-  }
-
-  m_commandBuffer.pushConstants(pipeline.getPipelineLayout(),
-                                vk_stages,
-                                offset,
-                                static_cast<uint32_t>(sizeof(float_t) * data.size()),
-                                data.data());
+  m_commandBuffer.pushConstants(
+      pipeline.getPipelineLayout(),
+      std::ranges::fold_left(
+          dst_stages | std::views::transform(vk_helper::getShaderStageFlagBits), vk::ShaderStageFlags{}, std::bit_or{}),
+      offset,
+      static_cast<uint32_t>(sizeof(float_t) * data.size()),
+      data.data());
 }
 
 void pandora::core::CommandBuffer::resetCommands() const {
@@ -285,8 +285,7 @@ void pandora::core::TransferCommandBuffer::transferMipmapImages(
   barrier.setSrcQueueFamilyIndex(queue_family_index.first);
   barrier.setDstQueueFamilyIndex(queue_family_index.second);
 
-  uint32_t mip_level = 1U;
-  for (; mip_level <= image.getMipLevels(); mip_level += 1U) {
+  for (uint32_t mip_level = 1U; mip_level <= image.getMipLevels(); mip_level += 1U) {
     barrier.subresourceRange.setBaseMipLevel(mip_level - 1U);
 
     m_commandBuffer.pipelineBarrier(vk_helper::getPipelineStageFlagBits(src_stage),
@@ -320,8 +319,7 @@ void pandora::core::TransferCommandBuffer::acquireMipmapImages(const gpu::Image&
   barrier.setSrcQueueFamilyIndex(queue_family_index.first);
   barrier.setDstQueueFamilyIndex(queue_family_index.second);
 
-  uint32_t mip_level = 1U;
-  for (; mip_level <= image.getMipLevels(); mip_level += 1U) {
+  for (uint32_t mip_level = 1U; mip_level <= image.getMipLevels(); mip_level += 1U) {
     barrier.subresourceRange.setBaseMipLevel(mip_level - 1U);
 
     m_commandBuffer.pipelineBarrier(vk_helper::getPipelineStageFlagBits(src_stage),

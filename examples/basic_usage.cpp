@@ -4,6 +4,9 @@
 #include "core/computing_image/simple_image_computing.hpp"
 
 int main() {
+  // samples::core::BasicComputing bc;
+  // bc.run();
+
   samples::core::SimpleImageComputing sc;
   sc.run();
 

@@ -1,3 +1,7 @@
+#include <algorithm>
+#include <functional>
+#include <ranges>
+
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
 
@@ -43,57 +47,46 @@ pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
   {
     vk::ImageCreateInfo image_info{};
     {
-      const vk::ImageUsageFlags vk_transfer_type = get_transfer_usage(transfer_type);
-
-      vk::ImageUsageFlags vk_image_usages{};
-      for (const auto& image_usage : image_usages) {
-        vk_image_usages |= vk_helper::getImageUsage(image_usage);
-      }
+      const auto vk_transfer_type = get_transfer_usage(transfer_type);
+      const auto vk_image_usages = std::ranges::fold_left(
+          image_usages | std::views::transform(vk_helper::getImageUsage), vk::ImageUsageFlags{}, std::bit_or());
 
       image_info.setUsage(vk_transfer_type | vk_image_usages);
     }
 
     {
-      const vk::Format vk_format = vk_helper::getFormat(image_sub_info.format);
+      const auto vk_format = vk_helper::getFormat(image_sub_info.format);
 
-      image_info.setFormat(vk_format);
       m_format = vk_format;
+      image_info.setFormat(vk_format);
     }
 
-    {
-      vk::Extent3D vk_extent{};
-      vk_extent.setWidth(image_sub_info.graphical_size.width);
-      vk_extent.setHeight(image_sub_info.graphical_size.height);
-      vk_extent.setDepth(image_sub_info.graphical_size.depth);
-
-      image_info.setExtent(vk_extent);
-      m_graphicalSize = image_sub_info.graphical_size;
-    }
-
+    m_graphicalSize = image_sub_info.graphical_size;
     m_arrayLayers = image_sub_info.array_layers;
-    image_info.setArrayLayers(m_arrayLayers);
-
     m_mipLevels = image_sub_info.mip_levels;
-    image_info.setMipLevels(image_sub_info.mip_levels);
-
-    image_info.setImageType(get_image_type(image_sub_info.dimension));
     m_dimension = image_sub_info.dimension;
 
-    image_info.setSamples(vk_helper::getSampleCount(image_sub_info.samples));
-    image_info.setTiling(vk::ImageTiling::eOptimal);
-    image_info.setSharingMode(vk::SharingMode::eExclusive);
-    image_info.setInitialLayout(vk::ImageLayout::eUndefined);
-    image_info.setQueueFamilyIndexCount(0U);
-    image_info.setPQueueFamilyIndices(nullptr);
+    image_info
+        .setExtent(vk::Extent3D()
+                       .setWidth(m_graphicalSize.width)
+                       .setHeight(m_graphicalSize.height)
+                       .setDepth(m_graphicalSize.depth))
+        .setArrayLayers(m_arrayLayers)
+        .setMipLevels(m_mipLevels)
+        .setImageType(get_image_type(m_dimension))
+        .setSamples(vk_helper::getSampleCount(image_sub_info.samples))
+        .setTiling(vk::ImageTiling::eOptimal)
+        .setSharingMode(vk::SharingMode::eExclusive)
+        .setInitialLayout(vk::ImageLayout::eUndefined)
+        .setQueueFamilyIndexCount(0U)
+        .setPQueueFamilyIndices(nullptr);
 
     m_ptrImage = ptr_vk_device->createImageUnique(image_info);
   }
 
   {
     const auto memory_requirements = ptr_vk_device->getImageMemoryRequirements(m_ptrImage.get());
-
-    const vk::MemoryPropertyFlags vk_memory_usage = vk_helper::getMemoryPropertyFlags(memory_usage);
-
+    const auto vk_memory_usage = vk_helper::getMemoryPropertyFlags(memory_usage);
     const auto memory_props = ptr_context->getPtrDevice()->getPhysicalDevice().getMemoryProperties();
 
     uint32_t memory_type_idx = 0U;
@@ -104,11 +97,8 @@ pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
       }
     }
 
-    vk::MemoryAllocateInfo allocation_info{};
-    allocation_info.setMemoryTypeIndex(memory_type_idx);
-    allocation_info.setAllocationSize(memory_requirements.size);
-
-    m_ptrMemory = ptr_vk_device->allocateMemoryUnique(allocation_info);
+    m_ptrMemory = ptr_vk_device->allocateMemoryUnique(
+        vk::MemoryAllocateInfo().setMemoryTypeIndex(memory_type_idx).setAllocationSize(memory_requirements.size));
   }
 
   ptr_vk_device->bindImageMemory(m_ptrImage.get(), m_ptrMemory.get(), 0U);

@@ -52,24 +52,24 @@ void pandora::core::gpu::Swapchain::constructSwapchain(const std::unique_ptr<Dev
     const auto& vk_surface = ptr_surface->getSurface();
 
     const auto surface_capabilities = ptr_device->getPhysicalDevice().getSurfaceCapabilitiesKHR(vk_surface.get());
-
-    auto swapchain_info = vk::SwapchainCreateInfoKHR();
-    swapchain_info.setSurface(vk_surface.get());
-    swapchain_info.setMinImageCount(std::min(surface_capabilities.maxImageCount, MAX_FRAMES_IN_FLIGHT));
-    swapchain_info.setImageSharingMode(vk::SharingMode::eExclusive);
-    swapchain_info.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque);
-    swapchain_info.setPresentMode(vk::PresentModeKHR::eFifo);
-    swapchain_info.setClipped(true);
-    swapchain_info.setImageFormat(vk_helper::getFormat(m_imageFormat));
-    swapchain_info.setImageColorSpace(vk::ColorSpaceKHR::eSrgbNonlinear);
-    swapchain_info.setImageExtent(vk_helper::getExtent2D(ptr_surface->getWindowSize()));
-    swapchain_info.setImageArrayLayers(1U);
-    swapchain_info.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
-    swapchain_info.setPreTransform(surface_capabilities.currentTransform);
-    swapchain_info.setOldSwapchain(m_ptrSwapchain.get());
-
     const auto queue_family_index = ptr_device->getQueueFamilyIndex(pandora::core::QueueFamilyType::Graphics);
-    swapchain_info.setQueueFamilyIndices(queue_family_index);
+
+    const auto swapchain_info =
+        vk::SwapchainCreateInfoKHR()
+            .setSurface(vk_surface.get())
+            .setMinImageCount(std::min(surface_capabilities.maxImageCount, MAX_FRAMES_IN_FLIGHT))
+            .setImageSharingMode(vk::SharingMode::eExclusive)
+            .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
+            .setPresentMode(vk::PresentModeKHR::eFifo)
+            .setClipped(true)
+            .setImageFormat(vk_helper::getFormat(m_imageFormat))
+            .setImageColorSpace(vk::ColorSpaceKHR::eSrgbNonlinear)
+            .setImageExtent(vk_helper::getExtent2D(ptr_surface->getWindowSize()))
+            .setImageArrayLayers(1U)
+            .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
+            .setPreTransform(surface_capabilities.currentTransform)
+            .setOldSwapchain(m_ptrSwapchain.get())
+            .setQueueFamilyIndices(queue_family_index);
 
     m_ptrSwapchain = ptr_device->getPtrLogicalDevice()->createSwapchainKHRUnique(swapchain_info);
   }
@@ -77,14 +77,14 @@ void pandora::core::gpu::Swapchain::constructSwapchain(const std::unique_ptr<Dev
   m_images = ptr_device->getPtrLogicalDevice()->getSwapchainImagesKHR(m_ptrSwapchain.get());
 
   {
-    vk::ImageViewCreateInfo image_view_info;
-    image_view_info.setViewType(vk::ImageViewType::e2D);
-    image_view_info.setFormat(vk_helper::getFormat(m_imageFormat));
-    image_view_info.setComponents({vk::ComponentSwizzle::eIdentity,
-                                   vk::ComponentSwizzle::eIdentity,
-                                   vk::ComponentSwizzle::eIdentity,
-                                   vk::ComponentSwizzle::eIdentity});
-    image_view_info.setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0U, 1U, 0U, 1U});
+    auto image_view_info = vk::ImageViewCreateInfo()
+                               .setViewType(vk::ImageViewType::e2D)
+                               .setFormat(vk_helper::getFormat(m_imageFormat))
+                               .setComponents({vk::ComponentSwizzle::eIdentity,
+                                               vk::ComponentSwizzle::eIdentity,
+                                               vk::ComponentSwizzle::eIdentity,
+                                               vk::ComponentSwizzle::eIdentity})
+                               .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0U, 1U, 0U, 1U});
 
     const auto& ptr_vk_device = ptr_device->getPtrLogicalDevice();
     for (const auto& image : m_images) {

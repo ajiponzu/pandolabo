@@ -1,5 +1,6 @@
-#include <iomanip>
-#include <iostream>
+#include <algorithm>
+#include <functional>
+#include <ranges>
 
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
@@ -50,18 +51,13 @@ pandora::core::gpu::Buffer::Buffer(const std::unique_ptr<Context>& ptr_context,
 
   {
     const auto vk_transfer_type = get_transfer_usage_flags(transfer_type);
+    const auto vk_buffer_usages = std::ranges::fold_left(
+        buffer_usages | std::views::transform(get_buffer_usage), vk::BufferUsageFlags{}, std::bit_or());
 
-    vk::BufferUsageFlags vk_buffer_usages{};
-    for (const auto& buffer_usage : buffer_usages) {
-      vk_buffer_usages |= get_buffer_usage(buffer_usage);
-    }
-
-    vk::BufferCreateInfo buffer_info{};
-    buffer_info.setUsage(vk_transfer_type | vk_buffer_usages);
-    buffer_info.setSize(m_size);
-    buffer_info.setSharingMode(vk::SharingMode::eExclusive);
-
-    m_ptrBuffer = ptr_vk_device->createBufferUnique(buffer_info);
+    m_ptrBuffer = ptr_vk_device->createBufferUnique(vk::BufferCreateInfo()
+                                                        .setUsage(vk_transfer_type | vk_buffer_usages)
+                                                        .setSize(m_size)
+                                                        .setSharingMode(vk::SharingMode::eExclusive));
   }
 
   {
@@ -77,11 +73,8 @@ pandora::core::gpu::Buffer::Buffer(const std::unique_ptr<Context>& ptr_context,
       }
     }
 
-    vk::MemoryAllocateInfo allocation_info{};
-    allocation_info.setMemoryTypeIndex(memory_type_idx);
-    allocation_info.setAllocationSize(memory_requirements.size);
-
-    m_ptrMemory = ptr_vk_device->allocateMemoryUnique(allocation_info);
+    m_ptrMemory = ptr_vk_device->allocateMemoryUnique(
+        vk::MemoryAllocateInfo().setMemoryTypeIndex(memory_type_idx).setAllocationSize(memory_requirements.size));
   }
 
   ptr_vk_device->bindBufferMemory(m_ptrBuffer.get(), m_ptrMemory.get(), 0U);

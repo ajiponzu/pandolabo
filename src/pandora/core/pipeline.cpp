@@ -1,17 +1,15 @@
 #include "pandora/core/pipeline.hpp"
 
+#include <ranges>
+
 #include "pandora/core/gpu/vk_helper.hpp"
 #include "pandora/core/renderpass.hpp"
 
 void pandora::core::pipeline::VertexInput::appendBinding(const uint32_t binding,
                                                          const uint32_t stride,
                                                          const VertexInputRate input_rate) {
-  vk::VertexInputBindingDescription binding_description;
-  binding_description.setBinding(binding);
-  binding_description.setStride(stride);
-  binding_description.setInputRate(vk_helper::getVertexInputRate(input_rate));
-
-  m_bindings.push_back(binding_description);
+  m_bindings.push_back(vk::VertexInputBindingDescription().setBinding(binding).setStride(stride).setInputRate(
+      vk_helper::getVertexInputRate(input_rate)));
 
   m_info.setVertexBindingDescriptions(m_bindings);
 }
@@ -20,15 +18,11 @@ void pandora::core::pipeline::VertexInput::appendAttribute(const uint32_t locati
                                                            const uint32_t binding,
                                                            const DataFormat format,
                                                            const uint32_t offset) {
-  using vk_helper::getFormat;  // 狭いスコープでのusing宣言
-
-  vk::VertexInputAttributeDescription attribute_description;
-  attribute_description.setLocation(location);
-  attribute_description.setBinding(binding);
-  attribute_description.setFormat(getFormat(format));
-  attribute_description.setOffset(offset);
-
-  m_attributes.push_back(attribute_description);
+  m_attributes.push_back(vk::VertexInputAttributeDescription()
+                             .setLocation(location)
+                             .setBinding(binding)
+                             .setFormat(vk_helper::getFormat(format))
+                             .setOffset(offset));
 
   m_info.setVertexAttributeDescriptions(m_attributes);
 }
@@ -48,19 +42,18 @@ void pandora::core::pipeline::Tessellation::setPatchControlPoints(const uint32_t
 void pandora::core::pipeline::ViewportState::setViewport(const gpu_ui::GraphicalSize<float_t>& size,
                                                          const float_t min_depth,
                                                          const float_t max_depth) {
-  m_viewport.setX(0.0f);
-  m_viewport.setY(0.0f);
-  m_viewport.setWidth(size.width);
-  m_viewport.setHeight(size.height);
-  m_viewport.setMinDepth(min_depth);
-  m_viewport.setMaxDepth(max_depth);
+  m_viewport.setX(0.0f)
+      .setY(0.0f)
+      .setWidth(size.width)
+      .setHeight(size.height)
+      .setMinDepth(min_depth)
+      .setMaxDepth(max_depth);
 
   m_info.setViewports(m_viewport);
 }
 
 void pandora::core::pipeline::ViewportState::setScissor(const gpu_ui::GraphicalSize<uint32_t>& size) {
-  m_scissor.setOffset({0, 0});
-  m_scissor.setExtent(vk_helper::getExtent2D(size));
+  m_scissor.setOffset({0, 0}).setExtent(vk_helper::getExtent2D(size));
 
   m_info.setScissors(m_scissor);
 }
@@ -72,9 +65,7 @@ void pandora::core::pipeline::Rasterization::setDepthBiasEnabled(const bool is_e
 void pandora::core::pipeline::Rasterization::setDepthBias(const float_t constant_factor,
                                                           const float_t clamp,
                                                           const float_t slope_factor) {
-  m_info.setDepthBiasConstantFactor(constant_factor);
-  m_info.setDepthBiasClamp(clamp);
-  m_info.setDepthBiasSlopeFactor(slope_factor);
+  m_info.setDepthBiasConstantFactor(constant_factor).setDepthBiasClamp(clamp).setDepthBiasSlopeFactor(slope_factor);
 }
 
 void pandora::core::pipeline::Rasterization::setRasterizerDiscard(const bool is_enabled) {
@@ -118,8 +109,7 @@ void pandora::core::pipeline::DepthStencil::setDepthWrite(const bool is_enabled)
 }
 
 void pandora::core::pipeline::DepthStencil::setDepthCompareOp(const CompareOp compare_op) {
-  using vk_helper::getCompareOp;
-  m_info.setDepthCompareOp(getCompareOp(compare_op));
+  m_info.setDepthCompareOp(vk_helper::getCompareOp(compare_op));
 }
 
 void pandora::core::pipeline::DepthStencil::setDepthBoundsTest(const bool is_enabled) {
@@ -131,13 +121,11 @@ void pandora::core::pipeline::DepthStencil::setStencilTest(const bool is_enabled
 }
 
 void pandora::core::pipeline::DepthStencil::setFrontStencilOp(const StencilOpState& state) {
-  using vk_helper::getStencilOpState;
-  m_info.setFront(getStencilOpState(state));
+  m_info.setFront(vk_helper::getStencilOpState(state));
 }
 
 void pandora::core::pipeline::DepthStencil::setBackStencilOp(const StencilOpState& state) {
-  using vk_helper::getStencilOpState;
-  m_info.setBack(getStencilOpState(state));
+  m_info.setBack(vk_helper::getStencilOpState(state));
 }
 
 void pandora::core::pipeline::ColorBlend::setLogicOp(const bool is_enabled, const LogicOp logic_op) {
@@ -148,17 +136,15 @@ void pandora::core::pipeline::ColorBlend::setLogicOp(const bool is_enabled, cons
 void pandora::core::pipeline::ColorBlend::appendAttachment(const ColorBlendAttachment& attachment) {
   using namespace vk_helper;  // ローカルスコープでusing宣言
 
-  vk::PipelineColorBlendAttachmentState attachment_state;
-  attachment_state.setBlendEnable(attachment.is_enabled);
-  attachment_state.setSrcColorBlendFactor(getBlendFactor(attachment.src_color));
-  attachment_state.setDstColorBlendFactor(getBlendFactor(attachment.dst_color));
-  attachment_state.setColorBlendOp(getBlendOp(attachment.color_op));
-  attachment_state.setSrcAlphaBlendFactor(getBlendFactor(attachment.src_alpha));
-  attachment_state.setDstAlphaBlendFactor(getBlendFactor(attachment.dst_alpha));
-  attachment_state.setAlphaBlendOp(getBlendOp(attachment.alpha_op));
-  attachment_state.setColorWriteMask(getColorComponent(attachment.color_components));
-
-  m_attachments.push_back(attachment_state);
+  m_attachments.push_back(vk::PipelineColorBlendAttachmentState()
+                              .setBlendEnable(attachment.is_enabled)
+                              .setSrcColorBlendFactor(getBlendFactor(attachment.src_color))
+                              .setDstColorBlendFactor(getBlendFactor(attachment.dst_color))
+                              .setColorBlendOp(getBlendOp(attachment.color_op))
+                              .setSrcAlphaBlendFactor(getBlendFactor(attachment.src_alpha))
+                              .setDstAlphaBlendFactor(getBlendFactor(attachment.dst_alpha))
+                              .setAlphaBlendOp(getBlendOp(attachment.alpha_op))
+                              .setColorWriteMask(getColorComponent(attachment.color_components)));
 }
 
 void pandora::core::pipeline::DynamicState::appendState(const DynamicOption option) {
@@ -170,18 +156,20 @@ pandora::core::Pipeline::Pipeline(const std::unique_ptr<gpu::Context>& ptr_conte
                                   const gpu::DescriptionUnit& description_unit,
                                   const gpu::DescriptorSetLayout& descriptor_set_layout,
                                   const PipelineBind bind_point) {
-  std::vector<vk::PushConstantRange> push_constant_ranges;
-  for (const auto& [_, push_constant_range] : description_unit.getPushConstantRangeMap()) {
-    push_constant_ranges.emplace_back(
-        push_constant_range.stage_flags, push_constant_range.offset, static_cast<uint32_t>(push_constant_range.size));
-  }
+  using P = std::ranges::range_value_t<decltype(description_unit.getPushConstantRangeMap() | std::views::values)>;
+  const auto push_constant_ranges = description_unit.getPushConstantRangeMap() | std::views::values |
+                                    std::views::transform([](const P& x) {
+                                      return vk::PushConstantRange()
+                                          .setStageFlags(x.stage_flags)
+                                          .setOffset(x.offset)
+                                          .setSize(static_cast<uint32_t>(x.size));
+                                    }) |
+                                    std::ranges::to<std::vector<vk::PushConstantRange>>();
 
-  vk::PipelineLayoutCreateInfo pipeline_layout_info;
-  pipeline_layout_info.setSetLayouts(descriptor_set_layout.getDescriptorSetLayout());
-  pipeline_layout_info.setPushConstantRanges(push_constant_ranges);
-
-  m_ptrPipelineLayout =
-      ptr_context->getPtrDevice()->getPtrLogicalDevice()->createPipelineLayoutUnique(pipeline_layout_info);
+  m_ptrPipelineLayout = ptr_context->getPtrDevice()->getPtrLogicalDevice()->createPipelineLayoutUnique(
+      vk::PipelineLayoutCreateInfo()
+          .setSetLayouts(descriptor_set_layout.getDescriptorSetLayout())
+          .setPushConstantRanges(push_constant_ranges));
 
   m_bindPoint = vk_helper::getPipelineBindPoint(bind_point);
 }
@@ -192,14 +180,12 @@ void pandora::core::Pipeline::constructComputePipeline(const std::unique_ptr<gpu
                                                        const gpu::ShaderModule& shader_module) {
   m_queueFamilyType = QueueFamilyType::Compute;
 
-  vk::PipelineShaderStageCreateInfo shader_stage_info;
-  shader_stage_info.setStage(vk::ShaderStageFlagBits::eCompute);
-  shader_stage_info.setModule(shader_module.getModule());
-  shader_stage_info.setPName(shader_module.getEntryPointName().c_str());
-
-  vk::ComputePipelineCreateInfo compute_pipeline_info;
-  compute_pipeline_info.setLayout(m_ptrPipelineLayout.get());
-  compute_pipeline_info.setStage(shader_stage_info);
+  const auto compute_pipeline_info = vk::ComputePipelineCreateInfo()
+                                         .setLayout(m_ptrPipelineLayout.get())
+                                         .setStage(vk::PipelineShaderStageCreateInfo()
+                                                       .setStage(vk::ShaderStageFlagBits::eCompute)
+                                                       .setModule(shader_module.getModule())
+                                                       .setPName(shader_module.getEntryPointName().c_str()));
 
   m_ptrPipeline = ptr_context->getPtrDevice()
                       ->getPtrLogicalDevice()
@@ -215,51 +201,29 @@ void pandora::core::Pipeline::constructGraphicsPipeline(
     const Renderpass& render_pass,
     const uint32_t subpass_index) {
   m_queueFamilyType = QueueFamilyType::Graphics;
-
-  std::vector<vk::PipelineShaderStageCreateInfo> shader_stage_infos;
-  for (const auto& module_key : module_keys) {
-    const auto& shader_module = shader_module_map.at(module_key);
-
-    vk::PipelineShaderStageCreateInfo shader_stage_info;
-    shader_stage_info.setStage(shader_module.getShaderStageFlag());
-    shader_stage_info.setModule(shader_module.getModule());
-    shader_stage_info.setPName(shader_module.getEntryPointName().c_str());
-    shader_stage_infos.emplace_back(shader_stage_info);
-  }
-
   vk::GraphicsPipelineCreateInfo pipeline_info;
-  pipeline_info.setStages(shader_stage_infos);
+
+  {
+    using M = std::ranges::range_value_t<decltype(module_keys)>;
+    const auto shader_stage_infos = module_keys | std::views::transform([&shader_module_map](const M& x) {
+                                      const auto& shader_module = shader_module_map.at(x);
+
+                                      return vk::PipelineShaderStageCreateInfo()
+                                          .setStage(shader_module.getShaderStageFlag())
+                                          .setModule(shader_module.getModule())
+                                          .setPName(shader_module.getEntryPointName().c_str());
+                                    }) |
+                                    std::ranges::to<std::vector<vk::PipelineShaderStageCreateInfo>>();
+
+    pipeline_info.setStages(shader_stage_infos);
+  }
 
   {
     auto& vertex_input = ptr_graphic_info->vertex_input;
-    vertex_input.m_info.setVertexBindingDescriptions(vertex_input.m_bindings);
-    vertex_input.m_info.setVertexAttributeDescriptions(vertex_input.m_attributes);
+    vertex_input.m_info.setVertexBindingDescriptions(vertex_input.m_bindings)
+        .setVertexAttributeDescriptions(vertex_input.m_attributes);
 
     pipeline_info.setPVertexInputState(&(vertex_input.m_info));
-  }
-
-  {
-    pipeline_info.setPInputAssemblyState(&(ptr_graphic_info->input_assembly.m_info));
-  }
-
-  {
-    pipeline_info.setPTessellationState(&(ptr_graphic_info->tessellation.m_info));
-  }
-
-  {
-    pipeline_info.setPViewportState(&(ptr_graphic_info->viewport_state.m_info));
-  }
-
-  {
-    pipeline_info.setPRasterizationState(&(ptr_graphic_info->rasterization.m_info));
-  }
-
-  {
-    pipeline_info.setPMultisampleState(&(ptr_graphic_info->multisample.m_info));
-  }
-
-  {
-    pipeline_info.setPDepthStencilState(&(ptr_graphic_info->depth_stencil.m_info));
   }
 
   {
@@ -276,9 +240,15 @@ void pandora::core::Pipeline::constructGraphicsPipeline(
     pipeline_info.setPDynamicState(&(dynamic_state.m_info));
   }
 
-  pipeline_info.setLayout(m_ptrPipelineLayout.get());
-  pipeline_info.setRenderPass(render_pass.getRenderPass());
-  pipeline_info.setSubpass(subpass_index);
+  pipeline_info.setPInputAssemblyState(&(ptr_graphic_info->input_assembly.m_info))
+      .setPTessellationState(&(ptr_graphic_info->tessellation.m_info))
+      .setPViewportState(&(ptr_graphic_info->viewport_state.m_info))
+      .setPRasterizationState(&(ptr_graphic_info->rasterization.m_info))
+      .setPMultisampleState(&(ptr_graphic_info->multisample.m_info))
+      .setPDepthStencilState(&(ptr_graphic_info->depth_stencil.m_info))
+      .setLayout(m_ptrPipelineLayout.get())
+      .setRenderPass(render_pass.getRenderPass())
+      .setSubpass(subpass_index);
 
   m_ptrPipeline =
       ptr_context->getPtrDevice()->getPtrLogicalDevice()->createGraphicsPipelineUnique(nullptr, pipeline_info).value;
