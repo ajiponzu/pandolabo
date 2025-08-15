@@ -56,13 +56,13 @@ vk::UniqueInstance pandora::core::gpu::debug::Messenger::createDebugInstance(
     return vk::UniqueInstance(nullptr);
   }
 
-  const vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
-                                                             vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-                                                             vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+  const vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
+                                                             | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
+                                                             | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
 
-  const vk::DebugUtilsMessageTypeFlagsEXT type_flags(vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-                                                     vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-                                                     vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
+  const vk::DebugUtilsMessageTypeFlagsEXT type_flags(vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
+                                                     | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
+                                                     | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
 
   vk::ValidationFeaturesEXT validation_features;
   std::vector<vk::ValidationFeatureEnableEXT> enabled_features = {vk::ValidationFeatureEnableEXT::eDebugPrintf};

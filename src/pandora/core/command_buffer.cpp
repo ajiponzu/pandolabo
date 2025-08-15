@@ -118,8 +118,8 @@ void pandora::core::TransferCommandBuffer::copyBufferToImage(const gpu::Buffer& 
   copy_region.setImageExtent({graphical_size.width, graphical_size.height, graphical_size.depth});
 
   vk::ImageLayout vk_image_layout = vk_helper::getImageLayout(image_layout);
-  if (vk_image_layout != vk::ImageLayout::eTransferDstOptimal && vk_image_layout != vk::ImageLayout::eGeneral &&
-      vk_image_layout != vk::ImageLayout::eSharedPresentKHR) {
+  if (vk_image_layout != vk::ImageLayout::eTransferDstOptimal && vk_image_layout != vk::ImageLayout::eGeneral
+      && vk_image_layout != vk::ImageLayout::eSharedPresentKHR) {
     vk_image_layout = vk::ImageLayout::eTransferDstOptimal;
   }
 
@@ -151,8 +151,8 @@ void pandora::core::TransferCommandBuffer::copyImageToBuffer(const gpu::Image& i
   copy_region.setImageExtent({graphical_size.width, graphical_size.height, graphical_size.depth});
 
   vk::ImageLayout vk_image_layout = vk_helper::getImageLayout(image_layout);
-  if (vk_image_layout != vk::ImageLayout::eTransferSrcOptimal && vk_image_layout != vk::ImageLayout::eGeneral &&
-      vk_image_layout != vk::ImageLayout::eSharedPresentKHR) {
+  if (vk_image_layout != vk::ImageLayout::eTransferSrcOptimal && vk_image_layout != vk::ImageLayout::eGeneral
+      && vk_image_layout != vk::ImageLayout::eSharedPresentKHR) {
     vk_image_layout = vk::ImageLayout::eTransferSrcOptimal;
   }
 

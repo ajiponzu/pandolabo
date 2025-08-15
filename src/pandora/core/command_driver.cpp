@@ -70,9 +70,9 @@ void pandora::core::CommandDriver::resetAllCommandPools(const std::unique_ptr<gp
 void pandora::core::CommandDriver::mergeSecondaryCommands() const {
   using C = std::ranges::range_value_t<decltype(m_secondaryCommandBuffers)>;
 
-  m_ptrPrimaryCommandBuffer->executeCommands(m_secondaryCommandBuffers |
-                                             std::views::transform([](const C& buf) { return buf.get(); }) |
-                                             std::ranges::to<std::vector<vk::CommandBuffer>>());
+  m_ptrPrimaryCommandBuffer->executeCommands(m_secondaryCommandBuffers
+                                             | std::views::transform([](const C& buf) { return buf.get(); })
+                                             | std::ranges::to<std::vector<vk::CommandBuffer>>());
 }
 
 void pandora::core::CommandDriver::submit(const PipelineStage dst_stage, gpu::TimelineSemaphore& semaphore) const {

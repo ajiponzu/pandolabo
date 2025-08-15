@@ -13,8 +13,8 @@ pandora::core::gpu_ui::WindowSurface::~WindowSurface() {
 
 void pandora::core::gpu_ui::WindowSurface::constructSurface(const vk::UniqueInstance& ptr_instance) {
   VkSurfaceKHR surface;
-  if (glfwCreateWindowSurface(VkInstance(ptr_instance.get()), m_ptrWindow, nullptr, &surface) !=
-      ::VkResult::VK_SUCCESS) {
+  if (glfwCreateWindowSurface(VkInstance(ptr_instance.get()), m_ptrWindow, nullptr, &surface)
+      != ::VkResult::VK_SUCCESS) {
     m_ptrSurface = vk::UniqueSurfaceKHR(nullptr);
 
     return;

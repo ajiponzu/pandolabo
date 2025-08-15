@@ -91,8 +91,8 @@ pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
 
     uint32_t memory_type_idx = 0U;
     for (; memory_type_idx < memory_props.memoryTypeCount; memory_type_idx += 1U) {
-      if ((memory_requirements.memoryTypeBits & (1U << memory_type_idx)) &&
-          (memory_props.memoryTypes.at(memory_type_idx).propertyFlags & vk_memory_usage) == vk_memory_usage) {
+      if ((memory_requirements.memoryTypeBits & (1U << memory_type_idx))
+          && (memory_props.memoryTypes.at(memory_type_idx).propertyFlags & vk_memory_usage) == vk_memory_usage) {
         break;
       }
     }

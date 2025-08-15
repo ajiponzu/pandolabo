@@ -216,8 +216,8 @@ vk::Queue pandora::core::gpu::Device::getQueue(const uint32_t queue_family_index
 
 vk::SampleCountFlagBits pandora::core::gpu::Device::getMaxUsableSampleCount() const {
   const auto physical_device_props = m_physicalDevice.getProperties();
-  const auto sample_count = physical_device_props.limits.framebufferColorSampleCounts &
-                            physical_device_props.limits.framebufferDepthSampleCounts;
+  const auto sample_count = physical_device_props.limits.framebufferColorSampleCounts
+                            & physical_device_props.limits.framebufferDepthSampleCounts;
 
   // Check sample counts in descending order to find the maximum supported
   constexpr std::array sample_priorities = {vk::SampleCountFlagBits::e64,

@@ -583,9 +583,9 @@ STBIDEF int stbi_zlib_decode_noheader_buffer(char* obuffer, int olen, const char
 
 #ifdef STB_IMAGE_IMPLEMENTATION
 
-  #if defined(STBI_ONLY_JPEG) || defined(STBI_ONLY_PNG) || defined(STBI_ONLY_BMP) || defined(STBI_ONLY_TGA) || \
-      defined(STBI_ONLY_GIF) || defined(STBI_ONLY_PSD) || defined(STBI_ONLY_HDR) || defined(STBI_ONLY_PIC) ||  \
-      defined(STBI_ONLY_PNM) || defined(STBI_ONLY_ZLIB)
+  #if defined(STBI_ONLY_JPEG) || defined(STBI_ONLY_PNG) || defined(STBI_ONLY_BMP) || defined(STBI_ONLY_TGA)   \
+      || defined(STBI_ONLY_GIF) || defined(STBI_ONLY_PSD) || defined(STBI_ONLY_HDR) || defined(STBI_ONLY_PIC) \
+      || defined(STBI_ONLY_PNM) || defined(STBI_ONLY_ZLIB)
     #ifndef STBI_ONLY_JPEG
       #define STBI_NO_JPEG
     #endif
@@ -1047,8 +1047,8 @@ static int stbi__mad3sizes_valid(int a, int b, int c, int add) {
   // returns 1 if "a*b*c*d + add" has no negative terms/factors and doesn't overflow
   #if !defined(STBI_NO_LINEAR) || !defined(STBI_NO_HDR) || !defined(STBI_NO_PNM)
 static int stbi__mad4sizes_valid(int a, int b, int c, int d, int add) {
-  return stbi__mul2sizes_valid(a, b) && stbi__mul2sizes_valid(a * b, c) && stbi__mul2sizes_valid(a * b * c, d) &&
-         stbi__addsizes_valid(a * b * c * d, add);
+  return stbi__mul2sizes_valid(a, b) && stbi__mul2sizes_valid(a * b, c) && stbi__mul2sizes_valid(a * b * c, d)
+         && stbi__addsizes_valid(a * b * c * d, add);
 }
   #endif
 
@@ -1669,8 +1669,8 @@ stbi_inline static int stbi__at_eof(stbi__context* s) {
 }
   #endif
 
-  #if defined(STBI_NO_JPEG) && defined(STBI_NO_PNG) && defined(STBI_NO_BMP) && defined(STBI_NO_PSD) && \
-      defined(STBI_NO_TGA) && defined(STBI_NO_GIF) && defined(STBI_NO_PIC)
+  #if defined(STBI_NO_JPEG) && defined(STBI_NO_PNG) && defined(STBI_NO_BMP) && defined(STBI_NO_PSD) \
+      && defined(STBI_NO_TGA) && defined(STBI_NO_GIF) && defined(STBI_NO_PIC)
   // nothing
   #else
 static void stbi__skip(stbi__context* s, int n) {
@@ -1756,8 +1756,8 @@ static stbi__uint32 stbi__get32le(stbi__context* s) {
 
   #define STBI__BYTECAST(x) ((stbi_uc)((x) & 255))  // truncate int to byte without warnings
 
-  #if defined(STBI_NO_JPEG) && defined(STBI_NO_PNG) && defined(STBI_NO_BMP) && defined(STBI_NO_PSD) && \
-      defined(STBI_NO_TGA) && defined(STBI_NO_GIF) && defined(STBI_NO_PIC) && defined(STBI_NO_PNM)
+  #if defined(STBI_NO_JPEG) && defined(STBI_NO_PNG) && defined(STBI_NO_BMP) && defined(STBI_NO_PSD) \
+      && defined(STBI_NO_TGA) && defined(STBI_NO_GIF) && defined(STBI_NO_PIC) && defined(STBI_NO_PNM)
   // nothing
   #else
 //////////////////////////////////////////////////////////////////////////////
@@ -1776,8 +1776,8 @@ static stbi_uc stbi__compute_y(int r, int g, int b) {
 }
   #endif
 
-  #if defined(STBI_NO_PNG) && defined(STBI_NO_BMP) && defined(STBI_NO_PSD) && defined(STBI_NO_TGA) && \
-      defined(STBI_NO_GIF) && defined(STBI_NO_PIC) && defined(STBI_NO_PNM)
+  #if defined(STBI_NO_PNG) && defined(STBI_NO_BMP) && defined(STBI_NO_PSD) && defined(STBI_NO_TGA) \
+      && defined(STBI_NO_GIF) && defined(STBI_NO_PIC) && defined(STBI_NO_PNM)
   // nothing
   #else
 static unsigned char* stbi__convert_format(unsigned char* data,
@@ -3559,8 +3559,8 @@ static int stbi__process_scan_header(stbi__jpeg* z) {
     z->succ_high = (aa >> 4);
     z->succ_low = (aa & 15);
     if (z->progressive) {
-      if (z->spec_start > 63 || z->spec_end > 63 || z->spec_start > z->spec_end || z->succ_high > 13 ||
-          z->succ_low > 13)
+      if (z->spec_start > 63 || z->spec_end > 63 || z->spec_start > z->spec_end || z->succ_high > 13
+          || z->succ_low > 13)
         return stbi__err("bad SOS", "Corrupt JPEG");
     } else {
       if (z->spec_start != 0)
@@ -5653,8 +5653,8 @@ static int stbi__parse_png_file(stbi__png* z, int scan, int req_comp) {
               tc16[k] = (stbi__uint16)stbi__get16be(s);  // copy the values as-is
           } else {
             for (k = 0; k < s->img_n && k < 3; ++k)
-              tc[k] = (stbi_uc)(stbi__get16be(s) & 255) *
-                      stbi__depth_scale_table[z->depth];  // non 8-bit images will be larger
+              tc[k] = (stbi_uc)(stbi__get16be(s) & 255)
+                      * stbi__depth_scale_table[z->depth];  // non 8-bit images will be larger
           }
         }
         break;

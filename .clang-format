@@ -42,6 +42,11 @@ BinPackParameters: false
 AlignAfterOpenBracket: Align
 AllowAllParametersOfDeclarationOnNextLine: false
 
+# 二項演算子の改行設定（パイプライン演算子対応）
+BreakBeforeBinaryOperators: NonAssignment
+AlignOperands: Align
+ContinuationIndentWidth: 4
+
 # コンストラクタ初期化設定
 BreakConstructorInitializers: BeforeColon
 ConstructorInitializerAllOnOneLineOrOnePerLine: true

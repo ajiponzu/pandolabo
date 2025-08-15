@@ -157,14 +157,14 @@ pandora::core::Pipeline::Pipeline(const std::unique_ptr<gpu::Context>& ptr_conte
                                   const gpu::DescriptorSetLayout& descriptor_set_layout,
                                   const PipelineBind bind_point) {
   using P = std::ranges::range_value_t<decltype(description_unit.getPushConstantRangeMap() | std::views::values)>;
-  const auto push_constant_ranges = description_unit.getPushConstantRangeMap() | std::views::values |
-                                    std::views::transform([](const P& x) {
-                                      return vk::PushConstantRange()
-                                          .setStageFlags(x.stage_flags)
-                                          .setOffset(x.offset)
-                                          .setSize(static_cast<uint32_t>(x.size));
-                                    }) |
-                                    std::ranges::to<std::vector<vk::PushConstantRange>>();
+  const auto push_constant_ranges = description_unit.getPushConstantRangeMap() | std::views::values
+                                    | std::views::transform([](const P& x) {
+                                        return vk::PushConstantRange()
+                                            .setStageFlags(x.stage_flags)
+                                            .setOffset(x.offset)
+                                            .setSize(static_cast<uint32_t>(x.size));
+                                      })
+                                    | std::ranges::to<std::vector<vk::PushConstantRange>>();
 
   m_ptrPipelineLayout = ptr_context->getPtrDevice()->getPtrLogicalDevice()->createPipelineLayoutUnique(
       vk::PipelineLayoutCreateInfo()
@@ -212,8 +212,8 @@ void pandora::core::Pipeline::constructGraphicsPipeline(
                                           .setStage(shader_module.getShaderStageFlag())
                                           .setModule(shader_module.getModule())
                                           .setPName(shader_module.getEntryPointName().c_str());
-                                    }) |
-                                    std::ranges::to<std::vector<vk::PipelineShaderStageCreateInfo>>();
+                                    })
+                                    | std::ranges::to<std::vector<vk::PipelineShaderStageCreateInfo>>();
 
     pipeline_info.setStages(shader_stage_infos);
   }
