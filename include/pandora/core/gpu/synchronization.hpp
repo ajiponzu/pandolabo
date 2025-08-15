@@ -47,12 +47,6 @@ class BufferBarrier {
                 const std::vector<AccessFlag>& wait_access_flags);
   ~BufferBarrier();
 
-  /// @brief Get mutable reference to underlying Vulkan barrier
-  /// @return Reference to vk::BufferMemoryBarrier
-  auto& getBarrier() {
-    return m_bufferMemoryBarrier;
-  }
-
   /// @brief Get const reference to underlying Vulkan barrier
   /// @return Const reference to vk::BufferMemoryBarrier
   const auto& getBarrier() const {
@@ -102,9 +96,6 @@ class ImageBarrier {
                const ImageLayout new_layout);
   ~ImageBarrier();
 
-  auto& getBarrier() {
-    return m_imageMemoryBarrier;
-  }
   const auto& getBarrier() const {
     return m_imageMemoryBarrier;
   }

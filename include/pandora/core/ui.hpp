@@ -22,7 +22,7 @@ namespace pandora::core {
 /// @brief Keyboard key codes mapped from GLFW constants
 /// This enum provides a type-safe wrapper around GLFW key codes
 /// for consistent input handling across the application
-enum class KeyCode {
+enum class KeyCode : int32_t {
   Space = GLFW_KEY_SPACE,
   Apostrophe = GLFW_KEY_APOSTROPHE,
   Comma = GLFW_KEY_COMMA,
@@ -102,6 +102,14 @@ enum class KeyCode {
   F8 = GLFW_KEY_F8,
 };
 
+constexpr auto convertKeyCodeToInt(KeyCode key) {
+  return static_cast<int32_t>(key);
+}
+
+constexpr auto convertIntToKeyCode(int32_t key) {
+  return static_cast<KeyCode>(key);
+}
+
 /// @brief Mouse state structure containing position and scroll information
 /// Used to track current mouse cursor position and scroll wheel state
 struct Mouse {
@@ -130,23 +138,28 @@ class Window {
   GLFWwindow* m_ptrWindow;
   std::vector<std::function<void()>> m_callbacks;
 
+ private:
+  static auto convertWindowPtr(const GLFWwindow* ptr_window) {
+    return reinterpret_cast<uint64_t>(ptr_window);
+  }
+
  public:
   static void insertInputKey(const GLFWwindow* ptr_window, const int32_t key) {
-    s_inputKeySetMap[reinterpret_cast<uint64_t>(ptr_window)].insert(key);
+    s_inputKeySetMap[convertWindowPtr(ptr_window)].insert(key);
   }
   static void eraseInputKey(const GLFWwindow* ptr_window, const int32_t key) {
-    s_inputKeySetMap[reinterpret_cast<uint64_t>(ptr_window)].erase(key);
+    s_inputKeySetMap[convertWindowPtr(ptr_window)].erase(key);
   }
   static void setMousePos(const GLFWwindow* ptr_window, const double x, const double y) {
-    s_mouseMap[reinterpret_cast<uint64_t>(ptr_window)].pos_x = x;
-    s_mouseMap[reinterpret_cast<uint64_t>(ptr_window)].pos_y = y;
+    s_mouseMap[convertWindowPtr(ptr_window)].pos_x = x;
+    s_mouseMap[convertWindowPtr(ptr_window)].pos_y = y;
   }
   static void setMouseScroll(const GLFWwindow* ptr_window, const double x, const double y) {
-    s_mouseMap[reinterpret_cast<uint64_t>(ptr_window)].scroll_x = x;
-    s_mouseMap[reinterpret_cast<uint64_t>(ptr_window)].scroll_y = y;
+    s_mouseMap[convertWindowPtr(ptr_window)].scroll_x = x;
+    s_mouseMap[convertWindowPtr(ptr_window)].scroll_y = y;
   }
   static void setResizedBool(const GLFWwindow* ptr_window, const bool is_resized) {
-    s_resizedBoolMap[reinterpret_cast<uint64_t>(ptr_window)] = is_resized;
+    s_resizedBoolMap[convertWindowPtr(ptr_window)] = is_resized;
   }
 
   Window(const std::string& title, const int32_t width, const int32_t height);
@@ -159,13 +172,13 @@ class Window {
   Window& operator=(Window&&) = default;
 
   const auto& getMouse() const {
-    return s_mouseMap.at(reinterpret_cast<uint64_t>(m_ptrWindow));
+    return s_mouseMap.at(convertWindowPtr(m_ptrWindow));
   }
   const auto& getWindowSurface() const {
     return m_ptrWindowSurface;
   }
   const auto isResized() const {
-    return s_resizedBoolMap.at(reinterpret_cast<uint64_t>(m_ptrWindow));
+    return s_resizedBoolMap.at(convertWindowPtr(m_ptrWindow));
   }
 
   /// @brief Update window and input
@@ -180,7 +193,7 @@ class Window {
   }
 
   bool findInputKey(KeyCode key) const {
-    return s_inputKeySetMap.at(reinterpret_cast<uint64_t>(m_ptrWindow)).contains(static_cast<int32_t>(key));
+    return s_inputKeySetMap.at(convertWindowPtr(m_ptrWindow)).contains(convertKeyCodeToInt(key));
   }
 };
 
