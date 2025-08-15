@@ -8,6 +8,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
@@ -25,14 +26,18 @@ class DescriptionUnit;
 
 namespace pandora::core::gpu {
 
-/// @brief Buffer descriptor wrapper for uniform and storage buffers
-/// Manages descriptor set write operations for buffers, encapsulating
-/// the Vulkan descriptor buffer info and write descriptor set structures.
-/// Used to bind uniform buffers, storage buffers, and other buffer resources to shaders.
+/// @brief Buffer descriptor build information for uniform and storage buffers
 class BufferDescription {
  private:
-  std::shared_ptr<vk::WriteDescriptorSet> m_ptrWriteDescriptorSet{};  ///< Vulkan write descriptor set
-  std::shared_ptr<vk::DescriptorBufferInfo> m_ptrBufferInfo{};        ///< Vulkan buffer descriptor info
+  struct BufferInfo {
+    vk::Buffer buffer;
+    size_t size;
+  } m_bufferInfo;
+
+  struct WriteDescInfo {
+    vk::DescriptorType type;
+    uint32_t binding;
+  } m_writeDescInfo;
 
  public:
   /// @brief Construct buffer descriptor
@@ -41,28 +46,29 @@ class BufferDescription {
   BufferDescription(const DescriptorInfo& descriptor_info, const Buffer& buffer);
   ~BufferDescription();
 
-  /// @brief Get write descriptor set for binding
-  /// @return Reference to Vulkan write descriptor set
-  const auto& getWriteDescriptorSet() const {
-    return *m_ptrWriteDescriptorSet;
-  }
+  /// @brief Create buffer descriptor info
+  /// @return Vulkan buffer descriptor info
+  vk::DescriptorBufferInfo createVkBufferInfo() const;
 
-  /// @brief Get buffer descriptor info
-  /// @return Reference to Vulkan buffer descriptor info
-  const auto& getBufferInfo() const {
-    return *m_ptrBufferInfo;
-  }
+  /// @brief Create vulkan write descriptor set
+  /// @param info Vulkan buffer descriptor info
+  /// @return Vulkan write descriptor set
+  vk::WriteDescriptorSet createVkWriteDescriptorSet(const vk::DescriptorBufferInfo& info) const;
 };
 
-/// @brief Image descriptor wrapper for texture and image resources
-/// Manages descriptor set write operations for images, encapsulating
-/// the Vulkan descriptor image info and write descriptor set structures.
-/// Supports binding of images, storage images, samplers, and combined image samplers to shaders.
-/// Multiple constructors support different descriptor types and use cases.
+/// @brief Image descriptor build information for texture and image resources
 class ImageDescription {
  private:
-  std::shared_ptr<vk::WriteDescriptorSet> m_ptrWriteDescriptorSet{};  ///< Vulkan write descriptor set
-  std::shared_ptr<vk::DescriptorImageInfo> m_ptrImageInfo{};          ///< Vulkan image descriptor info
+  struct ImageInfo {
+    std::optional<vk::ImageView> view;
+    std::optional<vk::Sampler> sampler;
+    std::optional<vk::ImageLayout> layout;
+  } m_imageInfo;
+
+  struct WriteDescInfo {
+    vk::DescriptorType type;
+    uint32_t binding;
+  } m_writeDescInfo;
 
  public:
   /// @brief Construct image descriptor for storage images or regular images
@@ -90,17 +96,14 @@ class ImageDescription {
                    const Sampler& sampler);
   ~ImageDescription();
 
-  /// @brief Get write descriptor set for binding
-  /// @return Reference to Vulkan write descriptor set
-  const auto& getWriteDescriptorSet() const {
-    return *m_ptrWriteDescriptorSet;
-  }
+  /// @brief Create image descriptor info
+  /// @return Vulkan image descriptor info
+  vk::DescriptorImageInfo createVkImageInfo() const;
 
-  /// @brief Get image descriptor info
-  /// @return Reference to Vulkan image descriptor info
-  const auto& getImageInfo() const {
-    return *m_ptrImageInfo;
-  }
+  /// @brief Create vulkan write descriptor set
+  /// @param info Vulkan image descriptor info
+  /// @return Vulkan write descriptor set
+  vk::WriteDescriptorSet createVkWriteDescriptorSet(const vk::DescriptorImageInfo& info) const;
 };
 
 /// @brief Descriptor set layout wrapper for managing shader resource bindings

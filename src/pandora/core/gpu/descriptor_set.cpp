@@ -1,3 +1,5 @@
+#include <ranges>
+
 #include "pandora/core/gpu.hpp"
 
 pandora::core::gpu::DescriptorSet::DescriptorSet(const std::unique_ptr<Context>& ptr_context,
@@ -19,15 +21,22 @@ void pandora::core::gpu::DescriptorSet::updateDescriptorSet(const std::unique_pt
                                                             const std::vector<BufferDescription>& buffer_descriptions,
                                                             const std::vector<ImageDescription>& image_descriptions) {
   std::vector<vk::WriteDescriptorSet> write_descriptor_sets;
-  write_descriptor_sets.reserve(buffer_descriptions.size() + image_descriptions.size());
 
-  for (const auto& buffer_description : buffer_descriptions) {
-    write_descriptor_sets.push_back(buffer_description.getWriteDescriptorSet());
-    write_descriptor_sets.back().setDstSet(m_ptrDescriptorSet.get());
+  const auto buffer_info_list =
+      buffer_descriptions
+      | std::views::transform([](const BufferDescription& desc) { return desc.createVkBufferInfo(); })
+      | std::ranges::to<std::vector<vk::DescriptorBufferInfo>>();
+  for (const auto& [buffer_desc, buffer_info] : std::views::zip(buffer_descriptions, buffer_info_list)) {
+    write_descriptor_sets.emplace_back(
+        buffer_desc.createVkWriteDescriptorSet(buffer_info).setDstSet(m_ptrDescriptorSet.get()));
   }
-  for (const auto& image_description : image_descriptions) {
-    write_descriptor_sets.push_back(image_description.getWriteDescriptorSet());
-    write_descriptor_sets.back().setDstSet(m_ptrDescriptorSet.get());
+
+  const auto image_info_list =
+      image_descriptions | std::views::transform([](const ImageDescription& desc) { return desc.createVkImageInfo(); })
+      | std::ranges::to<std::vector<vk::DescriptorImageInfo>>();
+  for (const auto& [image_desc, image_info] : std::views::zip(image_descriptions, image_info_list)) {
+    write_descriptor_sets.emplace_back(
+        image_desc.createVkWriteDescriptorSet(image_info).setDstSet(m_ptrDescriptorSet.get()));
   }
 
   ptr_context->getPtrDevice()->getPtrLogicalDevice()->updateDescriptorSets(write_descriptor_sets, nullptr);
