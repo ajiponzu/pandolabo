@@ -47,17 +47,17 @@ uint32_t pandora::core::AttachmentList::append(const AttachmentDescription& desc
 }
 
 const void pandora::core::AttachmentList::appendDescription(const AttachmentDescription& description) {
-  using namespace vk_helper;  // ローカルスコープでusing宣言
+  using namespace vk_helper;
 
-  vk::AttachmentDescription vk_description;
-  vk_description.setFormat(getFormat(description.format));
-  vk_description.setSamples(getSampleCount(description.samples));
-  vk_description.setLoadOp(getAttachmentLoadOp(description.load_op));
-  vk_description.setStoreOp(getAttachmentStoreOp(description.store_op));
-  vk_description.setStencilLoadOp(getAttachmentLoadOp(description.stencil_load_op));
-  vk_description.setStencilStoreOp(getAttachmentStoreOp(description.stencil_store_op));
-  vk_description.setInitialLayout(getImageLayout(description.initial_layout));
-  vk_description.setFinalLayout(getImageLayout(description.final_layout));
+  const auto vk_description = vk::AttachmentDescription()
+                                  .setFormat(getFormat(description.format))
+                                  .setSamples(getSampleCount(description.samples))
+                                  .setLoadOp(getAttachmentLoadOp(description.load_op))
+                                  .setStoreOp(getAttachmentStoreOp(description.store_op))
+                                  .setStencilLoadOp(getAttachmentLoadOp(description.stencil_load_op))
+                                  .setStencilStoreOp(getAttachmentStoreOp(description.stencil_store_op))
+                                  .setInitialLayout(getImageLayout(description.initial_layout))
+                                  .setFinalLayout(getImageLayout(description.final_layout));
 
   m_descriptions.push_back(vk_description);
 }

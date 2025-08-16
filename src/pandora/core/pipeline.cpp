@@ -134,7 +134,7 @@ void pandora::core::pipeline::ColorBlend::setLogicOp(const bool is_enabled, cons
 }
 
 void pandora::core::pipeline::ColorBlend::appendAttachment(const ColorBlendAttachment& attachment) {
-  using namespace vk_helper;  // ローカルスコープでusing宣言
+  using namespace vk_helper;
 
   m_attachments.push_back(vk::PipelineColorBlendAttachmentState()
                               .setBlendEnable(attachment.is_enabled)

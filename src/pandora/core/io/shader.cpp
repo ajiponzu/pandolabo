@@ -1,9 +1,8 @@
 #include <glslang/Public/ShaderLang.h>
 #include <glslang/SPIRV/GlslangToSpv.h>
 
-#include <format>
 #include <fstream>
-#include <iostream>
+#include <print>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -181,7 +180,7 @@ std::vector<uint32_t> pandora::core::io::shader::readText(const std::string& fil
 std::vector<uint32_t> pandora::core::io::shader::readBinary(const std::string& file_path) {
   std::ifstream file(file_path, std::ios::ate | std::ios::binary);
   if (!file.is_open()) {
-    std::cerr << std::format("Failed to open file: {}", file_path) << std::endl;
+    std::println("Failed to open file: {}", file_path);
 
     return std::vector<uint32_t>();
   }
@@ -191,7 +190,6 @@ std::vector<uint32_t> pandora::core::io::shader::readBinary(const std::string& f
 
   file.seekg(0);
   file.read(reinterpret_cast<char*>(shader_binary.data()), file_size);
-  file.close();
 
   return shader_binary;
 }
@@ -208,6 +206,4 @@ void pandora::core::io::shader::write(const std::string& file_path, const std::v
   std::ofstream output_file(file_path, std::ios::binary);
 
   output_file.write(reinterpret_cast<const char*>(shader_binary.data()), shader_binary.size() * sizeof(uint32_t));
-
-  output_file.close();
 }

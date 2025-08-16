@@ -1,6 +1,5 @@
 #include <array>
-#include <format>
-#include <iostream>
+#include <print>
 #include <set>
 #include <string>
 
@@ -38,9 +37,7 @@ static QueueFamilyIndices find_queue_families(const vk::PhysicalDevice& physical
   uint32_t family_id = 0U;
   for (const auto& queue_family : queue_families) {
     const auto graphics_support = queue_family.queueFlags & vk::QueueFlagBits::eGraphics;
-
     const auto compute_support = queue_family.queueFlags & vk::QueueFlagBits::eCompute;
-
     const auto transfer_support = queue_family.queueFlags & vk::QueueFlagBits::eTransfer;
 
     if (graphics_support) {
@@ -69,13 +66,9 @@ static bool check_device_extension_support(const vk::PhysicalDevice& physical_de
   return device_extensions.empty();
 }
 
-template <typename T>
+template <std::integral T>
 static T get_optional_value(const std::optional<T>& option) {
-  if (option.has_value()) {
-    return option.value();
-  }
-
-  return 0U;
+  return option.value_or(0U);
 }
 
 pandora::core::gpu::Device::Device(const vk::UniqueInstance& ptr_instance,
@@ -146,7 +139,7 @@ pandora::core::gpu::Device::Device(const vk::UniqueInstance& ptr_instance,
 
 #ifdef GPU_DEBUG
   if (m_physicalDevice) {
-    std::cout << std::format("vulkan_device: {}", m_physicalDevice.getProperties().deviceName.data()) << std::endl;
+    std::println("vulkan_device: {}", m_physicalDevice.getProperties().deviceName.data());
   }
   constructLogicalDevice(ptr_messenger);
 #else

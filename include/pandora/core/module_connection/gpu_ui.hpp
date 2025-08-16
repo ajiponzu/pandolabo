@@ -14,9 +14,9 @@ This header file contains a module connecting connect gpu.hpp and ui.hpp.
 namespace pandora::core::gpu_ui {
 
 template <typename T>
-concept GraphicalSizeConcept = std::is_arithmetic_v<T> && !std::is_same<T, bool>::value;
+concept NumberConcept = std::is_arithmetic_v<T>;
 
-template <GraphicalSizeConcept T>
+template <NumberConcept T>
 struct GraphicalSize {
   T width;
   T height;

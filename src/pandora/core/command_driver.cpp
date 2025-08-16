@@ -1,4 +1,3 @@
-#include <iostream>
 #include <ranges>
 
 #include "pandora/core/command_buffer.hpp"
@@ -94,13 +93,13 @@ void pandora::core::CommandDriver::submit(const PipelineStage dst_stage, gpu::Ti
 void pandora::core::CommandDriver::submit(gpu::BinarySemaphore& wait_semaphore,
                                           const PipelineStage dst_stage,
                                           gpu::BinarySemaphore& signal_semaphore) const {
-  auto submit_info = vk::SubmitInfo()
-                         .setCommandBuffers(m_ptrPrimaryCommandBuffer.get())
-                         .setWaitSemaphores(wait_semaphore.getSemaphore())
-                         .setSignalSemaphores(signal_semaphore.getSemaphore());
-
   const vk::PipelineStageFlags vk_stage_flags = vk_helper::getPipelineStageFlagBits(dst_stage);
-  submit_info.setWaitDstStageMask(vk_stage_flags);
+
+  const auto submit_info = vk::SubmitInfo()
+                               .setCommandBuffers(m_ptrPrimaryCommandBuffer.get())
+                               .setWaitSemaphores(wait_semaphore.getSemaphore())
+                               .setSignalSemaphores(signal_semaphore.getSemaphore())
+                               .setWaitDstStageMask(vk_stage_flags);
 
   m_queue.submit(submit_info, signal_semaphore.getFence());
 }
@@ -136,7 +135,7 @@ pandora::core::GraphicCommandBuffer pandora::core::CommandDriver::getGraphic(
 pandora::core::ComputeCommandBuffer pandora::core::CommandDriver::getCompute(
     const std::optional<size_t> secondary_index) const {
   if (secondary_index.has_value()) {
-    return ComputeCommandBuffer(m_secondaryCommandBuffers.at(secondary_index.value()), true);
+    return ComputeCommandBuffer(m_secondaryCommandBuffers.at(*secondary_index), true);
   }
 
   return ComputeCommandBuffer(m_ptrPrimaryCommandBuffer);
@@ -145,7 +144,7 @@ pandora::core::ComputeCommandBuffer pandora::core::CommandDriver::getCompute(
 pandora::core::TransferCommandBuffer pandora::core::CommandDriver::getTransfer(
     const std::optional<size_t> secondary_index) const {
   if (secondary_index.has_value()) {
-    return TransferCommandBuffer(m_secondaryCommandBuffers.at(secondary_index.value()), true);
+    return TransferCommandBuffer(m_secondaryCommandBuffers.at(*secondary_index), true);
   }
 
   return TransferCommandBuffer(m_ptrPrimaryCommandBuffer);

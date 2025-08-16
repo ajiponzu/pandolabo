@@ -3,9 +3,8 @@
 #ifdef GPU_DEBUG
 
   #include <cstring>
-  #include <format>
-  #include <iostream>
   #include <optional>
+  #include <print>
   #include <vector>
 
 std::vector<const char*> pandora::core::gpu::debug::Messenger::s_validationLayers = {
@@ -19,7 +18,7 @@ debug_utils_messenger_callback(VkDebugUtilsMessageSeverityFlagBitsEXT message_se
                                VkDebugUtilsMessageTypeFlagsEXT message_types,
                                VkDebugUtilsMessengerCallbackDataEXT const* p_callback_data,
                                void* p_user_data) {
-  std::cerr << std::format("[****] validation layer: {}\n", p_callback_data->pMessage) << std::endl;
+  std::println(stderr, "[****] validation layer: {}", p_callback_data->pMessage);
 
   return VK_FALSE;
 }

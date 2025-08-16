@@ -1,20 +1,12 @@
-#include <iostream>
-
 #include "pandora/core/gpu.hpp"
 
 pandora::core::gpu::TimelineSemaphore::TimelineSemaphore(const std::unique_ptr<Context>& ptr_context) {
-  {
-    vk::SemaphoreTypeCreateInfo semaphore_type_info;
-    semaphore_type_info.setSemaphoreType(vk::SemaphoreType::eTimeline);
+  const auto semaphore_type_info = vk::SemaphoreTypeCreateInfo().setSemaphoreType(vk::SemaphoreType::eTimeline);
+  const auto semaphore_info = vk::SemaphoreCreateInfo().setPNext(&semaphore_type_info);
 
-    vk::SemaphoreCreateInfo semaphore_info;
-    semaphore_info.setPNext(&semaphore_type_info);
+  m_ptrSemaphore = ptr_context->getPtrDevice()->getPtrLogicalDevice()->createSemaphoreUnique(semaphore_info);
 
-    m_ptrSemaphore = ptr_context->getPtrDevice()->getPtrLogicalDevice()->createSemaphoreUnique(semaphore_info);
-  }
-
-  m_timelineSubmitInfo.setWaitSemaphoreValues(m_waitValue);
-  m_timelineSubmitInfo.setSignalSemaphoreValues(m_signalValue);
+  m_timelineSubmitInfo.setWaitSemaphoreValues(m_waitValue).setSignalSemaphoreValues(m_signalValue);
 }
 
 pandora::core::gpu::TimelineSemaphore::~TimelineSemaphore() {}
@@ -22,12 +14,8 @@ pandora::core::gpu::TimelineSemaphore::~TimelineSemaphore() {}
 void pandora::core::gpu::TimelineSemaphore::wait(const std::unique_ptr<Context>& ptr_context) {
   const auto& ptr_vk_device = ptr_context->getPtrDevice()->getPtrLogicalDevice();
 
-  vk::SemaphoreWaitInfo semaphore_wait_info;
-  semaphore_wait_info.setSemaphores(m_ptrSemaphore.get());
-  semaphore_wait_info.setValues(m_waitValue);
-
+  const auto semaphore_wait_info = vk::SemaphoreWaitInfo().setSemaphores(m_ptrSemaphore.get()).setValues(m_waitValue);
   const auto vk_result = ptr_vk_device->waitSemaphores(semaphore_wait_info, std::numeric_limits<uint64_t>::max());
-
   if (vk_result != vk::Result::eSuccess) {
     throw std::runtime_error("Failed to wait for semaphore");
   }
@@ -37,19 +25,13 @@ void pandora::core::gpu::TimelineSemaphore::wait(const std::unique_ptr<Context>&
   m_waitValue = 0U;
   m_waitStages.clear();
 
-  {
-    vk::SemaphoreTypeCreateInfo semaphore_type_info;
-    semaphore_type_info.setSemaphoreType(vk::SemaphoreType::eTimeline);
+  m_timelineSubmitInfo =
+      vk::TimelineSemaphoreSubmitInfoKHR().setWaitSemaphoreValues(m_waitValue).setSignalSemaphoreValues(m_signalValue);
 
-    vk::SemaphoreCreateInfo semaphore_info;
-    semaphore_info.setPNext(&semaphore_type_info);
+  const auto semaphore_type_info = vk::SemaphoreTypeCreateInfo().setSemaphoreType(vk::SemaphoreType::eTimeline);
+  const auto semaphore_info = vk::SemaphoreCreateInfo().setPNext(&semaphore_type_info);
 
-    m_ptrSemaphore = ptr_vk_device->createSemaphoreUnique(semaphore_info);
-  }
-
-  m_timelineSubmitInfo = vk::TimelineSemaphoreSubmitInfoKHR{};
-  m_timelineSubmitInfo.setWaitSemaphoreValues(m_waitValue);
-  m_timelineSubmitInfo.setSignalSemaphoreValues(m_signalValue);
+  m_ptrSemaphore = ptr_vk_device->createSemaphoreUnique(semaphore_info);
 }
 
 pandora::core::gpu::SolidBinarySemaphore::SolidBinarySemaphore(const std::unique_ptr<Context>& ptr_context) {

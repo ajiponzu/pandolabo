@@ -47,7 +47,7 @@ uint32_t pandora::core::SubpassGraph::appendNode(const SubpassNode& node) {
 }
 
 void pandora::core::SubpassGraph::appendEdge(const SubpassEdge& edge) {
-  using namespace vk_helper;  // ローカルスコープでusing宣言
+  using namespace vk_helper;
 
   vk::SubpassDependency dependency;
   dependency.setSrcSubpass(edge.src_index).setDstSubpass(edge.dst_index);
