@@ -203,20 +203,16 @@ void pandora::core::Pipeline::constructGraphicsPipeline(
   m_queueFamilyType = QueueFamilyType::Graphics;
   vk::GraphicsPipelineCreateInfo pipeline_info;
 
-  {
-    using M = std::ranges::range_value_t<decltype(module_keys)>;
-    const auto shader_stage_infos = module_keys | std::views::transform([&shader_module_map](const M& x) {
-                                      const auto& shader_module = shader_module_map.at(x);
+  using M = std::ranges::range_value_t<decltype(module_keys)>;
+  const auto shader_stage_infos = module_keys | std::views::transform([&shader_module_map](const M& x) {
+                                    const auto& shader_module = shader_module_map.at(x);
 
-                                      return vk::PipelineShaderStageCreateInfo()
-                                          .setStage(shader_module.getShaderStageFlag())
-                                          .setModule(shader_module.getModule())
-                                          .setPName(shader_module.getEntryPointName().c_str());
-                                    })
-                                    | std::ranges::to<std::vector<vk::PipelineShaderStageCreateInfo>>();
-
-    pipeline_info.setStages(shader_stage_infos);
-  }
+                                    return vk::PipelineShaderStageCreateInfo()
+                                        .setStage(shader_module.getShaderStageFlag())
+                                        .setModule(shader_module.getModule())
+                                        .setPName(shader_module.getEntryPointName().c_str());
+                                  })
+                                  | std::ranges::to<std::vector<vk::PipelineShaderStageCreateInfo>>();
 
   {
     auto& vertex_input = ptr_graphic_info->vertex_input;
@@ -240,7 +236,8 @@ void pandora::core::Pipeline::constructGraphicsPipeline(
     pipeline_info.setPDynamicState(&(dynamic_state.m_info));
   }
 
-  pipeline_info.setPInputAssemblyState(&(ptr_graphic_info->input_assembly.m_info))
+  pipeline_info.setStages(shader_stage_infos)
+      .setPInputAssemblyState(&(ptr_graphic_info->input_assembly.m_info))
       .setPTessellationState(&(ptr_graphic_info->tessellation.m_info))
       .setPViewportState(&(ptr_graphic_info->viewport_state.m_info))
       .setPRasterizationState(&(ptr_graphic_info->rasterization.m_info))

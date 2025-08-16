@@ -8,6 +8,7 @@ spirv-tools/1.4.313.0
 spirv-headers/1.4.313.0
 nlohmann_json/3.11.3
 catch2/3.4.0
+glm/cci.20230113
 
 [generators]
 CMakeDeps
@@ -20,6 +21,7 @@ spirv-cross/*:shared=False
 spirv-tools/*:shared=False
 vulkan-loader/*:shared=False
 catch2/*:shared=False
+glm/*:shared=False
 
 [tool_requires]
 cmake/[>=3.17.2 <4.0]

@@ -148,6 +148,7 @@ find_package(VulkanLoader REQUIRED)
 find_package(VulkanHeaders REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
 
 # テストオプション
 option(BUILD_TESTS "Build tests" ON)
@@ -213,6 +214,7 @@ target_link_libraries(${PROJECT_NAME}
         vulkan-headers::vulkan-headers
         nlohmann_json::nlohmann_json
         glfw
+        glm::glm
 )
 
 # Conanパッケージのインクルードディレクトリを手動で追加

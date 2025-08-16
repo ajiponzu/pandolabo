@@ -28,6 +28,19 @@ def get_conan_home():
         return os.path.expanduser("~/.conan2")
 
 
+def get_glm_include_path():
+    """GLMのインクルードパスを取得"""
+    conan_home = get_conan_home()
+    glm_pattern = f"{conan_home}/p/*glm*/p/include"
+
+    glm_paths = glob.glob(glm_pattern)
+    for path in glm_paths:
+        if os.path.exists(os.path.join(path, "glm", "glm.hpp")):
+            return path
+
+    return None
+
+
 def get_conan_include_paths():
     """
     Conanパッケージのインクルードパスを取得
@@ -168,6 +181,21 @@ def generate_settings_json():
     }
 
     if is_windows:
+        # GLMのインクルードパスを取得
+        glm_include_path = get_glm_include_path()
+
+        # 基本のインクルードパス
+        base_include_paths = [
+            "include",
+            "C:/Users/cpjvm/.conan2/p/vulka*/p/include",
+            "C:/Users/cpjvm/.conan2/p/b/spirv*/p/include",
+            "C:/Users/cpjvm/.conan2/p/b/glsla*/b/src",
+        ]
+
+        # GLMパスが見つかった場合は追加
+        if glm_include_path:
+            base_include_paths.append(glm_include_path)
+
         # Windows/MSVC設定
         settings = {
             **common_format_settings,
@@ -175,6 +203,7 @@ def generate_settings_json():
             "C_Cpp.default.cStandard": "c17",
             "C_Cpp.default.compilerPath": "cl.exe",
             "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+            "C_Cpp.default.includePath": base_include_paths,
         }
     else:
         # Linux/macOS/Clang設定
