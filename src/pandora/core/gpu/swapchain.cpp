@@ -106,4 +106,7 @@ void pandora::core::gpu::Swapchain::clear() {
   m_renderFinishedSemaphores.clear();
   m_imageAvailableSemaphores.clear();
   m_fences.clear();
+
+  m_frameSyncIndex = 0U;
+  m_imageIndex = 0U;
 }
