@@ -2,7 +2,8 @@
  * buffer.hpp - GPU buffer wrapper for Pandolabo Vulkan C++ wrapper
  *
  * This header contains the Buffer class which manages Vulkan buffer resources.
- * Buffers are used for vertex data, uniform data, storage, and data transfer operations.
+ * Buffers are used for vertex data, uniform data, storage, and data transfer
+ * operations.
  */
 
 #pragma once
@@ -21,10 +22,10 @@ class Context;
 namespace pandora::core::gpu {
 
 /// @brief GPU buffer wrapper class
-/// @details GPU buffer is used for simple numbers or matrices for values, vertices, indices, uniforms, etc.
-/// This class is also used to transfer data between CPU and GPU.
-/// Buffer size unit is 1 byte. For example, if you want a float matrix 4x4,
-/// float size is 4 bytes, so 4 * 4 * 4 = 64 bytes are needed.
+/// @details GPU buffer is used for simple numbers or matrices for values,
+/// vertices, indices, uniforms, etc. This class is also used to transfer data
+/// between CPU and GPU. Buffer size unit is 1 byte. For example, if you want a
+/// float matrix 4x4, float size is 4 bytes, so 4 * 4 * 4 = 64 bytes are needed.
 class Buffer {
  protected:
   vk::UniqueDeviceMemory m_ptrMemory;
@@ -88,7 +89,8 @@ class Buffer {
   }
 
   /// @brief Get virtual address of mapped GPU buffer memory
-  /// @details Writing or reading data at this address is directly reflected in GPU memory.
+  /// @details Writing or reading data at this address is directly reflected in
+  /// GPU memory.
   /// @param ptr_context GPU context pointer
   /// @return Virtual GPU buffer memory address
   void* mapMemory(const std::unique_ptr<Context>& ptr_context) const;

@@ -1,8 +1,9 @@
 /*
  * device.hpp - GPU device wrapper for Pandolabo Vulkan C++ wrapper
  *
- * This header contains the Device class which wraps Vulkan physical and logical devices.
- * The Device class manages GPU resources, memory allocation, and queue operations.
+ * This header contains the Device class which wraps Vulkan physical and logical
+ * devices. The Device class manages GPU resources, memory allocation, and queue
+ * operations.
  */
 
 #pragma once
@@ -22,8 +23,8 @@ namespace pandora::core::gpu {
 
 /// @brief GPU device wrapper class
 /// @details This class wraps Vulkan physical and logical devices.
-/// When GPU resources, memory, or other operations are created, this class is used.
-/// Management and operation authority is mainly under Context class.
+/// When GPU resources, memory, or other operations are created, this class is
+/// used. Management and operation authority is mainly under Context class.
 ///
 /// Rule of Five
 class Device {
@@ -73,14 +74,15 @@ class Device {
 
   /// @brief Search queue family index from queue family type
   /// @details Queue in the header file means command queue for GPU calculation.
-  /// Queue family is a group of queues. Each queue family has different purposes
-  /// and allowed operations.
+  /// Queue family is a group of queues. Each queue family has different
+  /// purposes and allowed operations.
   /// @param family_type Queue target selection enum
   /// @return Queue family index
   const uint32_t getQueueFamilyIndex(const QueueFamilyType family_type) const;
 
   /// @brief Get GPU command queue
-  /// @param queue_family_index Queue family index (0 or result from getQueueFamilyIndex)
+  /// @param queue_family_index Queue family index (0 or result from
+  /// getQueueFamilyIndex)
   /// @return Vulkan queue object
   vk::Queue getQueue(const uint32_t queue_family_index);
 

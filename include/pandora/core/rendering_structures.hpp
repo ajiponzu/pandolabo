@@ -1,5 +1,6 @@
 /*
- * rendering_structures.hpp - Rendering-related structure definitions for Pandolabo core module
+ * rendering_structures.hpp - Rendering-related structure definitions for
+ * Pandolabo core module
  *
  * This header contains structure definitions used for rendering operations,
  * attachments, subpasses, and pipeline configurations.
@@ -20,10 +21,12 @@ namespace pandora::core {
 /// Defines how an attachment (color/depth/stencil buffer) should be handled
 /// during rendering operations, including load/store operations and layouts
 struct AttachmentDescription {
-  DataFormat format{};                   ///< Pixel format of the attachment
-  ImageSampleCount samples{};            ///< Number of samples for MSAA
-  AttachmentLoadOp load_op{};            ///< How to handle existing attachment data at load
-  AttachmentStoreOp store_op{};          ///< How to handle attachment data after rendering
+  DataFormat format{};         ///< Pixel format of the attachment
+  ImageSampleCount samples{};  ///< Number of samples for MSAA
+  AttachmentLoadOp
+      load_op{};  ///< How to handle existing attachment data at load
+  AttachmentStoreOp
+      store_op{};  ///< How to handle attachment data after rendering
   AttachmentLoadOp stencil_load_op{};    ///< Stencil component load operation
   AttachmentStoreOp stencil_store_op{};  ///< Stencil component store operation
   ImageLayout initial_layout{};          ///< Layout when subpass begins
@@ -77,7 +80,8 @@ struct AttachmentDescription {
     final_layout = final;
     return *this;
   }
-  AttachmentDescription& setStencilLayouts(ImageLayout initial, ImageLayout final) {
+  AttachmentDescription& setStencilLayouts(ImageLayout initial,
+                                           ImageLayout final) {
     stencil_initial_layout = initial;
     stencil_final_layout = final;
     return *this;
@@ -87,8 +91,9 @@ struct AttachmentDescription {
 /// @brief Reference to an attachment within a subpass
 /// Links a subpass to a specific attachment with the required layout
 struct AttachmentReference {
-  uint32_t index = 0u;   ///< Index of the attachment in the attachment list
-  ImageLayout layout{};  ///< Layout the attachment should be in during this subpass
+  uint32_t index = 0u;  ///< Index of the attachment in the attachment list
+  ImageLayout
+      layout{};  ///< Layout the attachment should be in during this subpass
 
   // Fluent interface methods
   AttachmentReference& setIndex(uint32_t attachment_index) {
@@ -105,13 +110,19 @@ struct AttachmentReference {
 /// Defines memory and execution dependencies between rendering operations
 /// to ensure proper ordering and memory coherency
 struct SubpassEdge {
-  uint32_t src_index = VK_SUBPASS_EXTERNAL;  ///< Source subpass index (VK_SUBPASS_EXTERNAL for external)
-  uint32_t dst_index = 0u;                   ///< Destination subpass index
-  std::vector<PipelineStage> src_stages{};   ///< Pipeline stages that must complete in source
-  std::vector<PipelineStage> dst_stages{};   ///< Pipeline stages that wait in destination
-  std::vector<AccessFlag> src_access{};      ///< Memory access that must complete in source
-  std::vector<AccessFlag> dst_access{};      ///< Memory access that waits in destination
-  DependencyFlag dependency_flag{};          ///< Additional dependency flags
+  uint32_t src_index =
+      VK_SUBPASS_EXTERNAL;  ///< Source subpass index (VK_SUBPASS_EXTERNAL for
+                            ///< external)
+  uint32_t dst_index = 0u;  ///< Destination subpass index
+  std::vector<PipelineStage>
+      src_stages{};  ///< Pipeline stages that must complete in source
+  std::vector<PipelineStage>
+      dst_stages{};  ///< Pipeline stages that wait in destination
+  std::vector<AccessFlag>
+      src_access{};  ///< Memory access that must complete in source
+  std::vector<AccessFlag>
+      dst_access{};  ///< Memory access that waits in destination
+  DependencyFlag dependency_flag{};  ///< Additional dependency flags
 
   // Fluent interface methods
   SubpassEdge& setSrcIndex(uint32_t index) {
@@ -163,13 +174,16 @@ struct SubpassEdge {
 /// @brief Stencil test operation configuration
 /// Defines what operations to perform based on stencil test results
 struct StencilOpState {
-  StencilOp fail_op = StencilOp::Keep;        ///< Operation when stencil test fails
-  StencilOp pass_op = StencilOp::Keep;        ///< Operation when stencil test passes
-  StencilOp depth_fail_op = StencilOp::Keep;  ///< Operation when depth test fails but stencil passes
-  CompareOp compare_op = CompareOp::Always;   ///< Comparison function for stencil test
-  uint32_t compare_mask = 0u;                 ///< Mask applied to stencil value before comparison
-  uint32_t write_mask = 0u;                   ///< Mask applied when writing to stencil buffer
-  uint32_t reference = 0u;                    ///< Reference value for stencil comparison
+  StencilOp fail_op = StencilOp::Keep;  ///< Operation when stencil test fails
+  StencilOp pass_op = StencilOp::Keep;  ///< Operation when stencil test passes
+  StencilOp depth_fail_op =
+      StencilOp::Keep;  ///< Operation when depth test fails but stencil passes
+  CompareOp compare_op =
+      CompareOp::Always;  ///< Comparison function for stencil test
+  uint32_t compare_mask =
+      0u;  ///< Mask applied to stencil value before comparison
+  uint32_t write_mask = 0u;  ///< Mask applied when writing to stencil buffer
+  uint32_t reference = 0u;   ///< Reference value for stencil comparison
 
   // Fluent interface methods
   StencilOpState& setFailOp(StencilOp op) {
@@ -214,16 +228,20 @@ struct StencilOpState {
 };
 
 /// @brief Color blending configuration for a single attachment
-/// Defines how new fragment colors are combined with existing framebuffer colors
+/// Defines how new fragment colors are combined with existing framebuffer
+/// colors
 struct ColorBlendAttachment {
-  bool is_enabled = false;                       ///< Whether color blending is enabled
-  BlendFactor src_color = BlendFactor::One;      ///< Source color blend factor
-  BlendFactor dst_color = BlendFactor::Zero;     ///< Destination color blend factor
-  BlendOp color_op = BlendOp::Add;               ///< Color blending operation
-  BlendFactor src_alpha = BlendFactor::One;      ///< Source alpha blend factor
-  BlendFactor dst_alpha = BlendFactor::Zero;     ///< Destination alpha blend factor
-  BlendOp alpha_op = BlendOp::Add;               ///< Alpha blending operation
-  std::vector<ColorComponent> color_components;  ///< Which color components to write
+  bool is_enabled = false;  ///< Whether color blending is enabled
+  BlendFactor src_color = BlendFactor::One;  ///< Source color blend factor
+  BlendFactor dst_color =
+      BlendFactor::Zero;                     ///< Destination color blend factor
+  BlendOp color_op = BlendOp::Add;           ///< Color blending operation
+  BlendFactor src_alpha = BlendFactor::One;  ///< Source alpha blend factor
+  BlendFactor dst_alpha =
+      BlendFactor::Zero;            ///< Destination alpha blend factor
+  BlendOp alpha_op = BlendOp::Add;  ///< Alpha blending operation
+  std::vector<ColorComponent>
+      color_components;  ///< Which color components to write
 
   // Fluent interface methods
   ColorBlendAttachment& setEnabled(bool enabled) {
@@ -254,7 +272,8 @@ struct ColorBlendAttachment {
     alpha_op = op;
     return *this;
   }
-  ColorBlendAttachment& setColorComponents(const std::vector<ColorComponent>& components) {
+  ColorBlendAttachment& setColorComponents(
+      const std::vector<ColorComponent>& components) {
     color_components = components;
     return *this;
   }
@@ -262,13 +281,17 @@ struct ColorBlendAttachment {
     color_components.push_back(component);
     return *this;
   }
-  ColorBlendAttachment& setColorBlend(BlendFactor src, BlendFactor dst, BlendOp op) {
+  ColorBlendAttachment& setColorBlend(BlendFactor src,
+                                      BlendFactor dst,
+                                      BlendOp op) {
     src_color = src;
     dst_color = dst;
     color_op = op;
     return *this;
   }
-  ColorBlendAttachment& setAlphaBlend(BlendFactor src, BlendFactor dst, BlendOp op) {
+  ColorBlendAttachment& setAlphaBlend(BlendFactor src,
+                                      BlendFactor dst,
+                                      BlendOp op) {
     src_alpha = src;
     dst_alpha = dst;
     alpha_op = op;
@@ -296,7 +319,9 @@ struct ComputeWorkGroupSize {
     z = size_z;
     return *this;
   }
-  ComputeWorkGroupSize& setSize(uint32_t size_x, uint32_t size_y = 1, uint32_t size_z = 1) {
+  ComputeWorkGroupSize& setSize(uint32_t size_x,
+                                uint32_t size_y = 1,
+                                uint32_t size_z = 1) {
     x = size_x;
     y = size_y;
     z = size_z;
@@ -337,7 +362,8 @@ struct ClearColor {
 };
 
 /// @brief Clear values for depth and stencil attachments
-/// Specifies the depth and stencil values to use when clearing depth/stencil buffers
+/// Specifies the depth and stencil values to use when clearing depth/stencil
+/// buffers
 struct ClearDepthStencil {
   float_t depth = 0.0f;   ///< Depth clear value (typically 0.0 or 1.0)
   uint32_t stencil = 0u;  ///< Stencil clear value (typically 0)

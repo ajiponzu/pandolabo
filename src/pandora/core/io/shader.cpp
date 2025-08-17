@@ -9,15 +9,17 @@
 
 #include "pandora/core/io.hpp"
 
-static std::pair<std::string, ::EShLanguage> translate_shader_stage(const std::string& shader_code_path) {
-  static const std::unordered_map<std::string, std::pair<std::string, ::EShLanguage>> extension_map = {
-      {".vert", {"vert", EShLangVertex}},
-      {".frag", {"frag", EShLangFragment}},
-      {".comp", {"comp", EShLangCompute}},
-      {".rgen", {"rgen", EShLangRayGen}},
-      {".rmiss", {"rmiss", EShLangMiss}},
-      {".rchit", {"rchit", EShLangClosestHit}},
-      {".rahit", {"rahit", EShLangAnyHit}}};
+static std::pair<std::string, ::EShLanguage> translate_shader_stage(
+    const std::string& shader_code_path) {
+  static const std::unordered_map<std::string,
+                                  std::pair<std::string, ::EShLanguage>>
+      extension_map = {{".vert", {"vert", EShLangVertex}},
+                       {".frag", {"frag", EShLangFragment}},
+                       {".comp", {"comp", EShLangCompute}},
+                       {".rgen", {"rgen", EShLangRayGen}},
+                       {".rmiss", {"rmiss", EShLangMiss}},
+                       {".rchit", {"rchit", EShLangClosestHit}},
+                       {".rahit", {"rahit", EShLangAnyHit}}};
 
   for (const auto& [extension, result] : extension_map) {
     if (shader_code_path.ends_with(extension)) {
@@ -137,14 +139,17 @@ static TBuiltInResource init_t_built_in_resources() {
   return resources;
 }
 
-static std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage, const std::string& shader_code) {
+static std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage,
+                                            const std::string& shader_code) {
   glslang::InitializeProcess();
 
   std::vector shader_c_strings = {shader_code.data()};
 
   glslang::TShader shader(shader_stage);
-  shader.setEnvTarget(glslang::EShTargetLanguage::EShTargetSpv, glslang::EShTargetLanguageVersion::EShTargetSpv_1_5);
-  shader.setStrings(shader_c_strings.data(), static_cast<int32_t>(shader_c_strings.size()));
+  shader.setEnvTarget(glslang::EShTargetLanguage::EShTargetSpv,
+                      glslang::EShTargetLanguageVersion::EShTargetSpv_1_5);
+  shader.setStrings(shader_c_strings.data(),
+                    static_cast<int32_t>(shader_c_strings.size()));
 
   EShMessages messages = (EShMessages)(EShMsgSpvRules | EShMsgVulkanRules);
   const auto t_built_in_resources = init_t_built_in_resources();
@@ -166,7 +171,8 @@ static std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage, c
   return shader_binary;
 }
 
-std::vector<uint32_t> pandora::core::io::shader::readText(const std::string& file_path) {
+std::vector<uint32_t> pandora::core::io::shader::readText(
+    const std::string& file_path) {
   const auto& [shader_type, stage] = translate_shader_stage(file_path);
 
   std::stringstream shader_code{};
@@ -177,7 +183,8 @@ std::vector<uint32_t> pandora::core::io::shader::readText(const std::string& fil
   return compile_shader(stage, shader_code.str());
 }
 
-std::vector<uint32_t> pandora::core::io::shader::readBinary(const std::string& file_path) {
+std::vector<uint32_t> pandora::core::io::shader::readBinary(
+    const std::string& file_path) {
   std::ifstream file(file_path, std::ios::ate | std::ios::binary);
   if (!file.is_open()) {
     std::println("Failed to open file: {}", file_path);
@@ -194,7 +201,8 @@ std::vector<uint32_t> pandora::core::io::shader::readBinary(const std::string& f
   return shader_binary;
 }
 
-std::vector<uint32_t> pandora::core::io::shader::read(const std::string& file_path) {
+std::vector<uint32_t> pandora::core::io::shader::read(
+    const std::string& file_path) {
   if (file_path.ends_with(".spv")) {
     return readBinary(file_path);
   } else {
@@ -202,8 +210,11 @@ std::vector<uint32_t> pandora::core::io::shader::read(const std::string& file_pa
   }
 }
 
-void pandora::core::io::shader::write(const std::string& file_path, const std::vector<uint32_t>& shader_binary) {
+void pandora::core::io::shader::write(
+    const std::string& file_path,
+    const std::vector<uint32_t>& shader_binary) {
   std::ofstream output_file(file_path, std::ios::binary);
 
-  output_file.write(reinterpret_cast<const char*>(shader_binary.data()), shader_binary.size() * sizeof(uint32_t));
+  output_file.write(reinterpret_cast<const char*>(shader_binary.data()),
+                    shader_binary.size() * sizeof(uint32_t));
 }

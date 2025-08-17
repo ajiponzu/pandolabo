@@ -2,7 +2,8 @@
  * context.hpp - GPU context wrapper for Pandolabo Vulkan C++ wrapper
  *
  * This header contains the Context class which is the main GPU handler.
- * The Context class manages Vulkan instance, device, window surface, and swapchain.
+ * The Context class manages Vulkan instance, device, window surface, and
+ * swapchain.
  */
 
 #pragma once
@@ -22,8 +23,8 @@
 namespace pandora::core::gpu {
 
 /// @brief Main GPU handler class
-/// @details This class contains Vulkan instance, GPU device, window surface, and swapchain.
-/// This is the core of the Pandolabo project.
+/// @details This class contains Vulkan instance, GPU device, window surface,
+/// and swapchain. This is the core of the Pandolabo project.
 class Context {
  private:
 #ifdef GPU_DEBUG

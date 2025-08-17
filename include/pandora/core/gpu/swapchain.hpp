@@ -1,8 +1,9 @@
 /*
  * swapchain.hpp - GPU swapchain wrapper for Pandolabo Vulkan C++ wrapper
  *
- * This header contains the Swapchain class which manages Vulkan swapchain operations.
- * The Swapchain class handles image presentation and frame synchronization.
+ * This header contains the Swapchain class which manages Vulkan swapchain
+ * operations. The Swapchain class handles image presentation and frame
+ * synchronization.
  */
 
 #pragma once
@@ -19,7 +20,8 @@ namespace pandora::core::gpu {
 
 /// @brief GPU swapchain wrapper class
 /// @details Swapchain is used to present images to the window surface.
-/// This wrapper class also contains semaphores and fences for GPU-rendering synchronization.
+/// This wrapper class also contains semaphores and fences for GPU-rendering
+/// synchronization.
 class Swapchain {
  private:
   vk::UniqueSwapchainKHR m_ptrSwapchain;
@@ -38,7 +40,8 @@ class Swapchain {
   /// @brief Construct swapchain with device and window surface
   /// @param ptr_device GPU device wrapper pointer
   /// @param ptr_surface GPU-window surface wrapper pointer
-  Swapchain(const std::unique_ptr<Device>& ptr_device, const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
+  Swapchain(const std::unique_ptr<Device>& ptr_device,
+            const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
 
   // Rule of Five
   ~Swapchain();
@@ -51,8 +54,9 @@ class Swapchain {
   /// @details Used when window is resized, moved, etc.
   /// @param ptr_device GPU device wrapper pointer
   /// @param ptr_surface GPU-window surface wrapper pointer
-  void resetSwapchain(const std::unique_ptr<Device>& ptr_device,
-                      const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
+  void resetSwapchain(
+      const std::unique_ptr<Device>& ptr_device,
+      const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
 
   /// @brief Get swapchain handle
   /// @return Vulkan swapchain handle
@@ -126,15 +130,17 @@ class Swapchain {
   void updateImageIndex(const std::unique_ptr<Device>& ptr_device);
 
   /// @brief Update frame sync image index
-  /// @details You must call this function after presenting rendered image in each frame.
+  /// @details You must call this function after presenting rendered image in
+  /// each frame.
   void updateFrameSyncIndex();
 
  private:
   /// @brief Internal swapchain construction
   /// @param ptr_device GPU device wrapper pointer
   /// @param ptr_surface GPU-window surface wrapper pointer
-  void constructSwapchain(const std::unique_ptr<Device>& ptr_device,
-                          const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
+  void constructSwapchain(
+      const std::unique_ptr<Device>& ptr_device,
+      const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
 
   /// @brief Clear swapchain resources
   void clear();

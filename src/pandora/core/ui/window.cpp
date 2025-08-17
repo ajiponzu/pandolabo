@@ -2,8 +2,10 @@
 
 #include "pandora/core/ui.hpp"
 
-std::unordered_map<uint64_t, std::unordered_set<int32_t>> pandora::core::ui::Window::s_inputKeySetMap;
-std::unordered_map<uint64_t, pandora::core::Mouse> pandora::core::ui::Window::s_mouseMap;
+std::unordered_map<uint64_t, std::unordered_set<int32_t>>
+    pandora::core::ui::Window::s_inputKeySetMap;
+std::unordered_map<uint64_t, pandora::core::Mouse>
+    pandora::core::ui::Window::s_mouseMap;
 std::unordered_map<uint64_t, bool> pandora::core::ui::Window::s_resizedBoolMap;
 
 #ifdef _DEBUG
@@ -12,7 +14,11 @@ static void error_callback(int error, const char* description) {
 }
 #endif
 
-static void callback_input_key(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/) {
+static void callback_input_key(GLFWwindow* window,
+                               int key,
+                               int /*scancode*/,
+                               int action,
+                               int /*mods*/) {
   using namespace pandora::core::ui;
 
   if (action == GLFW_PRESS) {
@@ -34,20 +40,25 @@ static void callback_scroll(GLFWwindow* window, double x, double y) {
   Window::setMouseScroll(window, x, y);
 }
 
-static void callback_resized(GLFWwindow* window, int /*width*/, int /*height*/) {
+static void callback_resized(GLFWwindow* window,
+                             int /*width*/,
+                             int /*height*/) {
   using namespace pandora::core::ui;
 
   Window::setResizedBool(window, true);
 }
 
-pandora::core::ui::Window::Window(const std::string& title, const int32_t width, const int32_t height) {
+pandora::core::ui::Window::Window(const std::string& title,
+                                  const int32_t width,
+                                  const int32_t height) {
   if (!glfwInit()) {
     throw std::runtime_error("Failed to initialize GLFW.");
   }
 
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-  m_ptrWindow = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+  m_ptrWindow =
+      glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
   if (m_ptrWindow == nullptr) {
     glfwTerminate();
     throw std::runtime_error("Failed to create GLFW window.");

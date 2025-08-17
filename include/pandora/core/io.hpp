@@ -40,6 +40,7 @@ std::vector<uint32_t> read(const std::string& file_path);
 /// Saves SPIR-V binary data to a file for later use or distribution.
 /// @param file_path Output file path for the binary
 /// @param shader_binary SPIR-V binary data to write
-void write(const std::string& file_path, const std::vector<uint32_t>& shader_binary);
+void write(const std::string& file_path,
+           const std::vector<uint32_t>& shader_binary);
 
 }  // namespace pandora::core::io::shader

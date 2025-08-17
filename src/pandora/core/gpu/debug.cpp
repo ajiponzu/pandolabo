@@ -7,24 +7,27 @@
   #include <print>
   #include <vector>
 
-std::vector<const char*> pandora::core::gpu::debug::Messenger::s_validationLayers = {
-    "VK_LAYER_KHRONOS_validation",
+std::vector<const char*>
+    pandora::core::gpu::debug::Messenger::s_validationLayers = {
+        "VK_LAYER_KHRONOS_validation",
 };
 
   #pragma warning(push)
   #pragma warning(disable : 4100)
-static VKAPI_ATTR VkBool32 VKAPI_CALL
-debug_utils_messenger_callback(VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-                               VkDebugUtilsMessageTypeFlagsEXT message_types,
-                               VkDebugUtilsMessengerCallbackDataEXT const* p_callback_data,
-                               void* p_user_data) {
-  std::println(stderr, "[****] validation layer: {}", p_callback_data->pMessage);
+static VKAPI_ATTR VkBool32 VKAPI_CALL debug_utils_messenger_callback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
+    VkDebugUtilsMessageTypeFlagsEXT message_types,
+    VkDebugUtilsMessengerCallbackDataEXT const* p_callback_data,
+    void* p_user_data) {
+  std::println(
+      stderr, "[****] validation layer: {}", p_callback_data->pMessage);
 
   return VK_FALSE;
 }
   #pragma warning(pop)
 
-static bool check_validation_layer_support(const std::vector<const char*>& validation_layers) {
+static bool check_validation_layer_support(
+    const std::vector<const char*>& validation_layers) {
   const auto available_layers = vk::enumerateInstanceLayerProperties();
 
   for (const auto& layer_name : validation_layers) {
@@ -55,24 +58,31 @@ vk::UniqueInstance pandora::core::gpu::debug::Messenger::createDebugInstance(
     return vk::UniqueInstance(nullptr);
   }
 
-  const vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
-                                                             | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
-                                                             | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+  const vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(
+      vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
+      | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
+      | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
 
-  const vk::DebugUtilsMessageTypeFlagsEXT type_flags(vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
-                                                     | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
-                                                     | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
+  const vk::DebugUtilsMessageTypeFlagsEXT type_flags(
+      vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
+      | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
+      | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
 
   vk::ValidationFeaturesEXT validation_features;
-  std::vector<vk::ValidationFeatureEnableEXT> enabled_features = {vk::ValidationFeatureEnableEXT::eDebugPrintf};
+  std::vector<vk::ValidationFeatureEnableEXT> enabled_features = {
+      vk::ValidationFeatureEnableEXT::eDebugPrintf};
   validation_features.setEnabledValidationFeatures(enabled_features);
 
-  const vk::StructureChain<vk::InstanceCreateInfo, vk::ValidationFeaturesEXT, vk::DebugUtilsMessengerCreateInfoEXT>
-      create_info_chain({{}, &app_info, s_validationLayers, extensions},
-                        validation_features,
-                        {{}, severity_flags, type_flags, &debug_utils_messenger_callback});
+  const vk::StructureChain<vk::InstanceCreateInfo,
+                           vk::ValidationFeaturesEXT,
+                           vk::DebugUtilsMessengerCreateInfoEXT>
+      create_info_chain(
+          {{}, &app_info, s_validationLayers, extensions},
+          validation_features,
+          {{}, severity_flags, type_flags, &debug_utils_messenger_callback});
 
-  auto ptr_vk_instance = vk::createInstanceUnique(create_info_chain.get<vk::InstanceCreateInfo>());
+  auto ptr_vk_instance =
+      vk::createInstanceUnique(create_info_chain.get<vk::InstanceCreateInfo>());
   VULKAN_HPP_DEFAULT_DISPATCHER.init(*ptr_vk_instance);
   m_ptrMessenger = ptr_vk_instance->createDebugUtilsMessengerEXTUnique(
       create_info_chain.get<vk::DebugUtilsMessengerCreateInfoEXT>());

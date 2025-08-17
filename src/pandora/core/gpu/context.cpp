@@ -2,26 +2,33 @@
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
-pandora::core::gpu::Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
+pandora::core::gpu::Context::Context(
+    std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
   // Initialize Vulkan.hpp
   {
     static vk::detail::DynamicLoader dl{};
-    auto vk_get_instance_proc_addr = dl.getProcAddress<::PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
+    auto vk_get_instance_proc_addr =
+        dl.getProcAddress<::PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
     VULKAN_HPP_DEFAULT_DISPATCHER.init(vk_get_instance_proc_addr);
   }
 
   // Create Vulkan instance
   {
-    vk::ApplicationInfo app_info{
-        "pandolabo", PANDOLABO_VK_VERSION, "pandolabo", PANDOLABO_VK_VERSION, PANDOLABO_VK_VERSION};
+    vk::ApplicationInfo app_info{"pandolabo",
+                                 PANDOLABO_VK_VERSION,
+                                 "pandolabo",
+                                 PANDOLABO_VK_VERSION,
+                                 PANDOLABO_VK_VERSION};
 
     std::vector<const char*> extensions;
 
     if (ptr_window_surface) {
       // Window mode: add GLFW extensions
       uint32_t extension_count = 0u;
-      const auto glfw_extensions = glfwGetRequiredInstanceExtensions(&extension_count);
-      extensions = std::vector<const char*>(glfw_extensions, glfw_extensions + extension_count);
+      const auto glfw_extensions =
+          glfwGetRequiredInstanceExtensions(&extension_count);
+      extensions = std::vector<const char*>(glfw_extensions,
+                                            glfw_extensions + extension_count);
       extensions.emplace_back(VK_KHR_SURFACE_EXTENSION_NAME);
     }
     // Headless mode: no GLFW or surface extensions needed
@@ -50,19 +57,24 @@ pandora::core::gpu::Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_
 
 // Create Vulkan device
 #ifdef GPU_DEBUG
-    m_ptrDevice = std::make_unique<Device>(m_ptrInstance, m_ptrWindowSurface->getSurface(), m_ptrMessenger);
+    m_ptrDevice = std::make_unique<Device>(
+        m_ptrInstance, m_ptrWindowSurface->getSurface(), m_ptrMessenger);
 #else
-    m_ptrDevice = std::make_unique<Device>(m_ptrInstance, m_ptrWindowSurface->getSurface());
+    m_ptrDevice = std::make_unique<Device>(m_ptrInstance,
+                                           m_ptrWindowSurface->getSurface());
 #endif
 
     // Create Vulkan swapchain
-    m_ptrSwapchain = std::make_unique<Swapchain>(m_ptrDevice, m_ptrWindowSurface);
+    m_ptrSwapchain =
+        std::make_unique<Swapchain>(m_ptrDevice, m_ptrWindowSurface);
   } else {
 // Create Vulkan device
 #ifdef GPU_DEBUG
-    m_ptrDevice = std::make_unique<Device>(m_ptrInstance, vk::UniqueSurfaceKHR(nullptr), m_ptrMessenger);
+    m_ptrDevice = std::make_unique<Device>(
+        m_ptrInstance, vk::UniqueSurfaceKHR(nullptr), m_ptrMessenger);
 #else
-    m_ptrDevice = std::make_unique<Device>(m_ptrInstance, vk::UniqueSurfaceKHR(nullptr));
+    m_ptrDevice =
+        std::make_unique<Device>(m_ptrInstance, vk::UniqueSurfaceKHR(nullptr));
 #endif
   }
 
@@ -85,7 +97,8 @@ void pandora::core::gpu::Context::resetSwapchain() {
 
 void pandora::core::gpu::Context::acquireNextImage() {
   if (!m_ptrSwapchain) {
-    throw std::runtime_error("Swapchain is not initialized. Cannot acquire next image.");
+    throw std::runtime_error(
+        "Swapchain is not initialized. Cannot acquire next image.");
   }
 
   m_ptrSwapchain->updateImageIndex(m_ptrDevice);

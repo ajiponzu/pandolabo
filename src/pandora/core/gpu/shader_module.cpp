@@ -4,7 +4,8 @@
 
 class ShaderCompiler : public spirv_cross::Compiler {
  public:
-  ShaderCompiler(const std::vector<uint32_t>& spirv_binary) : spirv_cross::Compiler(spirv_binary) {}
+  ShaderCompiler(const std::vector<uint32_t>& spirv_binary)
+      : spirv_cross::Compiler(spirv_binary) {}
 
   ~ShaderCompiler() {}
 
@@ -14,9 +15,11 @@ class ShaderCompiler : public spirv_cross::Compiler {
     return this->get_entry_point().name;
   }
 
-  std::unordered_map<std::string, pandora::core::DescriptorInfo> getDescriptorInfos() const;
+  std::unordered_map<std::string, pandora::core::DescriptorInfo>
+  getDescriptorInfos() const;
 
-  std::unordered_map<std::string, pandora::core::PushConstantRange> getPushConstantRanges() const;
+  std::unordered_map<std::string, pandora::core::PushConstantRange>
+  getPushConstantRanges() const;
 };
 
 vk::ShaderStageFlagBits ShaderCompiler::getShaderStageFlagBits() const {
@@ -59,7 +62,8 @@ vk::ShaderStageFlags ShaderCompiler::getShaderStageFlags() const {
   return flags;
 }
 
-static uint32_t get_type_size(const spirv_cross::Compiler& compiler, const spirv_cross::SPIRType& type) {
+static uint32_t get_type_size(const spirv_cross::Compiler& compiler,
+                              const spirv_cross::SPIRType& type) {
   if (type.basetype == spirv_cross::SPIRType::Struct) {
     return static_cast<uint32_t>(compiler.get_declared_struct_size(type));
   }
@@ -67,24 +71,31 @@ static uint32_t get_type_size(const spirv_cross::Compiler& compiler, const spirv
   return 0u;
 }
 
-static void set_descriptor_infos(std::unordered_map<std::string, pandora::core::DescriptorInfo>& descriptor_info_map,
-                                 const spirv_cross::Compiler& compiler,
-                                 const spirv_cross::SmallVector<spirv_cross::Resource>& resources,
-                                 const vk::DescriptorType descriptor_type,
-                                 const vk::ShaderStageFlags shader_stage_flags) {
+static void set_descriptor_infos(
+    std::unordered_map<std::string, pandora::core::DescriptorInfo>&
+        descriptor_info_map,
+    const spirv_cross::Compiler& compiler,
+    const spirv_cross::SmallVector<spirv_cross::Resource>& resources,
+    const vk::DescriptorType descriptor_type,
+    const vk::ShaderStageFlags shader_stage_flags) {
   for (const auto& resource : resources) {
-    const auto descriptor_info = pandora::core::DescriptorInfo{}
-                                     .setType(descriptor_type)
-                                     .setSize(get_type_size(compiler, compiler.get_type(resource.base_type_id)))
-                                     .setBinding(compiler.get_decoration(resource.id, spv::DecorationBinding))
-                                     .setStageFlags(shader_stage_flags);
+    const auto descriptor_info =
+        pandora::core::DescriptorInfo{}
+            .setType(descriptor_type)
+            .setSize(get_type_size(compiler,
+                                   compiler.get_type(resource.base_type_id)))
+            .setBinding(
+                compiler.get_decoration(resource.id, spv::DecorationBinding))
+            .setStageFlags(shader_stage_flags);
 
     descriptor_info_map.insert({resource.name, descriptor_info});
   }
 }
 
-std::unordered_map<std::string, pandora::core::DescriptorInfo> ShaderCompiler::getDescriptorInfos() const {
-  std::unordered_map<std::string, pandora::core::DescriptorInfo> descriptor_info_map;
+std::unordered_map<std::string, pandora::core::DescriptorInfo>
+ShaderCompiler::getDescriptorInfos() const {
+  std::unordered_map<std::string, pandora::core::DescriptorInfo>
+      descriptor_info_map;
 
   const auto resources = this->get_shader_resources();
   const auto shader_stage_flags = getShaderStageFlags();
@@ -92,20 +103,45 @@ std::unordered_map<std::string, pandora::core::DescriptorInfo> ShaderCompiler::g
   {
     using enum vk::DescriptorType;
 
-    set_descriptor_infos(descriptor_info_map, *this, resources.uniform_buffers, eUniformBuffer, shader_stage_flags);
-    set_descriptor_infos(descriptor_info_map, *this, resources.separate_images, eSampledImage, shader_stage_flags);
-    set_descriptor_infos(descriptor_info_map, *this, resources.separate_samplers, eSampler, shader_stage_flags);
-    set_descriptor_infos(
-        descriptor_info_map, *this, resources.sampled_images, eCombinedImageSampler, shader_stage_flags);
-    set_descriptor_infos(descriptor_info_map, *this, resources.storage_images, eStorageImage, shader_stage_flags);
-    set_descriptor_infos(descriptor_info_map, *this, resources.storage_buffers, eStorageBuffer, shader_stage_flags);
+    set_descriptor_infos(descriptor_info_map,
+                         *this,
+                         resources.uniform_buffers,
+                         eUniformBuffer,
+                         shader_stage_flags);
+    set_descriptor_infos(descriptor_info_map,
+                         *this,
+                         resources.separate_images,
+                         eSampledImage,
+                         shader_stage_flags);
+    set_descriptor_infos(descriptor_info_map,
+                         *this,
+                         resources.separate_samplers,
+                         eSampler,
+                         shader_stage_flags);
+    set_descriptor_infos(descriptor_info_map,
+                         *this,
+                         resources.sampled_images,
+                         eCombinedImageSampler,
+                         shader_stage_flags);
+    set_descriptor_infos(descriptor_info_map,
+                         *this,
+                         resources.storage_images,
+                         eStorageImage,
+                         shader_stage_flags);
+    set_descriptor_infos(descriptor_info_map,
+                         *this,
+                         resources.storage_buffers,
+                         eStorageBuffer,
+                         shader_stage_flags);
   }
 
   return descriptor_info_map;
 }
 
-std::unordered_map<std::string, pandora::core::PushConstantRange> ShaderCompiler::getPushConstantRanges() const {
-  std::unordered_map<std::string, pandora::core::PushConstantRange> push_constant_range_map;
+std::unordered_map<std::string, pandora::core::PushConstantRange>
+ShaderCompiler::getPushConstantRanges() const {
+  std::unordered_map<std::string, pandora::core::PushConstantRange>
+      push_constant_range_map;
 
   const auto& resources = this->get_shader_resources();
   const auto& shader_stage_flags = getShaderStageFlags();
@@ -116,7 +152,8 @@ std::unordered_map<std::string, pandora::core::PushConstantRange> ShaderCompiler
         pandora::core::PushConstantRange{}
             .setStageFlags(shader_stage_flags)
             .setOffset(previous_size)
-            .setSize(this->get_declared_struct_size(this->get_type(resource.base_type_id)));
+            .setSize(this->get_declared_struct_size(
+                this->get_type(resource.base_type_id)));
 
     push_constant_range_map.insert({resource.name, push_constant_range});
     previous_size += static_cast<uint32_t>(push_constant_range.size);
@@ -125,8 +162,9 @@ std::unordered_map<std::string, pandora::core::PushConstantRange> ShaderCompiler
   return push_constant_range_map;
 }
 
-pandora::core::gpu::ShaderModule::ShaderModule(const std::unique_ptr<Context>& ptr_context,
-                                               const std::vector<uint32_t>& spirv_binary) {
+pandora::core::gpu::ShaderModule::ShaderModule(
+    const std::unique_ptr<Context>& ptr_context,
+    const std::vector<uint32_t>& spirv_binary) {
   {
     ShaderCompiler compiler(spirv_binary);
 
@@ -141,8 +179,9 @@ pandora::core::gpu::ShaderModule::ShaderModule(const std::unique_ptr<Context>& p
     shader_module_info.codeSize = spirv_binary.size() * sizeof(uint32_t);
     shader_module_info.pCode = spirv_binary.data();
 
-    m_ptrShaderModule =
-        ptr_context->getPtrDevice()->getPtrLogicalDevice()->createShaderModuleUnique(shader_module_info);
+    m_ptrShaderModule = ptr_context->getPtrDevice()
+                            ->getPtrLogicalDevice()
+                            ->createShaderModuleUnique(shader_module_info);
   }
 }
 

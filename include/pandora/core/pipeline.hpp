@@ -40,9 +40,12 @@ namespace pipeline {
 /// how vertex data is fed into the vertex shader stage
 class VertexInput {
  public:
-  vk::PipelineVertexInputStateCreateInfo m_info{};                ///< Vulkan vertex input state
-  std::vector<vk::VertexInputBindingDescription> m_bindings;      ///< Vertex buffer binding descriptions
-  std::vector<vk::VertexInputAttributeDescription> m_attributes;  ///< Vertex attribute descriptions
+  vk::PipelineVertexInputStateCreateInfo
+      m_info{};  ///< Vulkan vertex input state
+  std::vector<vk::VertexInputBindingDescription>
+      m_bindings;  ///< Vertex buffer binding descriptions
+  std::vector<vk::VertexInputAttributeDescription>
+      m_attributes;  ///< Vertex attribute descriptions
 
   // Rule of Zero
   VertexInput() = default;
@@ -52,17 +55,24 @@ class VertexInput {
   /// @param binding Binding index for this vertex buffer
   /// @param stride Size in bytes between consecutive vertex elements
   /// @param input_rate Whether data is per-vertex or per-instance
-  void appendBinding(const uint32_t binding, const uint32_t stride, const VertexInputRate input_rate);
+  void appendBinding(const uint32_t binding,
+                     const uint32_t stride,
+                     const VertexInputRate input_rate);
 
   /// @brief Add a vertex attribute description
   /// @param location Shader input location for this attribute
   /// @param binding Vertex buffer binding this attribute comes from
   /// @param format Data format of the attribute
   /// @param offset Byte offset of this attribute within the vertex
-  void appendAttribute(const uint32_t location, const uint32_t binding, const DataFormat format, const uint32_t offset);
+  void appendAttribute(const uint32_t location,
+                       const uint32_t binding,
+                       const DataFormat format,
+                       const uint32_t offset);
 
   // Fluent interface methods
-  VertexInput& addBinding(const uint32_t binding, const uint32_t stride, const VertexInputRate input_rate) {
+  VertexInput& addBinding(const uint32_t binding,
+                          const uint32_t stride,
+                          const VertexInputRate input_rate) {
     appendBinding(binding, stride, input_rate);
     return *this;
   }
@@ -77,22 +87,25 @@ class VertexInput {
 };
 
 /// @brief Input assembly configuration for graphics pipelines
-/// Controls how vertices are assembled into primitives (points, lines, triangles)
-/// and whether primitive restart is enabled for indexed drawing
+/// Controls how vertices are assembled into primitives (points, lines,
+/// triangles) and whether primitive restart is enabled for indexed drawing
 class InputAssembly {
  public:
-  vk::PipelineInputAssemblyStateCreateInfo m_info{};  ///< Vulkan input assembly state
+  vk::PipelineInputAssemblyStateCreateInfo
+      m_info{};  ///< Vulkan input assembly state
 
   // Rule of Zero
   InputAssembly() = default;
   ~InputAssembly() = default;
 
   /// @brief Set primitive topology type
-  /// @param topology How vertices are assembled (triangles, lines, points, etc.)
+  /// @param topology How vertices are assembled (triangles, lines, points,
+  /// etc.)
   void setTopology(const PrimitiveTopology topology);
 
   /// @brief Enable or disable primitive restart
-  /// @param is_enabled Whether to enable primitive restart with special index values
+  /// @param is_enabled Whether to enable primitive restart with special index
+  /// values
   void setRestart(const bool is_enabled);
 
   // Fluent interface methods
@@ -112,7 +125,8 @@ class InputAssembly {
 /// for subdividing patches into more detailed geometry
 class Tessellation {
  public:
-  vk::PipelineTessellationStateCreateInfo m_info{};  ///< Vulkan tessellation state
+  vk::PipelineTessellationStateCreateInfo
+      m_info{};  ///< Vulkan tessellation state
 
   // Rule of Zero
   Tessellation() = default;
@@ -130,13 +144,13 @@ class Tessellation {
 };
 
 /// @brief Viewport and scissor state configuration for graphics pipelines
-/// Defines the viewport transformation from normalized device coordinates to framebuffer
-/// coordinates and optional scissor rectangle for pixel clipping
+/// Defines the viewport transformation from normalized device coordinates to
+/// framebuffer coordinates and optional scissor rectangle for pixel clipping
 class ViewportState {
  public:
   vk::PipelineViewportStateCreateInfo m_info{};  ///< Vulkan viewport state
-  vk::Viewport m_viewport;                       ///< Viewport transformation parameters
-  vk::Rect2D m_scissor;                          ///< Scissor test rectangle
+  vk::Viewport m_viewport;  ///< Viewport transformation parameters
+  vk::Rect2D m_scissor;     ///< Scissor test rectangle
 
   // Rule of Zero
   ViewportState() = default;
@@ -146,7 +160,9 @@ class ViewportState {
   /// @param size Width and height of the viewport
   /// @param min_depth Minimum depth value (typically 0.0)
   /// @param max_depth Maximum depth value (typically 1.0)
-  void setViewport(const gpu_ui::GraphicalSize<float_t>& size, const float_t min_depth, const float_t max_depth);
+  void setViewport(const gpu_ui::GraphicalSize<float_t>& size,
+                   const float_t min_depth,
+                   const float_t max_depth);
 
   /// @brief Set scissor test rectangle
   /// @param size Width and height of the scissor rectangle
@@ -171,7 +187,8 @@ class ViewportState {
 /// culling, depth bias, and line width settings
 class Rasterization {
  public:
-  vk::PipelineRasterizationStateCreateInfo m_info{};  ///< Vulkan rasterization state
+  vk::PipelineRasterizationStateCreateInfo
+      m_info{};  ///< Vulkan rasterization state
 
   // Rule of Zero
   Rasterization() = default;
@@ -185,7 +202,9 @@ class Rasterization {
   /// @param constant_factor Constant depth bias factor
   /// @param clamp Maximum depth bias clamp value
   /// @param slope_factor Slope-dependent depth bias factor
-  void setDepthBias(const float_t constant_factor, const float_t clamp, const float_t slope_factor);
+  void setDepthBias(const float_t constant_factor,
+                    const float_t clamp,
+                    const float_t slope_factor);
 
   /// @brief Enable or disable rasterizer discard
   /// @param is_enabled Whether to discard primitives before rasterization
@@ -213,7 +232,9 @@ class Rasterization {
     return *this;
   }
 
-  Rasterization& withDepthBias(const float_t constant_factor, const float_t clamp, const float_t slope_factor) {
+  Rasterization& withDepthBias(const float_t constant_factor,
+                               const float_t clamp,
+                               const float_t slope_factor) {
     setDepthBias(constant_factor, clamp, slope_factor);
     return *this;
   }
@@ -260,7 +281,8 @@ class Multisample {
   void setMinSampleShading(const float_t min_sample_shading);
 
   // Fluent interface methods
-  Multisample& withSampleCount(const std::unique_ptr<gpu::Context>& ptr_context) {
+  Multisample& withSampleCount(
+      const std::unique_ptr<gpu::Context>& ptr_context) {
     setSampleCount(ptr_context);
     return *this;
   }
@@ -277,8 +299,8 @@ class Multisample {
 };
 
 /// @brief Depth and stencil testing configuration for graphics pipelines
-/// Controls depth testing, depth writing, stencil testing, and depth bounds testing
-/// for per-fragment depth and stencil operations
+/// Controls depth testing, depth writing, stencil testing, and depth bounds
+/// testing for per-fragment depth and stencil operations
 class DepthStencil {
  public:
   vk::PipelineDepthStencilStateCreateInfo m_info{};
@@ -381,8 +403,8 @@ class DynamicState {
 };
 
 /// @brief Graphics pipeline configuration structure
-/// Aggregates all graphics pipeline state configurations into a single structure
-/// for convenient pipeline creation and management
+/// Aggregates all graphics pipeline state configurations into a single
+/// structure for convenient pipeline creation and management
 struct GraphicInfo {
   VertexInput vertex_input{};
   InputAssembly input_assembly{};
@@ -496,13 +518,15 @@ class GraphicInfoBuilder {
 /// @brief Vulkan pipeline and pipeline layout wrapper
 /// Encapsulates Vulkan pipeline creation and management.
 /// In the Pandolabo project, pipeline and pipeline layout are managed together
-/// as they are tightly coupled and separation is not necessary for most use cases.
+/// as they are tightly coupled and separation is not necessary for most use
+/// cases.
 class Pipeline {
  protected:
   vk::UniquePipeline m_ptrPipeline;              ///< Vulkan pipeline object
   vk::UniquePipelineLayout m_ptrPipelineLayout;  ///< Vulkan pipeline layout
-  QueueFamilyType m_queueFamilyType{};           ///< Queue family type for this pipeline
-  vk::PipelineBindPoint m_bindPoint{};           ///< Pipeline bind point (graphics or compute)
+  QueueFamilyType m_queueFamilyType{};  ///< Queue family type for this pipeline
+  vk::PipelineBindPoint
+      m_bindPoint{};  ///< Pipeline bind point (graphics or compute)
 
  public:
   Pipeline(const std::unique_ptr<gpu::Context>& ptr_context,
@@ -533,8 +557,9 @@ class Pipeline {
   /// @brief Construct pipeline for compute shader
   /// @param ptr_context Vulkan context for device operations
   /// @param shader_module Compute shader module
-  void constructComputePipeline(const std::unique_ptr<gpu::Context>& ptr_context,
-                                const gpu::ShaderModule& shader_module);
+  void constructComputePipeline(
+      const std::unique_ptr<gpu::Context>& ptr_context,
+      const gpu::ShaderModule& shader_module);
 
   /// @brief Construct pipeline for graphics rendering
   /// @param ptr_context Vulkan context for device operations
@@ -543,12 +568,14 @@ class Pipeline {
   /// @param ptr_graphic_info Graphics pipeline configuration
   /// @param render_pass Render pass for this pipeline
   /// @param subpass_index Subpass index using this pipeline
-  void constructGraphicsPipeline(const std::unique_ptr<gpu::Context>& ptr_context,
-                                 const std::unordered_map<std::string, gpu::ShaderModule>& shader_module_map,
-                                 const std::vector<std::string>& module_keys,
-                                 const std::unique_ptr<pipeline::GraphicInfo>& ptr_graphic_info,
-                                 const Renderpass& render_pass,
-                                 const uint32_t subpass_index);
+  void constructGraphicsPipeline(
+      const std::unique_ptr<gpu::Context>& ptr_context,
+      const std::unordered_map<std::string, gpu::ShaderModule>&
+          shader_module_map,
+      const std::vector<std::string>& module_keys,
+      const std::unique_ptr<pipeline::GraphicInfo>& ptr_graphic_info,
+      const Renderpass& render_pass,
+      const uint32_t subpass_index);
 };
 
 }  // namespace pandora::core

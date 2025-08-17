@@ -23,7 +23,8 @@ class Context;
 namespace pandora::core::gpu {
 
 /// @brief GPU image resource wrapper class
-/// @details This class manages Vulkan image resources including textures, render targets, etc.
+/// @details This class manages Vulkan image resources including textures,
+/// render targets, etc.
 class Image {
  protected:
   vk::UniqueDeviceMemory m_ptrMemory;
@@ -121,8 +122,8 @@ class Image {
 };
 
 /// @brief Vulkan image view wrapper class
-/// @details Image view is separated from image resource because image resource is only memory data
-/// and the way to handle image is decided by image view.
+/// @details Image view is separated from image resource because image resource
+/// is only memory data and the way to handle image is decided by image view.
 class ImageView {
  private:
   vk::UniqueImageView m_ptrImageView;
@@ -133,7 +134,9 @@ class ImageView {
   /// @param ptr_context GPU context pointer
   /// @param image Source image
   /// @param image_view_info Image view configuration
-  ImageView(const std::unique_ptr<Context>& ptr_context, const Image& image, const ImageViewInfo& image_view_info);
+  ImageView(const std::unique_ptr<Context>& ptr_context,
+            const Image& image,
+            const ImageViewInfo& image_view_info);
   ~ImageView();
 
   /// @brief Get image view handle
@@ -150,7 +153,8 @@ class ImageView {
 };
 
 /// @brief Vulkan sampler wrapper class
-/// @details Sampler is used for texture filtering, mipmapping, and texture interface on shader.
+/// @details Sampler is used for texture filtering, mipmapping, and texture
+/// interface on shader.
 class Sampler {
  private:
   vk::UniqueSampler m_ptrSampler;
@@ -159,7 +163,8 @@ class Sampler {
   /// @brief Construct sampler with specified configuration
   /// @param ptr_context GPU context pointer
   /// @param sampler_info Sampler configuration
-  Sampler(const std::unique_ptr<Context>& ptr_context, const SamplerInfo& sampler_info);
+  Sampler(const std::unique_ptr<Context>& ptr_context,
+          const SamplerInfo& sampler_info);
   ~Sampler();
 
   /// @brief Get sampler handle

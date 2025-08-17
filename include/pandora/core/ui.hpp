@@ -130,7 +130,8 @@ namespace ui {
 /// - Integration with Vulkan surface creation for rendering
 class Window {
  private:
-  static std::unordered_map<uint64_t, std::unordered_set<int32_t>> s_inputKeySetMap;
+  static std::unordered_map<uint64_t, std::unordered_set<int32_t>>
+      s_inputKeySetMap;
   static std::unordered_map<uint64_t, Mouse> s_mouseMap;
   static std::unordered_map<uint64_t, bool> s_resizedBoolMap;
 
@@ -150,15 +151,20 @@ class Window {
   static void eraseInputKey(const GLFWwindow* ptr_window, const int32_t key) {
     s_inputKeySetMap[convertWindowPtr(ptr_window)].erase(key);
   }
-  static void setMousePos(const GLFWwindow* ptr_window, const double x, const double y) {
+  static void setMousePos(const GLFWwindow* ptr_window,
+                          const double x,
+                          const double y) {
     s_mouseMap[convertWindowPtr(ptr_window)].pos_x = x;
     s_mouseMap[convertWindowPtr(ptr_window)].pos_y = y;
   }
-  static void setMouseScroll(const GLFWwindow* ptr_window, const double x, const double y) {
+  static void setMouseScroll(const GLFWwindow* ptr_window,
+                             const double x,
+                             const double y) {
     s_mouseMap[convertWindowPtr(ptr_window)].scroll_x = x;
     s_mouseMap[convertWindowPtr(ptr_window)].scroll_y = y;
   }
-  static void setResizedBool(const GLFWwindow* ptr_window, const bool is_resized) {
+  static void setResizedBool(const GLFWwindow* ptr_window,
+                             const bool is_resized) {
     s_resizedBoolMap[convertWindowPtr(ptr_window)] = is_resized;
   }
 
@@ -186,14 +192,17 @@ class Window {
   bool update();
 
   /// @brief Add callback function for input handling
-  /// You can add reference binding lambda functions for custom input processing.
-  /// @param callback Function or function object to be called during input processing
+  /// You can add reference binding lambda functions for custom input
+  /// processing.
+  /// @param callback Function or function object to be called during input
+  /// processing
   void addCallback(std::function<void()> callback) {
     m_callbacks.emplace_back(callback);
   }
 
   bool findInputKey(KeyCode key) const {
-    return s_inputKeySetMap.at(convertWindowPtr(m_ptrWindow)).contains(convertKeyCodeToInt(key));
+    return s_inputKeySetMap.at(convertWindowPtr(m_ptrWindow))
+        .contains(convertKeyCodeToInt(key));
   }
 };
 

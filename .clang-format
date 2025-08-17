@@ -14,7 +14,7 @@ IndentPPDirectives: BeforeHash
 IndentRequires: true
 
 # 行幅設定
-ColumnLimit: 120
+ColumnLimit: 80
 
 # ブレース設定
 BreakBeforeBraces: Attach

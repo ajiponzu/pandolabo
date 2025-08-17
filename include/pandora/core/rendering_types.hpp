@@ -1,5 +1,6 @@
 /*
- * rendering_types.hpp - Rendering-related type definitions for Pandolabo core module
+ * rendering_types.hpp - Rendering-related type definitions for Pandolabo core
+ * module
  *
  * This header contains enum class definitions used for rendering pipelines,
  * attachment operations, and command buffer management.
@@ -14,7 +15,8 @@ namespace pandora::core {
 enum class AttachmentLoadOp {
   Load = 0u,  ///< Load existing attachment data (preserve previous contents)
   Clear,      ///< Clear attachment to specified clear value
-  DontCare,   ///< Don't care about previous contents (undefined behavior but potentially faster)
+  DontCare,   ///< Don't care about previous contents (undefined behavior but
+              ///< potentially faster)
 };
 
 /// @brief Attachment store operations for render pass attachments
@@ -30,7 +32,8 @@ enum class DependencyFlag {
   ByRegion = 0u,  ///< Dependency is by-region (can be more efficient)
   DeviceGroup,    ///< Dependency spans multiple devices in a device group
   ViewLocal,      ///< Dependency is view-local for multiview rendering
-  Feedback,       ///< Feedback loop dependency (input and output from same attachment)
+  Feedback,       ///< Feedback loop dependency (input and output from same
+                  ///< attachment)
 };
 
 /// @brief Vertex input rate for vertex attributes
@@ -65,7 +68,8 @@ enum class PolygonMode {
 };
 
 /// @brief Face culling modes
-/// Defines which polygon faces should be culled (not rendered) based on winding order
+/// Defines which polygon faces should be culled (not rendered) based on winding
+/// order
 enum class CullMode {
   None = 0u,     ///< No face culling (render both front and back faces)
   Front,         ///< Cull front-facing polygons
@@ -76,8 +80,9 @@ enum class CullMode {
 /// @brief Front face winding order
 /// Defines which vertex winding order is considered front-facing
 enum class FrontFace {
-  CounterClockwise = 0u,  ///< Counter-clockwise winding is front-facing (OpenGL convention)
-  Clockwise,              ///< Clockwise winding is front-facing (DirectX convention)
+  CounterClockwise =
+      0u,     ///< Counter-clockwise winding is front-facing (OpenGL convention)
+  Clockwise,  ///< Clockwise winding is front-facing (DirectX convention)
 };
 
 /// @brief Depth and stencil comparison operations
@@ -128,7 +133,8 @@ enum class LogicOp {
 };
 
 /// @brief Blend factor values for color blending
-/// Defines factors used in blending equations to combine source and destination colors
+/// Defines factors used in blending equations to combine source and destination
+/// colors
 enum class BlendFactor {
   Zero = 0u,              ///< Factor = (0, 0, 0, 0)
   One,                    ///< Factor = (1, 1, 1, 1)
@@ -157,8 +163,8 @@ enum class BlendOp {
   Add = 0u,         ///< Result = src + dst (additive blending)
   Subtract,         ///< Result = src - dst (subtractive blending)
   ReverseSubtract,  ///< Result = dst - src (reverse subtractive blending)
-  Min,              ///< Result = min(src, dst) (minimum of source and destination)
-  Max,              ///< Result = max(src, dst) (maximum of source and destination)
+  Min,  ///< Result = min(src, dst) (minimum of source and destination)
+  Max,  ///< Result = max(src, dst) (maximum of source and destination)
 };
 
 /// @brief Color component flags
@@ -171,7 +177,8 @@ enum class ColorComponent {
 };
 
 /// @brief Dynamic pipeline state options
-/// Defines pipeline states that can be changed dynamically without rebuilding the pipeline
+/// Defines pipeline states that can be changed dynamically without rebuilding
+/// the pipeline
 enum class DynamicOption {
   Viewport = 0u,       ///< Viewport transformation parameters
   Scissor,             ///< Scissor rectangle for clipping
@@ -189,14 +196,16 @@ enum class DynamicOption {
 enum class CommandBufferUsage {
   OneTimeSubmit = 0u,  ///< Command buffer will be submitted once and reset
   RenderPassContinue,  ///< Secondary command buffer continues a render pass
-  SimultaneousUse,     ///< Command buffer can be submitted multiple times simultaneously
+  SimultaneousUse,     ///< Command buffer can be submitted multiple times
+                       ///< simultaneously
 };
 
 /// @brief Subpass contents specification
 /// Defines how commands within a subpass are provided
 enum class SubpassContents {
-  Inline = 0u,              ///< Commands are recorded directly in primary command buffer
-  SecondaryCommandBuffers,  ///< Commands are provided via secondary command buffers
+  Inline = 0u,  ///< Commands are recorded directly in primary command buffer
+  SecondaryCommandBuffers,  ///< Commands are provided via secondary command
+                            ///< buffers
 };
 
 }  // namespace pandora::core

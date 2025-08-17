@@ -1,6 +1,7 @@
 #include "pandora/core/module_connection/gpu_ui.hpp"
 
-pandora::core::gpu_ui::WindowSurface::WindowSurface(GLFWwindow* const ptr_window) {
+pandora::core::gpu_ui::WindowSurface::WindowSurface(
+    GLFWwindow* const ptr_window) {
   m_ptrWindow = ptr_window;
 
   setWindowSize();
@@ -11,9 +12,11 @@ pandora::core::gpu_ui::WindowSurface::~WindowSurface() {
   glfwDestroyWindow(m_ptrWindow);
 }
 
-void pandora::core::gpu_ui::WindowSurface::constructSurface(const vk::UniqueInstance& ptr_instance) {
+void pandora::core::gpu_ui::WindowSurface::constructSurface(
+    const vk::UniqueInstance& ptr_instance) {
   VkSurfaceKHR surface{};
-  if (glfwCreateWindowSurface(VkInstance(ptr_instance.get()), m_ptrWindow, nullptr, &surface)
+  if (glfwCreateWindowSurface(
+          VkInstance(ptr_instance.get()), m_ptrWindow, nullptr, &surface)
       != ::VkResult::VK_SUCCESS) {
     m_ptrSurface = vk::UniqueSurfaceKHR(nullptr);
 

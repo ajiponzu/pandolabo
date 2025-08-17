@@ -1,14 +1,16 @@
 #include "pandora/core/gpu/vk_helper.hpp"
 #include "pandora/core/renderpass.hpp"
 
-pandora::core::SubpassNode::SubpassNode(const PipelineBind bind_point, const uint32_t view_mask) {
+pandora::core::SubpassNode::SubpassNode(const PipelineBind bind_point,
+                                        const uint32_t view_mask) {
   m_bindPoint = vk_helper::getPipelineBindPoint(bind_point);
   m_viewMask = view_mask;
 }
 
 pandora::core::SubpassNode::~SubpassNode() {}
 
-vk::AttachmentReference pandora::core::SubpassNode::convert(const AttachmentReference& attachment_ref) {
+vk::AttachmentReference pandora::core::SubpassNode::convert(
+    const AttachmentReference& attachment_ref) {
   return vk::AttachmentReference{}
       .setAttachment(attachment_ref.index)
       .setLayout(vk_helper::getImageLayout(attachment_ref.layout));

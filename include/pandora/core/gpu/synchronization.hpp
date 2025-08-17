@@ -1,5 +1,6 @@
 /*
- * synchronization.hpp - GPU synchronization primitives for Pandolabo Vulkan C++ wrapper
+ * synchronization.hpp - GPU synchronization primitives for Pandolabo Vulkan C++
+ * wrapper
  *
  * This header contains memory barriers and semaphore classes for managing
  * GPU synchronization and memory access ordering.
@@ -40,7 +41,8 @@ class BufferBarrier {
  public:
   /// @brief Construct buffer memory barrier
   /// @param buffer The buffer to synchronize
-  /// @param priority_access_flags Memory access types that must complete before this barrier
+  /// @param priority_access_flags Memory access types that must complete before
+  /// this barrier
   /// @param wait_access_flags Memory access types that wait for this barrier
   BufferBarrier(const Buffer& buffer,
                 const std::vector<AccessFlag>& priority_access_flags,
@@ -67,8 +69,8 @@ class BufferBarrier {
 };
 
 /// @brief Vulkan image memory barrier wrapper class
-/// This class manages synchronization for image memory access and layout transitions.
-/// It provides control over:
+/// This class manages synchronization for image memory access and layout
+/// transitions. It provides control over:
 /// - Memory access ordering for image operations
 /// - Image layout transitions (e.g., undefined -> color attachment)
 /// - Queue family ownership transfers for multi-queue image operations
@@ -77,7 +79,8 @@ class BufferBarrier {
 /// @note For queue family transfers:
 /// 1. Release barrier: Set source queue family, keep current layout
 /// 2. Acquire barrier: Set destination queue family, perform layout transition
-/// @warning Do not change image layout in release barrier, only in acquire barrier
+/// @warning Do not change image layout in release barrier, only in acquire
+/// barrier
 class ImageBarrier {
  private:
   vk::ImageMemoryBarrier m_imageMemoryBarrier{};
@@ -110,8 +113,9 @@ class ImageBarrier {
 };
 
 /// @brief Vulkan timeline semaphore wrapper class
-/// Timeline semaphores provide advanced synchronization with monotonically increasing values.
-/// They enable fine-grained control over GPU/CPU synchronization and support:
+/// Timeline semaphores provide advanced synchronization with monotonically
+/// increasing values. They enable fine-grained control over GPU/CPU
+/// synchronization and support:
 /// - Wait-before-signal semantics for complex dependency chains
 /// - Host-side waiting and signaling operations
 /// - Multiple wait and signal operations on the same semaphore
@@ -120,11 +124,13 @@ class ImageBarrier {
 /// @note Timeline values must be monotonically increasing
 class TimelineSemaphore {
  private:
-  vk::UniqueSemaphore m_ptrSemaphore;                         ///< Underlying Vulkan timeline semaphore
-  uint64_t m_signalValue = 1u;                                ///< Next value to signal
-  uint64_t m_waitValue = 0u;                                  ///< Current value to wait for
-  vk::TimelineSemaphoreSubmitInfoKHR m_timelineSubmitInfo{};  ///< Timeline submission info
-  std::vector<vk::PipelineStageFlags> m_waitStages{};         ///< Pipeline stages to wait at
+  vk::UniqueSemaphore m_ptrSemaphore;  ///< Underlying Vulkan timeline semaphore
+  uint64_t m_signalValue = 1u;         ///< Next value to signal
+  uint64_t m_waitValue = 0u;           ///< Current value to wait for
+  vk::TimelineSemaphoreSubmitInfoKHR
+      m_timelineSubmitInfo{};  ///< Timeline submission info
+  std::vector<vk::PipelineStageFlags>
+      m_waitStages{};  ///< Pipeline stages to wait at
 
  public:
   /// @brief Construct timeline semaphore
@@ -171,14 +177,16 @@ class TimelineSemaphore {
   }
 
   /// @brief Wait until GPU operation completes
-  /// Waits until all GPU operations submitted with this semaphore have finished.
+  /// Waits until all GPU operations submitted with this semaphore have
+  /// finished.
   /// @param ptr_context Vulkan context for device operations
   void wait(const std::unique_ptr<Context>& ptr_context);
 };
 
 /// @brief Vulkan binary semaphore wrapper
-/// This class provides a reference interface to Vulkan binary semaphores and fences.
-/// Binary semaphores are used for coarse-grained synchronization between operations.
+/// This class provides a reference interface to Vulkan binary semaphores and
+/// fences. Binary semaphores are used for coarse-grained synchronization
+/// between operations.
 class BinarySemaphore {
  protected:
   friend class SolidBinarySemaphore;
@@ -199,12 +207,12 @@ class BinarySemaphore {
 };
 
 /// @brief Vulkan binary semaphore implementation
-/// This class represents the actual binary semaphore object created for user operations.
-/// Manages the lifetime of Vulkan semaphore and fence resources.
+/// This class represents the actual binary semaphore object created for user
+/// operations. Manages the lifetime of Vulkan semaphore and fence resources.
 class SolidBinarySemaphore {
  private:
   vk::UniqueSemaphore m_ptrSemaphore{};  ///< Vulkan binary semaphore
-  vk::UniqueFence m_ptrFence{};          ///< Vulkan fence for CPU-GPU synchronization
+  vk::UniqueFence m_ptrFence{};  ///< Vulkan fence for CPU-GPU synchronization
 
  public:
   /// @brief Construct binary semaphore
@@ -239,8 +247,9 @@ class AcquireImageSemaphore : public BinarySemaphore {
 };
 
 /// @brief Render completion semaphore
-/// Specialized binary semaphore used to synchronize the completion of GPU rendering.
-/// Signals when rendering operations are finished and ready for presentation.
+/// Specialized binary semaphore used to synchronize the completion of GPU
+/// rendering. Signals when rendering operations are finished and ready for
+/// presentation.
 class RenderSemaphore : public BinarySemaphore {
  public:
   /// @brief Construct render semaphore

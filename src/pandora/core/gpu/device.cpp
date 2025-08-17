@@ -29,16 +29,20 @@ struct QueueFamilyIndices {
   }
 };
 
-static QueueFamilyIndices find_queue_families(const vk::PhysicalDevice& physical_device) {
+static QueueFamilyIndices find_queue_families(
+    const vk::PhysicalDevice& physical_device) {
   QueueFamilyIndices indices;
 
   const auto queue_families = physical_device.getQueueFamilyProperties();
 
   uint32_t family_id = 0u;
   for (const auto& queue_family : queue_families) {
-    const auto graphics_support = queue_family.queueFlags & vk::QueueFlagBits::eGraphics;
-    const auto compute_support = queue_family.queueFlags & vk::QueueFlagBits::eCompute;
-    const auto transfer_support = queue_family.queueFlags & vk::QueueFlagBits::eTransfer;
+    const auto graphics_support =
+        queue_family.queueFlags & vk::QueueFlagBits::eGraphics;
+    const auto compute_support =
+        queue_family.queueFlags & vk::QueueFlagBits::eCompute;
+    const auto transfer_support =
+        queue_family.queueFlags & vk::QueueFlagBits::eTransfer;
 
     if (graphics_support) {
       indices.graphics = family_id;
@@ -54,10 +58,13 @@ static QueueFamilyIndices find_queue_families(const vk::PhysicalDevice& physical
   return indices;
 }
 
-static bool check_device_extension_support(const vk::PhysicalDevice& physical_device,
-                                           const std::vector<const char*>& device_extension_list) {
-  std::set<std::string> device_extensions(device_extension_list.begin(), device_extension_list.end());
-  const auto available_extensions = physical_device.enumerateDeviceExtensionProperties();
+static bool check_device_extension_support(
+    const vk::PhysicalDevice& physical_device,
+    const std::vector<const char*>& device_extension_list) {
+  std::set<std::string> device_extensions(device_extension_list.begin(),
+                                          device_extension_list.end());
+  const auto available_extensions =
+      physical_device.enumerateDeviceExtensionProperties();
 
   for (const auto& extension : available_extensions) {
     device_extensions.erase(extension.extensionName);
@@ -71,13 +78,14 @@ static T get_optional_value(const std::optional<T>& option) {
   return option.value_or(0u);
 }
 
-pandora::core::gpu::Device::Device(const vk::UniqueInstance& ptr_instance,
-                                   const vk::UniqueSurfaceKHR& ptr_window_surface
+pandora::core::gpu::Device::Device(
+    const vk::UniqueInstance& ptr_instance,
+    const vk::UniqueSurfaceKHR& ptr_window_surface
 #ifdef GPU_DEBUG
-                                   ,
-                                   const std::unique_ptr<debug::Messenger>& ptr_messenger
+    ,
+    const std::unique_ptr<debug::Messenger>& ptr_messenger
 #endif
-                                   )
+    )
     : m_hasWindowSurface(ptr_window_surface.get() != nullptr) {
   const auto physical_devices = ptr_instance->enumeratePhysicalDevices();
   if (physical_devices.empty()) {
@@ -99,8 +107,8 @@ pandora::core::gpu::Device::Device(const vk::UniqueInstance& ptr_instance,
     m_queueFamilyIndices.transfer = queue_family_indices.transfer;
 
     if (ptr_window_surface) {
-      const auto present_support =
-          physical_device.getSurfaceSupportKHR(m_queueFamilyIndices.graphics.value(), ptr_window_surface.get());
+      const auto present_support = physical_device.getSurfaceSupportKHR(
+          m_queueFamilyIndices.graphics.value(), ptr_window_surface.get());
 
       if (!present_support) {
         m_queueFamilyIndices.graphics.reset();
@@ -113,21 +121,27 @@ pandora::core::gpu::Device::Device(const vk::UniqueInstance& ptr_instance,
       m_queueFamilyIndices.present = m_queueFamilyIndices.graphics;
     }
 
-    const auto required_extensions = getDeviceExtensions(ptr_window_surface.get() != nullptr);
-    const auto extension_support = check_device_extension_support(physical_device, required_extensions);
+    const auto required_extensions =
+        getDeviceExtensions(ptr_window_surface.get() != nullptr);
+    const auto extension_support =
+        check_device_extension_support(physical_device, required_extensions);
 
-    auto is_suitable =
-        m_queueFamilyIndices.graphics.has_value() && m_queueFamilyIndices.compute.has_value() && extension_support;
+    auto is_suitable = m_queueFamilyIndices.graphics.has_value()
+                       && m_queueFamilyIndices.compute.has_value()
+                       && extension_support;
     if (ptr_window_surface) {
       bool swap_chain_adequate = false;
       if (extension_support) {
-        const auto formats = physical_device.getSurfaceFormatsKHR(ptr_window_surface.get());
-        const auto present_modes = physical_device.getSurfacePresentModesKHR(ptr_window_surface.get());
+        const auto formats =
+            physical_device.getSurfaceFormatsKHR(ptr_window_surface.get());
+        const auto present_modes =
+            physical_device.getSurfacePresentModesKHR(ptr_window_surface.get());
 
         swap_chain_adequate = !(formats.empty()) && !(present_modes.empty());
       }
 
-      is_suitable = m_queueFamilyIndices.present.has_value() && swap_chain_adequate && is_suitable;
+      is_suitable = m_queueFamilyIndices.present.has_value()
+                    && swap_chain_adequate && is_suitable;
     }
 
     if (is_suitable) {
@@ -139,7 +153,8 @@ pandora::core::gpu::Device::Device(const vk::UniqueInstance& ptr_instance,
 
 #ifdef GPU_DEBUG
   if (m_physicalDevice) {
-    std::println("vulkan_device: {}", m_physicalDevice.getProperties().deviceName.data());
+    std::println("vulkan_device: {}",
+                 m_physicalDevice.getProperties().deviceName.data());
   }
   constructLogicalDevice(ptr_messenger);
 #else
@@ -167,7 +182,8 @@ void pandora::core::gpu::Device::constructLogicalDevice(
       if (!queue_family.has_value()) {
         continue;
       }
-      queue_create_infos.emplace_back(vk::DeviceQueueCreateInfo({}, queue_family.value(), 1u, &queue_priority));
+      queue_create_infos.emplace_back(vk::DeviceQueueCreateInfo(
+          {}, queue_family.value(), 1u, &queue_priority));
     }
   }
 
@@ -179,7 +195,8 @@ void pandora::core::gpu::Device::constructLogicalDevice(
   features2.setPNext(&timeline_semaphore_features);
 
   const auto required_extensions = getDeviceExtensions(m_hasWindowSurface);
-  vk::DeviceCreateInfo create_info({}, queue_create_infos, {}, required_extensions, nullptr, &features2);
+  vk::DeviceCreateInfo create_info(
+      {}, queue_create_infos, {}, required_extensions, nullptr, &features2);
 
 #ifdef GPU_DEBUG
   create_info.setPEnabledLayerNames(ptr_messenger->getValidationLayers());
@@ -188,7 +205,8 @@ void pandora::core::gpu::Device::constructLogicalDevice(
   m_ptrLogicalDevice = m_physicalDevice.createDeviceUnique(create_info);
 }
 
-const uint32_t pandora::core::gpu::Device::getQueueFamilyIndex(const QueueFamilyType family_type) const {
+const uint32_t pandora::core::gpu::Device::getQueueFamilyIndex(
+    const QueueFamilyType family_type) const {
   switch (family_type) {
     using enum QueueFamilyType;
 
@@ -203,14 +221,17 @@ const uint32_t pandora::core::gpu::Device::getQueueFamilyIndex(const QueueFamily
   }
 }
 
-vk::Queue pandora::core::gpu::Device::getQueue(const uint32_t queue_family_index) {
+vk::Queue pandora::core::gpu::Device::getQueue(
+    const uint32_t queue_family_index) {
   return m_ptrLogicalDevice->getQueue(queue_family_index, 0u);
 }
 
-vk::SampleCountFlagBits pandora::core::gpu::Device::getMaxUsableSampleCount() const {
+vk::SampleCountFlagBits pandora::core::gpu::Device::getMaxUsableSampleCount()
+    const {
   const auto physical_device_props = m_physicalDevice.getProperties();
-  const auto sample_count = physical_device_props.limits.framebufferColorSampleCounts
-                            & physical_device_props.limits.framebufferDepthSampleCounts;
+  const auto sample_count =
+      physical_device_props.limits.framebufferColorSampleCounts
+      & physical_device_props.limits.framebufferDepthSampleCounts;
 
   // Check sample counts in descending order to find the maximum supported
   constexpr std::array sample_priorities = {vk::SampleCountFlagBits::e64,

@@ -1,5 +1,6 @@
 /*
- * renderpass.hpp - Renderpass and framebuffer management for Pandolabo core module
+ * renderpass.hpp - Renderpass and framebuffer management for Pandolabo core
+ * module
  *
  * This header contains classes for managing renderpasses, framebuffers,
  * attachments, and subpass configurations.
@@ -26,13 +27,18 @@ namespace pandora::core {
 /// @brief Attachment list manager for render pass configuration
 /// Manages a collection of render targets (color, depth, stencil) and their
 /// associated clear values. Provides functionality to add attachments with
-/// different clear value types and manage backbuffer attachments for presentation.
+/// different clear value types and manage backbuffer attachments for
+/// presentation.
 class AttachmentList {
  private:
-  std::vector<vk::AttachmentDescription> m_descriptions;  ///< Vulkan attachment descriptions
-  std::vector<vk::ImageView> m_attachments;               ///< Image views for each attachment
-  std::vector<vk::ClearValue> m_clearValues;              ///< Clear values for each attachment
-  size_t m_backbufferIndex = 0u;                          ///< Index of the current backbuffer attachment
+  std::vector<vk::AttachmentDescription>
+      m_descriptions;  ///< Vulkan attachment descriptions
+  std::vector<vk::ImageView>
+      m_attachments;  ///< Image views for each attachment
+  std::vector<vk::ClearValue>
+      m_clearValues;  ///< Clear values for each attachment
+  size_t m_backbufferIndex =
+      0u;  ///< Index of the current backbuffer attachment
 
  public:
   AttachmentList();
@@ -60,7 +66,8 @@ class AttachmentList {
   /// @param description Attachment configuration (format, load/store ops, etc.)
   /// @param clear_value Color values to clear the attachment with
   /// @return Index of the added attachment
-  uint32_t append(const AttachmentDescription& description, const ClearColor& clear_value);
+  uint32_t append(const AttachmentDescription& description,
+                  const ClearColor& clear_value);
 
   /// @brief Get attachment descriptions for render pass creation
   /// @return Vector of Vulkan attachment descriptions
@@ -83,14 +90,16 @@ class AttachmentList {
   /// @brief Set backbuffer attachment for presentation
   /// @param ptr_context GPU context for swapchain access
   /// @param index Swapchain image index to use
-  void setBackbufferAttachment(const std::unique_ptr<gpu::Context>& ptr_context, const size_t index);
+  void setBackbufferAttachment(const std::unique_ptr<gpu::Context>& ptr_context,
+                               const size_t index);
 
  private:
   /// @brief Internal method to add attachment with image view
   /// @param description Attachment configuration
   /// @param image_view Image view for the attachment
   /// @return Index of the added attachment
-  uint32_t append(const AttachmentDescription& description, const gpu::ImageView& image_view);
+  uint32_t append(const AttachmentDescription& description,
+                  const gpu::ImageView& image_view);
 
   /// @brief Internal method to add attachment description only
   /// @param description Attachment configuration to add
@@ -100,17 +109,22 @@ class AttachmentList {
 /// @brief Subpass node representing a single rendering subpass
 /// Manages attachment references for input, color, resolve, depth/stencil,
 /// and preserve attachments within a single subpass of a render pass.
-/// Each subpass defines which attachments it reads from, writes to, and preserves.
+/// Each subpass defines which attachments it reads from, writes to, and
+/// preserves.
 class SubpassNode {
  private:
-  std::vector<vk::AttachmentReference> m_inputs;               ///< Input attachments (read-only)
-  std::vector<vk::AttachmentReference> m_colors;               ///< Color attachments (write)
-  std::vector<vk::AttachmentReference> m_resolves;             ///< Resolve attachments for MSAA
-  std::shared_ptr<vk::AttachmentReference> m_ptrDepthStencil;  ///< Depth/stencil attachment
-  std::vector<uint32_t> m_preserves;                           ///< Preserved attachment indices
+  std::vector<vk::AttachmentReference>
+      m_inputs;  ///< Input attachments (read-only)
+  std::vector<vk::AttachmentReference> m_colors;  ///< Color attachments (write)
+  std::vector<vk::AttachmentReference>
+      m_resolves;  ///< Resolve attachments for MSAA
+  std::shared_ptr<vk::AttachmentReference>
+      m_ptrDepthStencil;              ///< Depth/stencil attachment
+  std::vector<uint32_t> m_preserves;  ///< Preserved attachment indices
 
-  vk::PipelineBindPoint m_bindPoint{};  ///< Pipeline bind point (graphics/compute)
-  uint32_t m_viewMask = 0u;             ///< View mask for multiview rendering
+  vk::PipelineBindPoint
+      m_bindPoint{};         ///< Pipeline bind point (graphics/compute)
+  uint32_t m_viewMask = 0u;  ///< View mask for multiview rendering
 
  public:
   /// @brief Construct subpass node
@@ -138,7 +152,8 @@ class SubpassNode {
   }
 
   /// @brief Get depth/stencil attachment reference
-  /// @return Shared pointer to depth/stencil attachment reference (nullptr if none)
+  /// @return Shared pointer to depth/stencil attachment reference (nullptr if
+  /// none)
   const auto& getPtrDepthStencil() const {
     return m_ptrDepthStencil;
   }
@@ -180,13 +195,16 @@ class SubpassNode {
   }
 
   /// @brief Attach depth/stencil attachment
-  /// @param attachment_ref Reference to attachment and layout for depth/stencil operations
+  /// @param attachment_ref Reference to attachment and layout for depth/stencil
+  /// operations
   void attachDepthStencil(const AttachmentReference& attachment_ref) {
-    m_ptrDepthStencil = std::make_shared<vk::AttachmentReference>(convert(attachment_ref));
+    m_ptrDepthStencil =
+        std::make_shared<vk::AttachmentReference>(convert(attachment_ref));
   }
 
   /// @brief Preserve attachment during this subpass
-  /// @param attachment_index Index of attachment to preserve (not read or written)
+  /// @param attachment_index Index of attachment to preserve (not read or
+  /// written)
   void attachPreserve(const uint32_t attachment_index) {
     m_preserves.push_back(attachment_index);
   }
@@ -203,9 +221,11 @@ class SubpassNode {
 /// the execution order and synchronization requirements between subpasses.
 class SubpassGraph {
  private:
-  std::vector<vk::SubpassDescription> m_descriptions;  ///< Vulkan subpass descriptions
-  std::vector<SubpassNode> m_nodes;                    ///< High-level subpass nodes
-  std::vector<vk::SubpassDependency> m_dependencies;   ///< Inter-subpass dependencies
+  std::vector<vk::SubpassDescription>
+      m_descriptions;                ///< Vulkan subpass descriptions
+  std::vector<SubpassNode> m_nodes;  ///< High-level subpass nodes
+  std::vector<vk::SubpassDependency>
+      m_dependencies;  ///< Inter-subpass dependencies
 
  public:
   SubpassGraph();
@@ -235,7 +255,8 @@ class SubpassGraph {
 
 /// @brief Vulkan render pass wrapper
 /// Encapsulates a Vulkan render pass object that defines the structure
-/// of rendering operations, including attachments, subpasses, and their dependencies.
+/// of rendering operations, including attachments, subpasses, and their
+/// dependencies.
 class Renderpass {
  private:
   vk::UniqueRenderPass m_ptrRenderPass;  ///< Unique Vulkan render pass handle
@@ -296,15 +317,17 @@ class Framebuffer {
 };
 
 /// @brief Complete rendering kit combining render pass and framebuffers
-/// Provides a high-level interface for managing render passes, multiple framebuffers
-/// (for double/triple buffering), and their associated clear values. Handles
-/// swapchain integration for presentation and automatic framebuffer management.
+/// Provides a high-level interface for managing render passes, multiple
+/// framebuffers (for double/triple buffering), and their associated clear
+/// values. Handles swapchain integration for presentation and automatic
+/// framebuffer management.
 class RenderKit {
  private:
   std::unique_ptr<Renderpass> m_ptrRenderpass;  ///< Managed render pass
-  std::vector<Framebuffer> m_framebuffers;      ///< Framebuffers for each swapchain image
-  std::vector<vk::ClearValue> m_clearValues;    ///< Clear values for attachments
-  size_t m_currentIndex = 0u;                   ///< Currently active framebuffer index
+  std::vector<Framebuffer>
+      m_framebuffers;  ///< Framebuffers for each swapchain image
+  std::vector<vk::ClearValue> m_clearValues;  ///< Clear values for attachments
+  size_t m_currentIndex = 0u;  ///< Currently active framebuffer index
 
  public:
   /// @brief Construct render kit with render pass and framebuffers
@@ -345,7 +368,8 @@ class RenderKit {
   }
 
   /// @brief Update current framebuffer index
-  /// @param index New framebuffer index to use (should match swapchain image index)
+  /// @param index New framebuffer index to use (should match swapchain image
+  /// index)
   void updateIndex(const size_t index) {
     m_currentIndex = index;
   }

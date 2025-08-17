@@ -141,7 +141,7 @@ def generate_settings_json():
         # C/C++フォーマット設定
         "C_Cpp.formatting": "clangFormat",
         "C_Cpp.clang_format_style": "file",
-        "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 120, AlignAfterOpenBracket: Align, AllowShortFunctionsOnASingleLine: Empty, AllowShortIfStatementsOnASingleLine: false, AllowShortLoopsOnASingleLine: false, BinPackArguments: false, BinPackParameters: false, BreakBeforeBraces: Attach, BreakBeforeBinaryOperators: NonAssignment, AlignOperands: Align, ContinuationIndentWidth: 4, BreakConstructorInitializers: BeforeColon, ConstructorInitializerAllOnOneLineOrOnePerLine: true, IndentCaseLabels: true, KeepEmptyLinesAtTheStartOfBlocks: false, NamespaceIndentation: None, SpaceAfterCStyleCast: false, SpaceBeforeParens: ControlStatements, SpacesInParentheses: false, Standard: c++20 }",
+        "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 80, AlignAfterOpenBracket: Align, AllowShortFunctionsOnASingleLine: Empty, AllowShortIfStatementsOnASingleLine: false, AllowShortLoopsOnASingleLine: false, BinPackArguments: false, BinPackParameters: false, BreakBeforeBraces: Attach, BreakBeforeBinaryOperators: NonAssignment, AlignOperands: Align, ContinuationIndentWidth: 4, BreakConstructorInitializers: BeforeColon, ConstructorInitializerAllOnOneLineOrOnePerLine: true, IndentCaseLabels: true, KeepEmptyLinesAtTheStartOfBlocks: false, NamespaceIndentation: None, SpaceAfterCStyleCast: false, SpaceBeforeParens: ControlStatements, SpacesInParentheses: false, Standard: c++20 }",
         # C/C++基本設定
         "C_Cpp.intelliSenseEngine": "default",
         "C_Cpp.errorSquiggles": "enabled",
@@ -719,7 +719,7 @@ IndentPPDirectives: BeforeHash
 IndentRequires: true
 
 # 行幅設定
-ColumnLimit: 120
+ColumnLimit: 80
 
 # ブレース設定
 BreakBeforeBraces: Attach

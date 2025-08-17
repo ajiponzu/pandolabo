@@ -1,7 +1,8 @@
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
 
-static vk::ImageViewType get_image_view_type(const pandora::core::ImageDimension image_dimension) {
+static vk::ImageViewType get_image_view_type(
+    const pandora::core::ImageDimension image_dimension) {
   switch (image_dimension) {
     using enum pandora::core::ImageDimension;
     using enum vk::ImageViewType;
@@ -17,17 +18,20 @@ static vk::ImageViewType get_image_view_type(const pandora::core::ImageDimension
   }
 }
 
-pandora::core::gpu::ImageView::ImageView(const std::unique_ptr<Context>& ptr_context,
-                                         const Image& image,
-                                         const ImageViewInfo& image_view_info) {
+pandora::core::gpu::ImageView::ImageView(
+    const std::unique_ptr<Context>& ptr_context,
+    const Image& image,
+    const ImageViewInfo& image_view_info) {
   const auto create_info =
       vk::ImageViewCreateInfo()
-          .setSubresourceRange(vk::ImageSubresourceRange{}
-                                   .setAspectMask(vk_helper::getImageAspectFlags(image_view_info.aspect))
-                                   .setBaseMipLevel(image_view_info.base_mip_level)
-                                   .setLevelCount(image_view_info.mip_levels)
-                                   .setBaseArrayLayer(image_view_info.base_array_layer)
-                                   .setLayerCount(image_view_info.array_layers))
+          .setSubresourceRange(
+              vk::ImageSubresourceRange{}
+                  .setAspectMask(
+                      vk_helper::getImageAspectFlags(image_view_info.aspect))
+                  .setBaseMipLevel(image_view_info.base_mip_level)
+                  .setLevelCount(image_view_info.mip_levels)
+                  .setBaseArrayLayer(image_view_info.base_array_layer)
+                  .setLayerCount(image_view_info.array_layers))
           .setComponents(vk::ComponentMapping{}
                              .setR(vk::ComponentSwizzle::eIdentity)
                              .setG(vk::ComponentSwizzle::eIdentity)
@@ -37,7 +41,9 @@ pandora::core::gpu::ImageView::ImageView(const std::unique_ptr<Context>& ptr_con
           .setFormat(image.getFormat())
           .setImage(image.getImage());
 
-  m_ptrImageView = ptr_context->getPtrDevice()->getPtrLogicalDevice()->createImageViewUnique(create_info);
+  m_ptrImageView =
+      ptr_context->getPtrDevice()->getPtrLogicalDevice()->createImageViewUnique(
+          create_info);
   m_ptrImageViewInfo = std::make_unique<ImageViewInfo>(image_view_info);
 }
 
