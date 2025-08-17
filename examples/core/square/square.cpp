@@ -131,9 +131,9 @@ void samples::core::Square::constructRenderpass(const bool is_resized) {
 }
 
 void samples::core::Square::constructGraphicPipeline() {
-  // Create GraphicInfo using fluent interface
-  const auto ptr_graphic_info = std::make_unique<plc::pipeline::GraphicInfo>(
-      plc::pipeline::GraphicInfo{}
+  // Create GraphicInfo using builder pattern
+  const auto ptr_graphic_info =
+      plc::pipeline::GraphicInfoBuilder::create()
           .setVertexInput(plc::pipeline::VertexInput{}
                               .addBinding(0u, sizeof(Vertex), plc::VertexInputRate::Vertex)
                               .addAttribute(0u, 0u, plc::DataFormat::R32G32Sfloat, offsetof(Vertex, pos))
@@ -155,7 +155,8 @@ void samples::core::Square::constructGraphicPipeline() {
                                                                                             plc::ColorComponent::A})))
           .setDynamicState(plc::pipeline::DynamicState{}
                                .addState(plc::DynamicOption::Viewport)
-                               .addState(plc::DynamicOption::Scissor)));
+                               .addState(plc::DynamicOption::Scissor))
+          .build();
 
   m_ptrPipeline->constructGraphicsPipeline(m_ptrContext,
                                            m_shaderModuleMap,
