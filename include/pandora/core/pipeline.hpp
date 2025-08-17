@@ -415,6 +415,22 @@ struct GraphicInfo {
   DepthStencil depth_stencil{};
   ColorBlend color_blend{};
   DynamicState dynamic_state{};
+
+  // Rule of Five
+  GraphicInfo() = default;
+  ~GraphicInfo() = default;
+
+  // Copy constructor
+  GraphicInfo(const GraphicInfo& other) = default;
+
+  // Copy assignment operator
+  GraphicInfo& operator=(const GraphicInfo& other) = default;
+
+  // Move constructor
+  GraphicInfo(GraphicInfo&& other) noexcept = default;
+
+  // Move assignment operator
+  GraphicInfo& operator=(GraphicInfo&& other) noexcept = default;
 };
 
 /// @brief Builder class for GraphicInfo
@@ -422,23 +438,24 @@ struct GraphicInfo {
 /// and returns a unique_ptr to the final configuration
 class GraphicInfoBuilder {
  private:
-  GraphicInfo m_info{};
+  std::unique_ptr<GraphicInfo> m_ptrInfo{};
 
   // Private constructor - use create() factory method instead
-  GraphicInfoBuilder() = default;
+  explicit GraphicInfoBuilder(std::unique_ptr<GraphicInfo> ptr_info)
+      : m_ptrInfo(std::move(ptr_info)) {}
 
  public:
   /// @brief Static factory method to create a new GraphicInfoBuilder
   /// @return A new GraphicInfoBuilder instance
   static GraphicInfoBuilder create() {
-    return GraphicInfoBuilder{};
+    return GraphicInfoBuilder{std::make_unique<GraphicInfo>()};
   }
 
   /// @brief Set vertex input configuration
   /// @param input VertexInput configuration
   /// @return Reference to this builder for method chaining
   GraphicInfoBuilder& setVertexInput(const VertexInput& input) {
-    m_info.vertex_input = input;
+    m_ptrInfo->vertex_input = input;
     return *this;
   }
 
@@ -446,7 +463,7 @@ class GraphicInfoBuilder {
   /// @param assembly InputAssembly configuration
   /// @return Reference to this builder for method chaining
   GraphicInfoBuilder& setInputAssembly(const InputAssembly& assembly) {
-    m_info.input_assembly = assembly;
+    m_ptrInfo->input_assembly = assembly;
     return *this;
   }
 
@@ -454,7 +471,7 @@ class GraphicInfoBuilder {
   /// @param tess Tessellation configuration
   /// @return Reference to this builder for method chaining
   GraphicInfoBuilder& setTessellation(const Tessellation& tess) {
-    m_info.tessellation = tess;
+    m_ptrInfo->tessellation = tess;
     return *this;
   }
 
@@ -462,7 +479,7 @@ class GraphicInfoBuilder {
   /// @param state ViewportState configuration
   /// @return Reference to this builder for method chaining
   GraphicInfoBuilder& setViewportState(const ViewportState& state) {
-    m_info.viewport_state = state;
+    m_ptrInfo->viewport_state = state;
     return *this;
   }
 
@@ -470,7 +487,7 @@ class GraphicInfoBuilder {
   /// @param raster Rasterization configuration
   /// @return Reference to this builder for method chaining
   GraphicInfoBuilder& setRasterization(const Rasterization& raster) {
-    m_info.rasterization = raster;
+    m_ptrInfo->rasterization = raster;
     return *this;
   }
 
@@ -478,7 +495,7 @@ class GraphicInfoBuilder {
   /// @param multi Multisample configuration
   /// @return Reference to this builder for method chaining
   GraphicInfoBuilder& setMultisample(const Multisample& multi) {
-    m_info.multisample = multi;
+    m_ptrInfo->multisample = multi;
     return *this;
   }
 
@@ -486,7 +503,7 @@ class GraphicInfoBuilder {
   /// @param depth DepthStencil configuration
   /// @return Reference to this builder for method chaining
   GraphicInfoBuilder& setDepthStencil(const DepthStencil& depth) {
-    m_info.depth_stencil = depth;
+    m_ptrInfo->depth_stencil = depth;
     return *this;
   }
 
@@ -494,7 +511,7 @@ class GraphicInfoBuilder {
   /// @param blend ColorBlend configuration
   /// @return Reference to this builder for method chaining
   GraphicInfoBuilder& setColorBlend(const ColorBlend& blend) {
-    m_info.color_blend = blend;
+    m_ptrInfo->color_blend = blend;
     return *this;
   }
 
@@ -502,14 +519,14 @@ class GraphicInfoBuilder {
   /// @param state DynamicState configuration
   /// @return Reference to this builder for method chaining
   GraphicInfoBuilder& setDynamicState(const DynamicState& state) {
-    m_info.dynamic_state = state;
+    m_ptrInfo->dynamic_state = state;
     return *this;
   }
 
   /// @brief Build and return the final GraphicInfo instance
   /// @return unique_ptr to the constructed GraphicInfo
   std::unique_ptr<GraphicInfo> build() {
-    return std::make_unique<GraphicInfo>(std::move(m_info));
+    return std::move(m_ptrInfo);
   }
 };
 
