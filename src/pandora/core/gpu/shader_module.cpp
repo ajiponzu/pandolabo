@@ -73,11 +73,11 @@ static void set_descriptor_infos(std::unordered_map<std::string, pandora::core::
                                  const vk::DescriptorType descriptor_type,
                                  const vk::ShaderStageFlags shader_stage_flags) {
   for (const auto& resource : resources) {
-    pandora::core::DescriptorInfo descriptor_info;
-    descriptor_info.type = descriptor_type;
-    descriptor_info.size = get_type_size(compiler, compiler.get_type(resource.base_type_id));
-    descriptor_info.binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
-    descriptor_info.stage_flags = shader_stage_flags;
+    const auto descriptor_info = pandora::core::DescriptorInfo{}
+                                     .setType(descriptor_type)
+                                     .setSize(get_type_size(compiler, compiler.get_type(resource.base_type_id)))
+                                     .setBinding(compiler.get_decoration(resource.id, spv::DecorationBinding))
+                                     .setStageFlags(shader_stage_flags);
 
     descriptor_info_map.insert({resource.name, descriptor_info});
   }
@@ -112,10 +112,11 @@ std::unordered_map<std::string, pandora::core::PushConstantRange> ShaderCompiler
 
   uint32_t previous_size = 0U;
   for (const auto& resource : resources.push_constant_buffers) {
-    pandora::core::PushConstantRange push_constant_range;
-    push_constant_range.stage_flags = shader_stage_flags;
-    push_constant_range.offset = previous_size;
-    push_constant_range.size = this->get_declared_struct_size(this->get_type(resource.base_type_id));
+    const auto push_constant_range =
+        pandora::core::PushConstantRange{}
+            .setStageFlags(shader_stage_flags)
+            .setOffset(previous_size)
+            .setSize(this->get_declared_struct_size(this->get_type(resource.base_type_id)));
 
     push_constant_range_map.insert({resource.name, push_constant_range});
     previous_size += static_cast<uint32_t>(push_constant_range.size);

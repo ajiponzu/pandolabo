@@ -145,12 +145,10 @@ void pandora::core::TransferCommandBuffer::copyImageToBuffer(const gpu::Image& i
 }
 
 void pandora::core::TransferCommandBuffer::setMipmaps(const gpu::Image& image, const PipelineStage dst_stage) const {
-  ImageViewInfo image_view_info{};
-  image_view_info.aspect = pandora::core::ImageAspect::Color;
-  image_view_info.base_mip_level = 0U;
-  image_view_info.mip_levels = 1U;  // for sending each mip level
-  image_view_info.base_array_layer = 0U;
-  image_view_info.array_layers = 1U;
+  const auto image_view_info = ImageViewInfo{}
+                                   .setAspect(pandora::core::ImageAspect::Color)
+                                   .setMipRange(0U, 1U)  // for sending each mip level
+                                   .setArrayRange(0U, 1U);
 
   const gpu::ImageBarrier src_image_barrier(image,
                                             {AccessFlag::TransferWrite},
@@ -240,12 +238,8 @@ void pandora::core::TransferCommandBuffer::transferMipmapImages(
     const PipelineStage src_stage,
     const PipelineStage dst_stage,
     std::pair<uint32_t, uint32_t> queue_family_index) const {
-  ImageViewInfo image_view_info{};
-  image_view_info.aspect = pandora::core::ImageAspect::Color;
-  image_view_info.base_mip_level = 0U;
-  image_view_info.mip_levels = 1U;
-  image_view_info.base_array_layer = 0U;
-  image_view_info.array_layers = 1U;
+  const auto image_view_info =
+      ImageViewInfo{}.setAspect(pandora::core::ImageAspect::Color).setMipRange(0U, 1U).setArrayRange(0U, 1U);
 
   const gpu::ImageBarrier image_barrier(image,
                                         {AccessFlag::TransferWrite},
@@ -273,12 +267,12 @@ void pandora::core::TransferCommandBuffer::acquireMipmapImages(const gpu::Image&
                                                                const PipelineStage src_stage,
                                                                const PipelineStage dst_stage,
                                                                std::pair<uint32_t, uint32_t> queue_family_index) const {
-  ImageViewInfo image_view_info{};
-  image_view_info.aspect = pandora::core::ImageAspect::Color;
-  image_view_info.base_mip_level = 0U;
-  image_view_info.mip_levels = 1U;
-  image_view_info.base_array_layer = 0U;
-  image_view_info.array_layers = 1U;
+  const auto image_view_info = ImageViewInfo{}
+                                   .setAspect(pandora::core::ImageAspect::Color)
+                                   .setBaseMipLevel(0U)
+                                   .setMipLevels(1U)
+                                   .setBaseArrayLayer(0U)
+                                   .setArrayLayers(1U);
 
   const gpu::ImageBarrier image_barrier(image,
                                         {AccessFlag::TransferWrite},

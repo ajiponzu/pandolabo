@@ -117,15 +117,13 @@ void samples::core::BasicCube::constructRenderpass(const bool is_resized) {
   {
     const auto& window_size = m_ptrWindow->getWindowSurface()->getWindowSize();
 
-    plc::ImageSubInfo image_sub_info;
-    image_sub_info.graphical_size.width = window_size.width;
-    image_sub_info.graphical_size.height = window_size.height;
-    image_sub_info.graphical_size.depth = 1U;
-    image_sub_info.mip_levels = 1U;
-    image_sub_info.array_layers = 1U;
-    image_sub_info.samples = plc::ImageSampleCount::v1;
-    image_sub_info.format = plc::DataFormat::DepthSfloatStencilUint;
-    image_sub_info.dimension = plc::ImageDimension::v2D;
+    const auto image_sub_info = plc::ImageSubInfo{}
+                                    .setSize(window_size.width, window_size.height, 1U)
+                                    .setMipLevels(1U)
+                                    .setArrayLayers(1U)
+                                    .setSamples(plc::ImageSampleCount::v1)
+                                    .setFormat(plc::DataFormat::DepthSfloatStencilUint)
+                                    .setDimension(plc::ImageDimension::v2D);
 
     m_ptrDepthImage.reset(new plc::gpu::Image(m_ptrContext,
                                               plc::MemoryUsage::GpuOnly,
@@ -133,12 +131,10 @@ void samples::core::BasicCube::constructRenderpass(const bool is_resized) {
                                               {plc::ImageUsage::DepthStencilAttachment},
                                               image_sub_info));
 
-    plc::ImageViewInfo image_view_info{};
-    image_view_info.aspect = plc::ImageAspect::DepthStencil;
-    image_view_info.base_array_layer = 0U;
-    image_view_info.array_layers = image_sub_info.array_layers;
-    image_view_info.base_mip_level = 0U;
-    image_view_info.mip_levels = image_sub_info.mip_levels;
+    const auto image_view_info = plc::ImageViewInfo{}
+                                     .setAspect(plc::ImageAspect::DepthStencil)
+                                     .setArrayRange(0U, image_sub_info.array_layers)
+                                     .setMipRange(0U, image_sub_info.mip_levels);
 
     m_ptrDepthImageView.reset(new plc::gpu::ImageView(m_ptrContext, *m_ptrDepthImage, image_view_info));
   }
@@ -146,50 +142,52 @@ void samples::core::BasicCube::constructRenderpass(const bool is_resized) {
   plc::AttachmentList attachment_list;
 
   const auto backbuffer_attach_index = [&] {
-    plc::AttachmentDescription attachment_description;
-    attachment_description.format = m_ptrContext->getPtrSwapchain()->getImageFormat();
-    attachment_description.samples = plc::ImageSampleCount::v1;
-    attachment_description.load_op = plc::AttachmentLoadOp::Clear;
-    attachment_description.store_op = plc::AttachmentStoreOp::Store;
-    attachment_description.stencil_load_op = plc::AttachmentLoadOp::DontCare;
-    attachment_description.stencil_store_op = plc::AttachmentStoreOp::DontCare;
-    attachment_description.initial_layout = plc::ImageLayout::Undefined;
-    attachment_description.final_layout = plc::ImageLayout::PresentSrc;
+    const auto attachment_description = plc::AttachmentDescription{}
+                                            .setFormat(m_ptrContext->getPtrSwapchain()->getImageFormat())
+                                            .setSamples(plc::ImageSampleCount::v1)
+                                            .setLoadOp(plc::AttachmentLoadOp::Clear)
+                                            .setStoreOp(plc::AttachmentStoreOp::Store)
+                                            .setStencilLoadOp(plc::AttachmentLoadOp::DontCare)
+                                            .setStencilStoreOp(plc::AttachmentStoreOp::DontCare)
+                                            .setLayouts(plc::ImageLayout::Undefined, plc::ImageLayout::PresentSrc);
 
-    return attachment_list.append(attachment_description, plc::ClearColor({0.0f, 0.0f, 0.0f, 1.0f}));
+    return attachment_list.append(attachment_description, plc::ClearColor{}.setColor(0.0f, 0.0f, 0.0f, 1.0f));
   }();
 
   const auto depth_attach_index = [&] {
-    plc::AttachmentDescription attachment_description;
-    attachment_description.format = plc::DataFormat::DepthSfloatStencilUint;
-    attachment_description.samples = plc::ImageSampleCount::v1;
-    attachment_description.load_op = plc::AttachmentLoadOp::Clear;
-    attachment_description.store_op = plc::AttachmentStoreOp::DontCare;
-    attachment_description.stencil_load_op = plc::AttachmentLoadOp::DontCare;
-    attachment_description.stencil_store_op = plc::AttachmentStoreOp::DontCare;
-    attachment_description.initial_layout = plc::ImageLayout::Undefined;
-    attachment_description.final_layout = plc::ImageLayout::DepthStencilAttachmentOptimal;
+    const auto attachment_description =
+        plc::AttachmentDescription{}
+            .setFormat(plc::DataFormat::DepthSfloatStencilUint)
+            .setSamples(plc::ImageSampleCount::v1)
+            .setLoadOp(plc::AttachmentLoadOp::Clear)
+            .setStoreOp(plc::AttachmentStoreOp::DontCare)
+            .setStencilLoadOp(plc::AttachmentLoadOp::DontCare)
+            .setStencilStoreOp(plc::AttachmentStoreOp::DontCare)
+            .setLayouts(plc::ImageLayout::Undefined, plc::ImageLayout::DepthStencilAttachmentOptimal);
 
-    return attachment_list.append(attachment_description, *m_ptrDepthImageView, plc::ClearDepthStencil(1.0f, 0U));
+    return attachment_list.append(
+        attachment_description, *m_ptrDepthImageView, plc::ClearDepthStencil{}.setValues(1.0f, 0U));
   }();
 
   plc::SubpassGraph subpass_graph;
 
   {
     plc::SubpassNode subpass_node(plc::PipelineBind::Graphics, 0U);
-    subpass_node.attachColor(
-        plc::AttachmentReference(backbuffer_attach_index, plc::ImageLayout::ColorAttachmentOptimal));
-    subpass_node.attachDepthStencil(
-        plc::AttachmentReference(depth_attach_index, plc::ImageLayout::DepthStencilAttachmentOptimal));
+    subpass_node.attachColor(plc::AttachmentReference{}
+                                 .setIndex(backbuffer_attach_index)
+                                 .setLayout(plc::ImageLayout::ColorAttachmentOptimal));
+    subpass_node.attachDepthStencil(plc::AttachmentReference{}
+                                        .setIndex(depth_attach_index)
+                                        .setLayout(plc::ImageLayout::DepthStencilAttachmentOptimal));
     m_supassIndexMap["draw"] = subpass_graph.appendNode(subpass_node);
 
-    plc::SubpassEdge subpass_edge;
-    subpass_edge.dependency_flag = plc::DependencyFlag::ByRegion;
-    subpass_edge.dst_index = m_supassIndexMap.at("draw");
-    subpass_edge.src_stages.push_back(plc::PipelineStage::ColorAttachmentOutput);
-    subpass_edge.dst_stages.push_back(plc::PipelineStage::ColorAttachmentOutput);
-    subpass_edge.src_access.push_back(plc::AccessFlag::Unknown);
-    subpass_edge.dst_access.push_back(plc::AccessFlag::ColorAttachmentWrite);
+    const auto subpass_edge = plc::SubpassEdge{}
+                                  .setDependencyFlag(plc::DependencyFlag::ByRegion)
+                                  .setDstIndex(m_supassIndexMap.at("draw"))
+                                  .addSrcStage(plc::PipelineStage::ColorAttachmentOutput)
+                                  .addDstStage(plc::PipelineStage::ColorAttachmentOutput)
+                                  .addSrcAccess(plc::AccessFlag::Unknown)
+                                  .addDstAccess(plc::AccessFlag::ColorAttachmentWrite);
     subpass_graph.appendEdge(subpass_edge);
   }
 

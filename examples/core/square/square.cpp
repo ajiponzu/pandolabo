@@ -93,35 +93,32 @@ void samples::core::Square::constructRenderpass(const bool is_resized) {
   plc::AttachmentList attachment_list;
 
   const auto backbuffer_attach_index = [&] {
-    plc::AttachmentDescription attachment_description;
-    attachment_description.format = m_ptrContext->getPtrSwapchain()->getImageFormat();
-    attachment_description.samples = plc::ImageSampleCount::v1;
-    attachment_description.load_op = plc::AttachmentLoadOp::Clear;
-    attachment_description.store_op = plc::AttachmentStoreOp::Store;
-    attachment_description.stencil_load_op = plc::AttachmentLoadOp::DontCare;
-    attachment_description.stencil_store_op = plc::AttachmentStoreOp::DontCare;
-    attachment_description.initial_layout = plc::ImageLayout::Undefined;
-    attachment_description.final_layout = plc::ImageLayout::PresentSrc;
+    const auto attachment_description = plc::AttachmentDescription{}
+                                            .setFormat(m_ptrContext->getPtrSwapchain()->getImageFormat())
+                                            .setSamples(plc::ImageSampleCount::v1)
+                                            .setLoadOp(plc::AttachmentLoadOp::Clear)
+                                            .setStoreOp(plc::AttachmentStoreOp::Store)
+                                            .setStencilLoadOp(plc::AttachmentLoadOp::DontCare)
+                                            .setStencilStoreOp(plc::AttachmentStoreOp::DontCare)
+                                            .setLayouts(plc::ImageLayout::Undefined, plc::ImageLayout::PresentSrc);
 
-    return attachment_list.append(attachment_description, plc::ClearColor({0.0F, 0.0F, 0.0F, 1.0F}));
+    return attachment_list.append(attachment_description, plc::ClearColor{}.setColor(0.0F, 0.0F, 0.0F, 1.0F));
   }();
 
   plc::SubpassGraph subpass_graph;
 
   plc::SubpassNode subpass_node(plc::PipelineBind::Graphics, 0U);
-  subpass_node.attachColor(plc::AttachmentReference(backbuffer_attach_index, plc::ImageLayout::ColorAttachmentOptimal));
+  subpass_node.attachColor(
+      plc::AttachmentReference{}.setIndex(backbuffer_attach_index).setLayout(plc::ImageLayout::ColorAttachmentOptimal));
   m_supassIndexMap["draw"] = subpass_graph.appendNode(subpass_node);
 
-  plc::SubpassEdge subpass_edge;
-  subpass_edge.dependency_flag = plc::DependencyFlag::ByRegion;
-  // First subpass index must be ~0U (not equal 0U).
-  // SubpassEdge struct's src_index is initialized ~0U.
-  // subpass_edge.src_index = ~0U;
-  subpass_edge.dst_index = m_supassIndexMap.at("draw");
-  subpass_edge.src_stages.push_back(plc::PipelineStage::ColorAttachmentOutput);
-  subpass_edge.dst_stages.push_back(plc::PipelineStage::ColorAttachmentOutput);
-  subpass_edge.src_access.push_back(plc::AccessFlag::Unknown);
-  subpass_edge.dst_access.push_back(plc::AccessFlag::ColorAttachmentWrite);
+  const auto subpass_edge = plc::SubpassEdge{}
+                                .setDependencyFlag(plc::DependencyFlag::ByRegion)
+                                .setDstIndex(m_supassIndexMap.at("draw"))
+                                .addSrcStage(plc::PipelineStage::ColorAttachmentOutput)
+                                .addDstStage(plc::PipelineStage::ColorAttachmentOutput)
+                                .addSrcAccess(plc::AccessFlag::Unknown)
+                                .addDstAccess(plc::AccessFlag::ColorAttachmentWrite);
   subpass_graph.appendEdge(subpass_edge);
 
   if (is_resized) {
@@ -160,9 +157,8 @@ void samples::core::Square::constructGraphicPipeline() {
   }
 
   {
-    plc::ColorBlendAttachment color_blend_attachment;
-    color_blend_attachment.color_components = {
-        plc::ColorComponent::R, plc::ColorComponent::G, plc::ColorComponent::B, plc::ColorComponent::A};
+    const auto color_blend_attachment = plc::ColorBlendAttachment{}.setColorComponents(
+        {plc::ColorComponent::R, plc::ColorComponent::G, plc::ColorComponent::B, plc::ColorComponent::A});
     ptr_graphic_info->color_blend.setLogicOp(false, plc::LogicOp::Copy);
     ptr_graphic_info->color_blend.appendAttachment(color_blend_attachment);
   }

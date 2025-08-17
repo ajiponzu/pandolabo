@@ -60,15 +60,14 @@ void samples::core::SimpleImageComputing::initializeImageResources() {
   m_image.data =
       stbi_load("examples/core/computing_image/lenna.png", &(m_image.width), &(m_image.height), &(m_image.channels), 0);
 
-  plc::ImageSubInfo image_sub_info;
-  image_sub_info.graphical_size.width = static_cast<uint32_t>(m_image.width);
-  image_sub_info.graphical_size.height = static_cast<uint32_t>(m_image.height);
-  image_sub_info.graphical_size.depth = 1U;
-  image_sub_info.mip_levels = 1U;
-  image_sub_info.array_layers = 1U;
-  image_sub_info.samples = plc::ImageSampleCount::v1;
-  image_sub_info.format = plc::DataFormat::R8G8B8A8Unorm;
-  image_sub_info.dimension = plc::ImageDimension::v2D;
+  const auto image_sub_info =
+      plc::ImageSubInfo{}
+          .setSize(static_cast<uint32_t>(m_image.width), static_cast<uint32_t>(m_image.height), 1U)
+          .setMipLevels(1U)
+          .setArrayLayers(1U)
+          .setSamples(plc::ImageSampleCount::v1)
+          .setFormat(plc::DataFormat::R8G8B8A8Unorm)
+          .setDimension(plc::ImageDimension::v2D);
 
   m_ptrImage = std::make_unique<plc::gpu::Image>(m_ptrContext,
                                                  plc::MemoryUsage::GpuOnly,
@@ -83,12 +82,10 @@ void samples::core::SimpleImageComputing::initializeImageResources() {
                                                         image_sub_info);
 
   {
-    plc::ImageViewInfo image_view_info{};
-    image_view_info.aspect = plc::ImageAspect::Color;
-    image_view_info.base_array_layer = 0U;
-    image_view_info.array_layers = image_sub_info.array_layers;
-    image_view_info.base_mip_level = 0U;
-    image_view_info.mip_levels = image_sub_info.mip_levels;
+    const auto image_view_info = plc::ImageViewInfo{}
+                                     .setAspect(plc::ImageAspect::Color)
+                                     .setArrayRange(0U, image_sub_info.array_layers)
+                                     .setMipRange(0U, image_sub_info.mip_levels);
 
     m_ptrImageView = std::make_unique<plc::gpu::ImageView>(m_ptrContext, *m_ptrImage, image_view_info);
 
@@ -96,20 +93,13 @@ void samples::core::SimpleImageComputing::initializeImageResources() {
   }
 
   {
-    plc::SamplerInfo sampler_info{};
-    sampler_info.address_mode_u = plc::SamplerAddressMode::ClampToBorder;
-    sampler_info.address_mode_v = plc::SamplerAddressMode::ClampToBorder;
-    sampler_info.address_mode_w = plc::SamplerAddressMode::ClampToBorder;
-    sampler_info.mag_filter = plc::SamplerFilter::Linear;
-    sampler_info.min_filter = plc::SamplerFilter::Linear;
-    sampler_info.mipmap_mode = plc::SamplerMipmapMode::Linear;
-    sampler_info.mip_lod_bias = 0.0f;
-    sampler_info.anisotropy_enable = false;
-    sampler_info.compare_enable = false;
-    sampler_info.max_lod = static_cast<float_t>(image_sub_info.mip_levels);
-    sampler_info.min_lod = 0.0f;
-    sampler_info.border_color = plc::SamplerBorderColor::FloatOpaqueWhite;
-    sampler_info.unnormalized_coordinates = false;
+    const auto sampler_info = plc::SamplerInfo{}
+                                  .setAddressMode(plc::SamplerAddressMode::ClampToBorder)
+                                  .setFilters(plc::SamplerFilter::Linear, plc::SamplerFilter::Linear)
+                                  .setMipmapMode(plc::SamplerMipmapMode::Linear)
+                                  .setLodRange(0.0f, static_cast<float_t>(image_sub_info.mip_levels))
+                                  .setBorderColor(plc::SamplerBorderColor::FloatOpaqueWhite)
+                                  .setUnnormalizedCoordinates(false);
 
     m_ptrImageSampler = std::make_unique<plc::gpu::Sampler>(m_ptrContext, sampler_info);
   }
