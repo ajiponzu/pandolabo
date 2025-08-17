@@ -54,7 +54,7 @@ pandora::core::gpu::Buffer::Buffer(const std::unique_ptr<Context>& ptr_context,
     const auto vk_buffer_usages = std::ranges::fold_left(
         buffer_usages | std::views::transform(get_buffer_usage), vk::BufferUsageFlags{}, std::bit_or());
 
-    m_ptrBuffer = ptr_vk_device->createBufferUnique(vk::BufferCreateInfo()
+    m_ptrBuffer = ptr_vk_device->createBufferUnique(vk::BufferCreateInfo{}
                                                         .setUsage(vk_transfer_type | vk_buffer_usages)
                                                         .setSize(m_size)
                                                         .setSharingMode(vk::SharingMode::eExclusive));
@@ -74,7 +74,7 @@ pandora::core::gpu::Buffer::Buffer(const std::unique_ptr<Context>& ptr_context,
     }
 
     m_ptrMemory = ptr_vk_device->allocateMemoryUnique(
-        vk::MemoryAllocateInfo().setMemoryTypeIndex(memory_type_idx).setAllocationSize(memory_requirements.size));
+        vk::MemoryAllocateInfo{}.setMemoryTypeIndex(memory_type_idx).setAllocationSize(memory_requirements.size));
   }
 
   ptr_vk_device->bindBufferMemory(m_ptrBuffer.get(), m_ptrMemory.get(), 0U);

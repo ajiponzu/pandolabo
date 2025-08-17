@@ -20,7 +20,7 @@ pandora::core::gpu::DescriptorSetLayout::DescriptorSetLayout(const std::unique_p
       | std::ranges::to<std::vector<vk::DescriptorSetLayoutBinding>>();
 
   const auto descriptor_set_layout_info =
-      vk::DescriptorSetLayoutCreateInfo().setBindings(descriptor_set_layout_bindings);
+      vk::DescriptorSetLayoutCreateInfo{}.setBindings(descriptor_set_layout_bindings);
 
   m_ptrDescriptorSetLayout =
       ptr_context->getPtrDevice()->getPtrLogicalDevice()->createDescriptorSetLayoutUnique(descriptor_set_layout_info);

@@ -152,7 +152,7 @@ static std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage, c
     throw std::runtime_error(shader_code + "\n" + shader.getInfoLog());
   }
 
-  glslang::TProgram program;
+  glslang::TProgram program{};
   program.addShader(&shader);
 
   if (!program.link(messages)) {
@@ -169,7 +169,7 @@ static std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage, c
 std::vector<uint32_t> pandora::core::io::shader::readText(const std::string& file_path) {
   const auto& [shader_type, stage] = translate_shader_stage(file_path);
 
-  std::stringstream shader_code;
+  std::stringstream shader_code{};
   std::ifstream input_file(file_path);
   shader_code << input_file.rdbuf();
   input_file.close();

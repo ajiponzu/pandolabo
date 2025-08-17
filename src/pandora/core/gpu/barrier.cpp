@@ -28,7 +28,7 @@ pandora::core::gpu::ImageBarrier::ImageBarrier(const Image& image,
                                                const ImageLayout old_layout,
                                                const ImageLayout new_layout,
                                                const ImageViewInfo& image_view_info) {
-  vk::ImageSubresourceRange subresource_range;
+  vk::ImageSubresourceRange subresource_range{};
 
   switch (image_view_info.aspect) {
     using enum ImageAspect;

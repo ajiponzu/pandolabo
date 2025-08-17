@@ -8,7 +8,7 @@
 void pandora::core::pipeline::VertexInput::appendBinding(const uint32_t binding,
                                                          const uint32_t stride,
                                                          const VertexInputRate input_rate) {
-  m_bindings.push_back(vk::VertexInputBindingDescription().setBinding(binding).setStride(stride).setInputRate(
+  m_bindings.push_back(vk::VertexInputBindingDescription{}.setBinding(binding).setStride(stride).setInputRate(
       vk_helper::getVertexInputRate(input_rate)));
 
   m_info.setVertexBindingDescriptions(m_bindings);
@@ -18,7 +18,7 @@ void pandora::core::pipeline::VertexInput::appendAttribute(const uint32_t locati
                                                            const uint32_t binding,
                                                            const DataFormat format,
                                                            const uint32_t offset) {
-  m_attributes.push_back(vk::VertexInputAttributeDescription()
+  m_attributes.push_back(vk::VertexInputAttributeDescription{}
                              .setLocation(location)
                              .setBinding(binding)
                              .setFormat(vk_helper::getFormat(format))
@@ -42,8 +42,8 @@ void pandora::core::pipeline::Tessellation::setPatchControlPoints(const uint32_t
 void pandora::core::pipeline::ViewportState::setViewport(const gpu_ui::GraphicalSize<float_t>& size,
                                                          const float_t min_depth,
                                                          const float_t max_depth) {
-  m_viewport.setX(0.0f)
-      .setY(0.0f)
+  m_viewport.setX(0.0F)
+      .setY(0.0F)
       .setWidth(size.width)
       .setHeight(size.height)
       .setMinDepth(min_depth)
@@ -136,7 +136,7 @@ void pandora::core::pipeline::ColorBlend::setLogicOp(const bool is_enabled, cons
 void pandora::core::pipeline::ColorBlend::appendAttachment(const ColorBlendAttachment& attachment) {
   using namespace vk_helper;
 
-  m_attachments.push_back(vk::PipelineColorBlendAttachmentState()
+  m_attachments.push_back(vk::PipelineColorBlendAttachmentState{}
                               .setBlendEnable(attachment.is_enabled)
                               .setSrcColorBlendFactor(getBlendFactor(attachment.src_color))
                               .setDstColorBlendFactor(getBlendFactor(attachment.dst_color))
@@ -159,7 +159,7 @@ pandora::core::Pipeline::Pipeline(const std::unique_ptr<gpu::Context>& ptr_conte
   using P = std::ranges::range_value_t<decltype(description_unit.getPushConstantRangeMap() | std::views::values)>;
   const auto push_constant_ranges = description_unit.getPushConstantRangeMap() | std::views::values
                                     | std::views::transform([](const P& x) {
-                                        return vk::PushConstantRange()
+                                        return vk::PushConstantRange{}
                                             .setStageFlags(x.stage_flags)
                                             .setOffset(x.offset)
                                             .setSize(static_cast<uint32_t>(x.size));
@@ -167,7 +167,7 @@ pandora::core::Pipeline::Pipeline(const std::unique_ptr<gpu::Context>& ptr_conte
                                     | std::ranges::to<std::vector<vk::PushConstantRange>>();
 
   m_ptrPipelineLayout = ptr_context->getPtrDevice()->getPtrLogicalDevice()->createPipelineLayoutUnique(
-      vk::PipelineLayoutCreateInfo()
+      vk::PipelineLayoutCreateInfo{}
           .setSetLayouts(descriptor_set_layout.getDescriptorSetLayout())
           .setPushConstantRanges(push_constant_ranges));
 
@@ -180,9 +180,9 @@ void pandora::core::Pipeline::constructComputePipeline(const std::unique_ptr<gpu
                                                        const gpu::ShaderModule& shader_module) {
   m_queueFamilyType = QueueFamilyType::Compute;
 
-  const auto compute_pipeline_info = vk::ComputePipelineCreateInfo()
+  const auto compute_pipeline_info = vk::ComputePipelineCreateInfo{}
                                          .setLayout(m_ptrPipelineLayout.get())
-                                         .setStage(vk::PipelineShaderStageCreateInfo()
+                                         .setStage(vk::PipelineShaderStageCreateInfo{}
                                                        .setStage(vk::ShaderStageFlagBits::eCompute)
                                                        .setModule(shader_module.getModule())
                                                        .setPName(shader_module.getEntryPointName().c_str()));
@@ -201,13 +201,13 @@ void pandora::core::Pipeline::constructGraphicsPipeline(
     const Renderpass& render_pass,
     const uint32_t subpass_index) {
   m_queueFamilyType = QueueFamilyType::Graphics;
-  vk::GraphicsPipelineCreateInfo pipeline_info;
+  vk::GraphicsPipelineCreateInfo pipeline_info{};
 
   using M = std::ranges::range_value_t<decltype(module_keys)>;
   const auto shader_stage_infos = module_keys | std::views::transform([&shader_module_map](const M& x) {
                                     const auto& shader_module = shader_module_map.at(x);
 
-                                    return vk::PipelineShaderStageCreateInfo()
+                                    return vk::PipelineShaderStageCreateInfo{}
                                         .setStage(shader_module.getShaderStageFlag())
                                         .setModule(shader_module.getModule())
                                         .setPName(shader_module.getEntryPointName().c_str());

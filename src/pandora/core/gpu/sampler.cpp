@@ -4,7 +4,7 @@
 pandora::core::gpu::Sampler::Sampler(const std::unique_ptr<Context>& ptr_context, const SamplerInfo& sampler_info) {
   using namespace vk_helper;
 
-  const auto sampler_create_info = vk::SamplerCreateInfo()
+  const auto sampler_create_info = vk::SamplerCreateInfo{}
                                        .setMagFilter(getSamplerFilter(sampler_info.mag_filter))
                                        .setMinFilter(getSamplerFilter(sampler_info.min_filter))
                                        .setMipmapMode(getSamplerMipmapMode(sampler_info.mipmap_mode))

@@ -9,7 +9,7 @@ pandora::core::gpu::DescriptorSet::DescriptorSet(const std::unique_ptr<Context>&
   m_ptrDescriptorPool = ptr_vk_device->createDescriptorPoolUnique(description_set_layout.getDescriptorPoolInfo());
   m_ptrDescriptorSet =
       std::move(ptr_vk_device
-                    ->allocateDescriptorSetsUnique(vk::DescriptorSetAllocateInfo()
+                    ->allocateDescriptorSetsUnique(vk::DescriptorSetAllocateInfo{}
                                                        .setDescriptorPool(m_ptrDescriptorPool.get())
                                                        .setSetLayouts(description_set_layout.getDescriptorSetLayout()))
                     .front());

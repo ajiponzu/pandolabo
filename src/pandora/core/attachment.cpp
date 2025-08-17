@@ -49,7 +49,7 @@ uint32_t pandora::core::AttachmentList::append(const AttachmentDescription& desc
 const void pandora::core::AttachmentList::appendDescription(const AttachmentDescription& description) {
   using namespace vk_helper;
 
-  const auto vk_description = vk::AttachmentDescription()
+  const auto vk_description = vk::AttachmentDescription{}
                                   .setFormat(getFormat(description.format))
                                   .setSamples(getSampleCount(description.samples))
                                   .setLoadOp(getAttachmentLoadOp(description.load_op))

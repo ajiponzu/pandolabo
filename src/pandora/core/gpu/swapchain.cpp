@@ -55,7 +55,7 @@ void pandora::core::gpu::Swapchain::constructSwapchain(const std::unique_ptr<Dev
     const auto queue_family_index = ptr_device->getQueueFamilyIndex(pandora::core::QueueFamilyType::Graphics);
 
     const auto swapchain_info =
-        vk::SwapchainCreateInfoKHR()
+        vk::SwapchainCreateInfoKHR{}
             .setSurface(vk_surface.get())
             .setMinImageCount(std::min(surface_capabilities.maxImageCount, MAX_FRAMES_IN_FLIGHT))
             .setImageSharingMode(vk::SharingMode::eExclusive)
@@ -93,7 +93,7 @@ void pandora::core::gpu::Swapchain::constructSwapchain(const std::unique_ptr<Dev
 
       m_imageAvailableSemaphores.emplace_back(ptr_vk_device->createSemaphoreUnique({}));
       m_renderFinishedSemaphores.emplace_back(ptr_vk_device->createSemaphoreUnique({}));
-      m_fences.emplace_back(ptr_vk_device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled)));
+      m_fences.emplace_back(ptr_vk_device->createFenceUnique(vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled}));
     }
   }
 }

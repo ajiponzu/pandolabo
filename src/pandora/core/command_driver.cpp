@@ -35,12 +35,12 @@ void pandora::core::CommandDriver::constructSecondary(const std::unique_ptr<gpu:
 
   for (uint32_t idx = 0U; idx < required_secondary_num; idx += 1U) {
     m_ptrSecondaryCommandPools.push_back(
-        ptr_vk_device->createCommandPoolUnique(vk::CommandPoolCreateInfo()
+        ptr_vk_device->createCommandPoolUnique(vk::CommandPoolCreateInfo{}
                                                    .setQueueFamilyIndex(m_queueFamilyIndex)
                                                    .setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)));
     m_secondaryCommandBuffers.push_back(
         std::move(ptr_vk_device
-                      ->allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo()
+                      ->allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{}
                                                          .setCommandPool(m_ptrSecondaryCommandPools.back().get())
                                                          .setLevel(vk::CommandBufferLevel::eSecondary)
                                                          .setCommandBufferCount(1U))
@@ -50,10 +50,10 @@ void pandora::core::CommandDriver::constructSecondary(const std::unique_ptr<gpu:
 
 void pandora::core::CommandDriver::resetAllCommands() const {
   for (const auto& command_buffer : m_secondaryCommandBuffers) {
-    command_buffer->reset(vk::CommandBufferResetFlags());
+    command_buffer->reset(vk::CommandBufferResetFlags{});
   }
 
-  m_ptrPrimaryCommandBuffer->reset(vk::CommandBufferResetFlags());
+  m_ptrPrimaryCommandBuffer->reset(vk::CommandBufferResetFlags{});
 }
 
 void pandora::core::CommandDriver::resetAllCommandPools(const std::unique_ptr<gpu::Context>& ptr_context) const {
@@ -63,7 +63,7 @@ void pandora::core::CommandDriver::resetAllCommandPools(const std::unique_ptr<gp
     ptr_vk_device->resetCommandPool(command_pool.get());
   }
 
-  ptr_vk_device->resetCommandPool(m_ptrCommandPool.get(), vk::CommandPoolResetFlags());
+  ptr_vk_device->resetCommandPool(m_ptrCommandPool.get(), vk::CommandPoolResetFlags{});
 }
 
 void pandora::core::CommandDriver::mergeSecondaryCommands() const {

@@ -12,12 +12,12 @@ pandora::core::gpu::BufferDescription::BufferDescription(const DescriptorInfo& d
 pandora::core::gpu::BufferDescription::~BufferDescription() {}
 
 vk::DescriptorBufferInfo pandora::core::gpu::BufferDescription::createVkBufferInfo() const {
-  return vk::DescriptorBufferInfo().setBuffer(m_bufferInfo.buffer).setRange(m_bufferInfo.size).setOffset(0U);
+  return vk::DescriptorBufferInfo{}.setBuffer(m_bufferInfo.buffer).setRange(m_bufferInfo.size).setOffset(0U);
 }
 
 vk::WriteDescriptorSet pandora::core::gpu::BufferDescription::createVkWriteDescriptorSet(
     const vk::DescriptorBufferInfo& info) const {
-  return vk::WriteDescriptorSet()
+  return vk::WriteDescriptorSet{}
       .setDstBinding(m_writeDescInfo.binding)
       .setDescriptorType(m_writeDescInfo.type)
       .setDstArrayElement(0U)
@@ -59,7 +59,7 @@ pandora::core::gpu::ImageDescription::ImageDescription(const DescriptorInfo& des
 pandora::core::gpu::ImageDescription::~ImageDescription() {}
 
 vk::DescriptorImageInfo pandora::core::gpu::ImageDescription::createVkImageInfo() const {
-  vk::DescriptorImageInfo info;
+  vk::DescriptorImageInfo info{};
 
   if (m_imageInfo.layout) {
     info.setImageLayout(*(m_imageInfo.layout));
@@ -76,7 +76,7 @@ vk::DescriptorImageInfo pandora::core::gpu::ImageDescription::createVkImageInfo(
 
 vk::WriteDescriptorSet pandora::core::gpu::ImageDescription::createVkWriteDescriptorSet(
     const vk::DescriptorImageInfo& info) const {
-  return vk::WriteDescriptorSet()
+  return vk::WriteDescriptorSet{}
       .setDstBinding(m_writeDescInfo.binding)
       .setDescriptorType(m_writeDescInfo.type)
       .setDstArrayElement(0U)

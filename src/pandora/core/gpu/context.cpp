@@ -5,15 +5,15 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 pandora::core::gpu::Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
   // Initialize Vulkan.hpp
   {
-    static vk::detail::DynamicLoader dl;
+    static vk::detail::DynamicLoader dl{};
     auto vk_get_instance_proc_addr = dl.getProcAddress<::PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
     VULKAN_HPP_DEFAULT_DISPATCHER.init(vk_get_instance_proc_addr);
   }
 
   // Create Vulkan instance
   {
-    vk::ApplicationInfo app_info(
-        "pandolabo", PANDOLABO_VK_VERSION, "pandolabo", PANDOLABO_VK_VERSION, PANDOLABO_VK_VERSION);
+    vk::ApplicationInfo app_info{
+        "pandolabo", PANDOLABO_VK_VERSION, "pandolabo", PANDOLABO_VK_VERSION, PANDOLABO_VK_VERSION};
 
     std::vector<const char*> extensions;
 

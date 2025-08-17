@@ -66,11 +66,7 @@ pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
     m_mipLevels = image_sub_info.mip_levels;
     m_dimension = image_sub_info.dimension;
 
-    image_info
-        .setExtent(vk::Extent3D()
-                       .setWidth(m_graphicalSize.width)
-                       .setHeight(m_graphicalSize.height)
-                       .setDepth(m_graphicalSize.depth))
+    image_info.setExtent(vk_helper::getExtent3D(m_graphicalSize))
         .setArrayLayers(m_arrayLayers)
         .setMipLevels(m_mipLevels)
         .setImageType(get_image_type(m_dimension))
@@ -98,7 +94,7 @@ pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
     }
 
     m_ptrMemory = ptr_vk_device->allocateMemoryUnique(
-        vk::MemoryAllocateInfo().setMemoryTypeIndex(memory_type_idx).setAllocationSize(memory_requirements.size));
+        vk::MemoryAllocateInfo{}.setMemoryTypeIndex(memory_type_idx).setAllocationSize(memory_requirements.size));
   }
 
   ptr_vk_device->bindImageMemory(m_ptrImage.get(), m_ptrMemory.get(), 0U);

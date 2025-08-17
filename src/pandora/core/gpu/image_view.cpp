@@ -22,13 +22,13 @@ pandora::core::gpu::ImageView::ImageView(const std::unique_ptr<Context>& ptr_con
                                          const ImageViewInfo& image_view_info) {
   const auto create_info =
       vk::ImageViewCreateInfo()
-          .setSubresourceRange(vk::ImageSubresourceRange()
+          .setSubresourceRange(vk::ImageSubresourceRange{}
                                    .setAspectMask(vk_helper::getImageAspectFlags(image_view_info.aspect))
                                    .setBaseMipLevel(image_view_info.base_mip_level)
                                    .setLevelCount(image_view_info.mip_levels)
                                    .setBaseArrayLayer(image_view_info.base_array_layer)
                                    .setLayerCount(image_view_info.array_layers))
-          .setComponents(vk::ComponentMapping()
+          .setComponents(vk::ComponentMapping{}
                              .setR(vk::ComponentSwizzle::eIdentity)
                              .setG(vk::ComponentSwizzle::eIdentity)
                              .setB(vk::ComponentSwizzle::eIdentity)

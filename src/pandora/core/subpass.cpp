@@ -9,7 +9,7 @@ pandora::core::SubpassNode::SubpassNode(const PipelineBind bind_point, const uin
 pandora::core::SubpassNode::~SubpassNode() {}
 
 vk::AttachmentReference pandora::core::SubpassNode::convert(const AttachmentReference& attachment_ref) {
-  return vk::AttachmentReference()
+  return vk::AttachmentReference{}
       .setAttachment(attachment_ref.index)
       .setLayout(vk_helper::getImageLayout(attachment_ref.layout));
 }
@@ -24,7 +24,7 @@ uint32_t pandora::core::SubpassGraph::appendNode(const SubpassNode& node) {
   {
     const auto& subpass_node = m_nodes.back();
 
-    vk::SubpassDescription description;
+    vk::SubpassDescription description{};
     description.setPipelineBindPoint(subpass_node.getBindPoint());
 
     if (!subpass_node.getInputs().empty()) {
@@ -49,7 +49,7 @@ uint32_t pandora::core::SubpassGraph::appendNode(const SubpassNode& node) {
 void pandora::core::SubpassGraph::appendEdge(const SubpassEdge& edge) {
   using namespace vk_helper;
 
-  vk::SubpassDependency dependency;
+  vk::SubpassDependency dependency{};
   dependency.setSrcSubpass(edge.src_index).setDstSubpass(edge.dst_index);
 
   for (const auto& stage : edge.src_stages) {
