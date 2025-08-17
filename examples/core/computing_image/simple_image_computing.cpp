@@ -192,12 +192,15 @@ void samples::core::SimpleImageComputing::setTransferCommands(
 
   {
     const auto image_barrier =
-        plc::gpu::ImageBarrier(*m_ptrImage,
-                               {plc::AccessFlag::Unknown},
-                               {plc::AccessFlag::TransferWrite},
-                               plc::ImageLayout::Undefined,
-                               plc::ImageLayout::TransferDstOptimal,
-                               image_view_info);
+        plc::gpu::ImageBarrierBuilder::create()
+            .setImage(*m_ptrImage)
+            .setPriorityAccessFlags(std::vector{plc::AccessFlag::Unknown})
+            .setWaitAccessFlags(std::vector{plc::AccessFlag::TransferWrite})
+            .setOldLayout(plc::ImageLayout::Undefined)
+            .setNewLayout(plc::ImageLayout::TransferDstOptimal)
+            .setImageViewInfo(image_view_info)
+            .build();
+
     command_buffer.setPipelineBarrier(image_barrier,
                                       plc::PipelineStage::TopOfPipe,
                                       plc::PipelineStage::Transfer);
@@ -209,17 +212,19 @@ void samples::core::SimpleImageComputing::setTransferCommands(
                                    image_view_info);
 
   {
-    auto image_barrier =
-        plc::gpu::ImageBarrier(*m_ptrImage,
-                               {plc::AccessFlag::TransferWrite},
-                               {plc::AccessFlag::ShaderRead},
-                               plc::ImageLayout::TransferDstOptimal,
-                               plc::ImageLayout::TransferDstOptimal,
-                               image_view_info);
-    image_barrier.setSrcQueueFamilyIndex(
-        m_ptrTransferCommandDriver->getQueueFamilyIndex());
-    image_barrier.setDstQueueFamilyIndex(
-        m_ptrComputeCommandDriver->getQueueFamilyIndex());
+    const auto image_barrier =
+        plc::gpu::ImageBarrierBuilder::create()
+            .setImage(*m_ptrImage)
+            .setPriorityAccessFlags(std::vector{plc::AccessFlag::TransferWrite})
+            .setWaitAccessFlags(std::vector{plc::AccessFlag::ShaderRead})
+            .setOldLayout(plc::ImageLayout::TransferDstOptimal)
+            .setNewLayout(plc::ImageLayout::TransferDstOptimal)
+            .setImageViewInfo(image_view_info)
+            .setSrcQueueFamilyIndex(
+                m_ptrTransferCommandDriver->getQueueFamilyIndex())
+            .setDstQueueFamilyIndex(
+                m_ptrComputeCommandDriver->getQueueFamilyIndex())
+            .build();
 
     command_buffer.setPipelineBarrier(image_barrier,
                                       plc::PipelineStage::Transfer,
@@ -242,17 +247,19 @@ void samples::core::SimpleImageComputing::setComputeCommands(
     const plc::ImageViewInfo image_view_info =
         m_ptrImageView->getImageViewInfo();
 
-    auto image_barrier =
-        plc::gpu::ImageBarrier(*m_ptrImage,
-                               {plc::AccessFlag::TransferWrite},
-                               {plc::AccessFlag::ShaderRead},
-                               plc::ImageLayout::TransferDstOptimal,
-                               plc::ImageLayout::ShaderReadOnlyOptimal,
-                               image_view_info);
-    image_barrier.setSrcQueueFamilyIndex(
-        m_ptrTransferCommandDriver->getQueueFamilyIndex());
-    image_barrier.setDstQueueFamilyIndex(
-        m_ptrComputeCommandDriver->getQueueFamilyIndex());
+    const auto image_barrier =
+        plc::gpu::ImageBarrierBuilder::create()
+            .setImage(*m_ptrImage)
+            .setPriorityAccessFlags(std::vector{plc::AccessFlag::TransferWrite})
+            .setWaitAccessFlags(std::vector{plc::AccessFlag::ShaderRead})
+            .setOldLayout(plc::ImageLayout::TransferDstOptimal)
+            .setNewLayout(plc::ImageLayout::ShaderReadOnlyOptimal)
+            .setImageViewInfo(image_view_info)
+            .setSrcQueueFamilyIndex(
+                m_ptrTransferCommandDriver->getQueueFamilyIndex())
+            .setDstQueueFamilyIndex(
+                m_ptrComputeCommandDriver->getQueueFamilyIndex())
+            .build();
 
     command_buffer.setPipelineBarrier(image_barrier,
                                       plc::PipelineStage::BottomOfPipe,
@@ -263,12 +270,14 @@ void samples::core::SimpleImageComputing::setComputeCommands(
       m_ptrStorageImageView->getImageViewInfo();
   {
     const auto image_barrier =
-        plc::gpu::ImageBarrier(*m_ptrStorageImage,
-                               {plc::AccessFlag::Unknown},
-                               {plc::AccessFlag::ShaderWrite},
-                               plc::ImageLayout::Undefined,
-                               plc::ImageLayout::General,
-                               image_view_info);
+        plc::gpu::ImageBarrierBuilder::create()
+            .setImage(*m_ptrStorageImage)
+            .setPriorityAccessFlags(std::vector{plc::AccessFlag::Unknown})
+            .setWaitAccessFlags(std::vector{plc::AccessFlag::ShaderWrite})
+            .setOldLayout(plc::ImageLayout::Undefined)
+            .setNewLayout(plc::ImageLayout::General)
+            .setImageViewInfo(image_view_info)
+            .build();
 
     command_buffer.setPipelineBarrier(image_barrier,
                                       plc::PipelineStage::TopOfPipe,
@@ -286,12 +295,14 @@ void samples::core::SimpleImageComputing::setComputeCommands(
 
   {
     const auto image_barrier =
-        plc::gpu::ImageBarrier(*m_ptrStorageImage,
-                               {plc::AccessFlag::ShaderWrite},
-                               {plc::AccessFlag::TransferRead},
-                               plc::ImageLayout::General,
-                               plc::ImageLayout::General,
-                               image_view_info);
+        plc::gpu::ImageBarrierBuilder::create()
+            .setImage(*m_ptrStorageImage)
+            .setPriorityAccessFlags(std::vector{plc::AccessFlag::ShaderWrite})
+            .setWaitAccessFlags(std::vector{plc::AccessFlag::TransferRead})
+            .setOldLayout(plc::ImageLayout::General)
+            .setNewLayout(plc::ImageLayout::General)
+            .setImageViewInfo(image_view_info)
+            .build();
 
     command_buffer.setPipelineBarrier(image_barrier,
                                       plc::PipelineStage::ComputeShader,
@@ -305,12 +316,15 @@ void samples::core::SimpleImageComputing::setComputeCommands(
 
   {
     const auto image_barrier =
-        plc::gpu::ImageBarrier(*m_ptrStorageImage,
-                               {plc::AccessFlag::TransferRead},
-                               {plc::AccessFlag::ShaderWrite},
-                               plc::ImageLayout::General,
-                               plc::ImageLayout::General,
-                               image_view_info);
+        plc::gpu::ImageBarrierBuilder::create()
+            .setImage(*m_ptrStorageImage)
+            .setPriorityAccessFlags(std::vector{plc::AccessFlag::TransferRead})
+            .setWaitAccessFlags(std::vector{plc::AccessFlag::ShaderWrite})
+            .setOldLayout(plc::ImageLayout::General)
+            .setNewLayout(plc::ImageLayout::General)
+            .setImageViewInfo(image_view_info)
+            .build();
+
     command_buffer.setPipelineBarrier(image_barrier,
                                       plc::PipelineStage::Transfer,
                                       plc::PipelineStage::ComputeShader);

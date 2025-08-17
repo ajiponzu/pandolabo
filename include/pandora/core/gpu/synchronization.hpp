@@ -9,6 +9,9 @@
 #pragma once
 
 #include <memory>
+#include <optional>
+#include <span>
+#include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
@@ -45,8 +48,10 @@ class BufferBarrier {
   /// this barrier
   /// @param wait_access_flags Memory access types that wait for this barrier
   BufferBarrier(const Buffer& buffer,
-                const std::vector<AccessFlag>& priority_access_flags,
-                const std::vector<AccessFlag>& wait_access_flags);
+                std::span<const AccessFlag> priority_access_flags,
+                std::span<const AccessFlag> wait_access_flags,
+                uint32_t src_queue_family = 0u,
+                uint32_t dst_queue_family = 0u);
   ~BufferBarrier();
 
   /// @brief Get const reference to underlying Vulkan barrier
@@ -65,6 +70,84 @@ class BufferBarrier {
   /// @param index Queue family index that will receive buffer ownership
   void setDstQueueFamilyIndex(const uint32_t index) {
     m_bufferMemoryBarrier.setDstQueueFamilyIndex(index);
+  }
+};
+
+/// @brief Builder class for BufferBarrier
+/// Provides a fluent interface for constructing BufferBarrier instances
+class BufferBarrierBuilder {
+ private:
+  const Buffer* m_ptrBuffer = nullptr;
+  std::span<const AccessFlag> m_priorityAccessFlags{};
+  std::span<const AccessFlag> m_waitAccessFlags{};
+  uint32_t m_srcQueueFamily = 0u;
+  uint32_t m_dstQueueFamily = 0u;
+
+  // Private constructor - use create() factory method instead
+  BufferBarrierBuilder() = default;
+
+ public:
+  /// @brief Static factory method to create a new BufferBarrierBuilder
+  /// @return A new BufferBarrierBuilder instance
+  static BufferBarrierBuilder create() {
+    return BufferBarrierBuilder{};
+  }
+
+  /// @brief Set the buffer to synchronize
+  /// @param buffer The buffer to apply the barrier to
+  /// @return Reference to this builder for method chaining
+  BufferBarrierBuilder& setBuffer(const Buffer& buffer) {
+    m_ptrBuffer = &buffer;
+    return *this;
+  }
+
+  /// @brief Set priority access flags
+  /// @param flags Memory access types that must complete before this barrier
+  /// @return Reference to this builder for method chaining
+  BufferBarrierBuilder& setPriorityAccessFlags(
+      std::span<const AccessFlag> flags) {
+    m_priorityAccessFlags = flags;
+    return *this;
+  }
+
+  /// @brief Set wait access flags
+  /// @param flags Memory access types that wait for this barrier
+  /// @return Reference to this builder for method chaining
+  BufferBarrierBuilder& setWaitAccessFlags(std::span<const AccessFlag> flags) {
+    m_waitAccessFlags = flags;
+    return *this;
+  }
+
+  /// @brief Set source queue family index for ownership transfer
+  /// @param index Queue family index that currently owns the buffer
+  /// @return Reference to this builder for method chaining
+  BufferBarrierBuilder& setSrcQueueFamilyIndex(const uint32_t index) {
+    m_srcQueueFamily = index;
+    return *this;
+  }
+
+  /// @brief Set destination queue family index for ownership transfer
+  /// @param index Queue family index that will receive buffer ownership
+  /// @return Reference to this builder for method chaining
+  BufferBarrierBuilder& setDstQueueFamilyIndex(const uint32_t index) {
+    m_dstQueueFamily = index;
+    return *this;
+  }
+
+  /// @brief Build and return the final BufferBarrier instance
+  /// @return BufferBarrier instance
+  /// @throws std::runtime_error if buffer is not set
+  BufferBarrier build() {
+    if (!m_ptrBuffer) {
+      throw std::runtime_error(
+          "Buffer must be set before building BufferBarrier");
+    }
+
+    return BufferBarrier(*m_ptrBuffer,
+                         m_priorityAccessFlags,
+                         m_waitAccessFlags,
+                         m_srcQueueFamily,
+                         m_dstQueueFamily);
   }
 };
 
@@ -87,16 +170,20 @@ class ImageBarrier {
 
  public:
   ImageBarrier(const Image& image,
-               const std::vector<AccessFlag>& priority_access_flags,
-               const std::vector<AccessFlag>& wait_access_flags,
+               std::span<const AccessFlag> priority_access_flags,
+               std::span<const AccessFlag> wait_access_flags,
                const ImageLayout old_layout,
                const ImageLayout new_layout,
-               const ImageViewInfo& image_view_info);
+               const ImageViewInfo& image_view_info,
+               uint32_t src_queue_family = 0u,
+               uint32_t dst_queue_family = 0u);
   ImageBarrier(const std::unique_ptr<Context>& ptr_context,
-               const std::vector<AccessFlag>& priority_access_flags,
-               const std::vector<AccessFlag>& wait_access_flags,
+               std::span<const AccessFlag> priority_access_flags,
+               std::span<const AccessFlag> wait_access_flags,
                const ImageLayout old_layout,
-               const ImageLayout new_layout);
+               const ImageLayout new_layout,
+               uint32_t src_queue_family = 0u,
+               uint32_t dst_queue_family = 0u);
   ~ImageBarrier();
 
   const auto& getBarrier() const {
@@ -109,6 +196,128 @@ class ImageBarrier {
 
   void setDstQueueFamilyIndex(const uint32_t index) {
     m_imageMemoryBarrier.setDstQueueFamilyIndex(index);
+  }
+};
+
+/// @brief Builder class for ImageBarrier
+/// Provides a fluent interface for constructing ImageBarrier instances
+class ImageBarrierBuilder {
+ private:
+  const Image* m_ptrImage = nullptr;
+  std::span<const AccessFlag> m_priorityAccessFlags{};
+  std::span<const AccessFlag> m_waitAccessFlags{};
+  ImageLayout m_oldLayout = ImageLayout::Undefined;
+  ImageLayout m_newLayout = ImageLayout::Undefined;
+  std::optional<ImageViewInfo> m_imageViewInfo{};
+  uint32_t m_srcQueueFamily = 0u;
+  uint32_t m_dstQueueFamily = 0u;
+
+  // Private constructor - use create() factory method instead
+  ImageBarrierBuilder() = default;
+
+ public:
+  /// @brief Static factory method to create a new ImageBarrierBuilder
+  /// @return A new ImageBarrierBuilder instance
+  static ImageBarrierBuilder create() {
+    return ImageBarrierBuilder{};
+  }
+
+  /// @brief Set the image to synchronize
+  /// @param image The image to apply the barrier to
+  /// @return Reference to this builder for method chaining
+  ImageBarrierBuilder& setImage(const Image& image) {
+    m_ptrImage = &image;
+    return *this;
+  }
+
+  /// @brief Set priority access flags
+  /// @param flags Memory access types that must complete before this barrier
+  /// @return Reference to this builder for method chaining
+  ImageBarrierBuilder& setPriorityAccessFlags(
+      std::span<const AccessFlag> flags) {
+    m_priorityAccessFlags = flags;
+    return *this;
+  }
+
+  /// @brief Set wait access flags
+  /// @param flags Memory access types that wait for this barrier
+  /// @return Reference to this builder for method chaining
+  ImageBarrierBuilder& setWaitAccessFlags(std::span<const AccessFlag> flags) {
+    m_waitAccessFlags = flags;
+    return *this;
+  }
+
+  /// @brief Set old image layout
+  /// @param layout The current layout of the image
+  /// @return Reference to this builder for method chaining
+  ImageBarrierBuilder& setOldLayout(const ImageLayout layout) {
+    m_oldLayout = layout;
+    return *this;
+  }
+
+  /// @brief Set new image layout
+  /// @param layout The desired layout after the barrier
+  /// @return Reference to this builder for method chaining
+  ImageBarrierBuilder& setNewLayout(const ImageLayout layout) {
+    m_newLayout = layout;
+    return *this;
+  }
+
+  /// @brief Set image view info for subresource specification
+  /// @param info Image view information specifying which parts of the image to
+  /// barrier
+  /// @return Reference to this builder for method chaining
+  ImageBarrierBuilder& setImageViewInfo(const ImageViewInfo& info) {
+    m_imageViewInfo = info;
+    return *this;
+  }
+
+  /// @brief Set source queue family index for ownership transfer
+  /// @param index Queue family index that currently owns the buffer
+  /// @return Reference to this builder for method chaining
+  ImageBarrierBuilder& setSrcQueueFamilyIndex(const uint32_t index) {
+    m_srcQueueFamily = index;
+    return *this;
+  }
+
+  /// @brief Set destination queue family index for ownership transfer
+  /// @param index Queue family index that will receive buffer ownership
+  /// @return Reference to this builder for method chaining
+  ImageBarrierBuilder& setDstQueueFamilyIndex(const uint32_t index) {
+    m_dstQueueFamily = index;
+    return *this;
+  }
+
+  /// @brief Build and return the final ImageBarrier instance
+  /// @param ptr_context GPU context pointer (required for context-based
+  /// construction)
+  /// @return ImageBarrier instance
+  /// @throws std::runtime_error if required parameters are not set
+  ImageBarrier build(const std::unique_ptr<Context>& ptr_context = nullptr) {
+    if (m_ptrImage && m_imageViewInfo) {
+      // Build with image and image view info
+      return ImageBarrier(*m_ptrImage,
+                          m_priorityAccessFlags,
+                          m_waitAccessFlags,
+                          m_oldLayout,
+                          m_newLayout,
+                          *m_imageViewInfo,
+                          m_srcQueueFamily,
+                          m_dstQueueFamily);
+    } else if (ptr_context) {
+      // Build with context
+      return ImageBarrier(ptr_context,
+                          m_priorityAccessFlags,
+                          m_waitAccessFlags,
+                          m_oldLayout,
+                          m_newLayout,
+                          m_srcQueueFamily,
+                          m_dstQueueFamily);
+    } else {
+      throw std::runtime_error(
+          "Either image with ImageViewInfo or context parameter must be "
+          "provided for building ImageBarrier");
+    }
   }
 };
 

@@ -1,12 +1,13 @@
 #include <algorithm>
 #include <functional>
 #include <ranges>
+#include <span>
 
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
 
 inline static constexpr auto g_lamda_convert_access_flags =
-    [](const std::vector<pandora::core::AccessFlag>& access_flags) {
+    [](const std::span<const pandora::core::AccessFlag>& access_flags) {
       return std::ranges::fold_left(
           access_flags | std::views::transform(vk_helper::getAccessFlagBits),
           vk::AccessFlags{},
@@ -15,23 +16,29 @@ inline static constexpr auto g_lamda_convert_access_flags =
 
 pandora::core::gpu::BufferBarrier::BufferBarrier(
     const Buffer& buffer,
-    const std::vector<AccessFlag>& priority_access_flags,
-    const std::vector<AccessFlag>& wait_access_flags) {
+    std::span<const AccessFlag> priority_access_flags,
+    std::span<const AccessFlag> wait_access_flags,
+    uint32_t src_queue_family,
+    uint32_t dst_queue_family) {
   m_bufferMemoryBarrier.setBuffer(buffer.getBuffer())
       .setSize(buffer.getSize())
       .setSrcAccessMask(g_lamda_convert_access_flags(priority_access_flags))
-      .setDstAccessMask(g_lamda_convert_access_flags(wait_access_flags));
+      .setDstAccessMask(g_lamda_convert_access_flags(wait_access_flags))
+      .setSrcQueueFamilyIndex(src_queue_family)
+      .setDstQueueFamilyIndex(dst_queue_family);
 }
 
 pandora::core::gpu::BufferBarrier::~BufferBarrier() {}
 
 pandora::core::gpu::ImageBarrier::ImageBarrier(
     const Image& image,
-    const std::vector<AccessFlag>& priority_access_flags,
-    const std::vector<AccessFlag>& wait_access_flags,
+    std::span<const AccessFlag> priority_access_flags,
+    std::span<const AccessFlag> wait_access_flags,
     const ImageLayout old_layout,
     const ImageLayout new_layout,
-    const ImageViewInfo& image_view_info) {
+    const ImageViewInfo& image_view_info,
+    uint32_t src_queue_family,
+    uint32_t dst_queue_family) {
   vk::ImageSubresourceRange subresource_range{};
 
   switch (image_view_info.aspect) {
@@ -64,15 +71,19 @@ pandora::core::gpu::ImageBarrier::ImageBarrier(
       .setDstAccessMask(g_lamda_convert_access_flags(wait_access_flags))
       .setOldLayout(vk_helper::getImageLayout(old_layout))
       .setNewLayout(vk_helper::getImageLayout(new_layout))
-      .setSubresourceRange(subresource_range);
+      .setSubresourceRange(subresource_range)
+      .setSrcQueueFamilyIndex(src_queue_family)
+      .setDstQueueFamilyIndex(dst_queue_family);
 }
 
 pandora::core::gpu::ImageBarrier::ImageBarrier(
     const std::unique_ptr<Context>& ptr_context,
-    const std::vector<AccessFlag>& priority_access_flags,
-    const std::vector<AccessFlag>& wait_access_flags,
+    std::span<const AccessFlag> priority_access_flags,
+    std::span<const AccessFlag> wait_access_flags,
     const ImageLayout old_layout,
-    const ImageLayout new_layout) {
+    const ImageLayout new_layout,
+    uint32_t src_queue_family,
+    uint32_t dst_queue_family) {
   m_imageMemoryBarrier.setImage(ptr_context->getPtrSwapchain()->getImage())
       .setSrcAccessMask(g_lamda_convert_access_flags(priority_access_flags))
       .setDstAccessMask(g_lamda_convert_access_flags(wait_access_flags))
@@ -83,7 +94,9 @@ pandora::core::gpu::ImageBarrier::ImageBarrier(
                                .setBaseMipLevel(0u)
                                .setLevelCount(1u)
                                .setBaseArrayLayer(0u)
-                               .setLayerCount(1u));
+                               .setLayerCount(1u))
+      .setSrcQueueFamilyIndex(src_queue_family)
+      .setDstQueueFamilyIndex(dst_queue_family);
 }
 
 pandora::core::gpu::ImageBarrier::~ImageBarrier() {}

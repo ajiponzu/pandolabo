@@ -179,19 +179,25 @@ void pandora::core::TransferCommandBuffer::setMipmaps(
           .setMipRange(0u, 1u)  // for sending each mip level
           .setArrayRange(0u, 1u);
 
-  const gpu::ImageBarrier src_image_barrier(image,
-                                            {AccessFlag::TransferWrite},
-                                            {AccessFlag::TransferRead},
-                                            ImageLayout::TransferDstOptimal,
-                                            ImageLayout::TransferSrcOptimal,
-                                            image_view_info);
+  const auto src_image_barrier =
+      gpu::ImageBarrierBuilder::create()
+          .setImage(image)
+          .setPriorityAccessFlags(std::vector{AccessFlag::TransferWrite})
+          .setWaitAccessFlags(std::vector{AccessFlag::TransferRead})
+          .setOldLayout(ImageLayout::TransferDstOptimal)
+          .setNewLayout(ImageLayout::TransferSrcOptimal)
+          .setImageViewInfo(image_view_info)
+          .build();
 
-  const gpu::ImageBarrier dst_image_barrier(image,
-                                            {AccessFlag::TransferRead},
-                                            {AccessFlag::ShaderRead},
-                                            ImageLayout::TransferSrcOptimal,
-                                            ImageLayout::ShaderReadOnlyOptimal,
-                                            image_view_info);
+  const auto dst_image_barrier =
+      gpu::ImageBarrierBuilder::create()
+          .setImage(image)
+          .setPriorityAccessFlags(std::vector{AccessFlag::TransferRead})
+          .setWaitAccessFlags(std::vector{AccessFlag::ShaderRead})
+          .setOldLayout(ImageLayout::TransferSrcOptimal)
+          .setNewLayout(ImageLayout::ShaderReadOnlyOptimal)
+          .setImageViewInfo(image_view_info)
+          .build();
 
   vk::ImageMemoryBarrier src_barrier = src_image_barrier.getBarrier();
   vk::ImageMemoryBarrier dst_barrier = dst_image_barrier.getBarrier();
@@ -280,12 +286,15 @@ void pandora::core::TransferCommandBuffer::transferMipmapImages(
                                    .setMipRange(0u, 1u)
                                    .setArrayRange(0u, 1u);
 
-  const gpu::ImageBarrier image_barrier(image,
-                                        {AccessFlag::TransferWrite},
-                                        {AccessFlag::ShaderRead},
-                                        ImageLayout::TransferDstOptimal,
-                                        ImageLayout::TransferDstOptimal,
-                                        image_view_info);
+  const auto image_barrier =
+      gpu::ImageBarrierBuilder::create()
+          .setImage(image)
+          .setPriorityAccessFlags(std::vector{AccessFlag::TransferWrite})
+          .setWaitAccessFlags(std::vector{AccessFlag::TransferRead})
+          .setOldLayout(ImageLayout::TransferDstOptimal)
+          .setNewLayout(ImageLayout::TransferDstOptimal)
+          .setImageViewInfo(image_view_info)
+          .build();
 
   vk::ImageMemoryBarrier barrier = image_barrier.getBarrier();
   barrier.setSrcQueueFamilyIndex(queue_family_index.first)
@@ -317,12 +326,15 @@ void pandora::core::TransferCommandBuffer::acquireMipmapImages(
                                    .setBaseArrayLayer(0u)
                                    .setArrayLayers(1u);
 
-  const gpu::ImageBarrier image_barrier(image,
-                                        {AccessFlag::TransferWrite},
-                                        {AccessFlag::ShaderRead},
-                                        ImageLayout::TransferDstOptimal,
-                                        ImageLayout::ShaderReadOnlyOptimal,
-                                        image_view_info);
+  const auto image_barrier =
+      gpu::ImageBarrierBuilder::create()
+          .setImage(image)
+          .setPriorityAccessFlags(std::vector{AccessFlag::TransferWrite})
+          .setWaitAccessFlags(std::vector{AccessFlag::TransferRead})
+          .setOldLayout(ImageLayout::TransferDstOptimal)
+          .setNewLayout(ImageLayout::ShaderReadOnlyOptimal)
+          .setImageViewInfo(image_view_info)
+          .build();
 
   vk::ImageMemoryBarrier barrier = image_barrier.getBarrier();
   barrier.setSrcQueueFamilyIndex(queue_family_index.first);
