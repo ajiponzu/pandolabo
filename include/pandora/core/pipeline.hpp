@@ -60,6 +60,20 @@ class VertexInput {
   /// @param format Data format of the attribute
   /// @param offset Byte offset of this attribute within the vertex
   void appendAttribute(const uint32_t location, const uint32_t binding, const DataFormat format, const uint32_t offset);
+
+  // Fluent interface methods
+  VertexInput& addBinding(const uint32_t binding, const uint32_t stride, const VertexInputRate input_rate) {
+    appendBinding(binding, stride, input_rate);
+    return *this;
+  }
+
+  VertexInput& addAttribute(const uint32_t location,
+                            const uint32_t binding,
+                            const DataFormat format,
+                            const uint32_t offset) {
+    appendAttribute(location, binding, format, offset);
+    return *this;
+  }
 };
 
 /// @brief Input assembly configuration for graphics pipelines
@@ -80,6 +94,17 @@ class InputAssembly {
   /// @brief Enable or disable primitive restart
   /// @param is_enabled Whether to enable primitive restart with special index values
   void setRestart(const bool is_enabled);
+
+  // Fluent interface methods
+  InputAssembly& withTopology(const PrimitiveTopology topology) {
+    setTopology(topology);
+    return *this;
+  }
+
+  InputAssembly& withRestart(const bool is_enabled) {
+    setRestart(is_enabled);
+    return *this;
+  }
 };
 
 /// @brief Tessellation stage configuration for graphics pipelines
@@ -96,6 +121,12 @@ class Tessellation {
   /// @brief Set number of control points per patch
   /// @param count Number of vertices that define each tessellation patch
   void setPatchControlPoints(const uint32_t count);
+
+  // Fluent interface methods
+  Tessellation& withPatchControlPoints(const uint32_t count) {
+    setPatchControlPoints(count);
+    return *this;
+  }
 };
 
 /// @brief Viewport and scissor state configuration for graphics pipelines
@@ -120,6 +151,19 @@ class ViewportState {
   /// @brief Set scissor test rectangle
   /// @param size Width and height of the scissor rectangle
   void setScissor(const gpu_ui::GraphicalSize<uint32_t>& size);
+
+  // Fluent interface methods
+  ViewportState& withViewport(const gpu_ui::GraphicalSize<float_t>& size,
+                              const float_t min_depth,
+                              const float_t max_depth) {
+    setViewport(size, min_depth, max_depth);
+    return *this;
+  }
+
+  ViewportState& withScissor(const gpu_ui::GraphicalSize<uint32_t>& size) {
+    setScissor(size);
+    return *this;
+  }
 };
 
 /// @brief Rasterization state configuration for graphics pipelines
@@ -162,6 +206,42 @@ class Rasterization {
   /// @brief Set line width for line primitives
   /// @param line_width Width of rasterized lines in pixels
   void setLineWidth(const float_t line_width);
+
+  // Fluent interface methods
+  Rasterization& withDepthBiasEnabled(const bool is_enabled) {
+    setDepthBiasEnabled(is_enabled);
+    return *this;
+  }
+
+  Rasterization& withDepthBias(const float_t constant_factor, const float_t clamp, const float_t slope_factor) {
+    setDepthBias(constant_factor, clamp, slope_factor);
+    return *this;
+  }
+
+  Rasterization& withRasterizerDiscard(const bool is_enabled) {
+    setRasterizerDiscard(is_enabled);
+    return *this;
+  }
+
+  Rasterization& withPolygonMode(const PolygonMode polygon_mode) {
+    setPolygonMode(polygon_mode);
+    return *this;
+  }
+
+  Rasterization& withCullMode(const CullMode cull_mode) {
+    setCullMode(cull_mode);
+    return *this;
+  }
+
+  Rasterization& withFrontFace(const FrontFace front_face) {
+    setFrontFace(front_face);
+    return *this;
+  }
+
+  Rasterization& withLineWidth(const float_t line_width) {
+    setLineWidth(line_width);
+    return *this;
+  }
 };
 
 /// @brief Multisample anti-aliasing configuration for graphics pipelines
@@ -178,6 +258,22 @@ class Multisample {
   void setSampleCount(const std::unique_ptr<gpu::Context>& ptr_context);
   void setSampleShading(const bool is_enabled);
   void setMinSampleShading(const float_t min_sample_shading);
+
+  // Fluent interface methods
+  Multisample& withSampleCount(const std::unique_ptr<gpu::Context>& ptr_context) {
+    setSampleCount(ptr_context);
+    return *this;
+  }
+
+  Multisample& withSampleShading(const bool is_enabled) {
+    setSampleShading(is_enabled);
+    return *this;
+  }
+
+  Multisample& withMinSampleShading(const float_t min_sample_shading) {
+    setMinSampleShading(min_sample_shading);
+    return *this;
+  }
 };
 
 /// @brief Depth and stencil testing configuration for graphics pipelines
@@ -198,6 +294,42 @@ class DepthStencil {
   void setStencilTest(const bool is_enabled);
   void setFrontStencilOp(const StencilOpState& state);
   void setBackStencilOp(const StencilOpState& state);
+
+  // Fluent interface methods
+  DepthStencil& withDepthTest(const bool is_enabled) {
+    setDepthTest(is_enabled);
+    return *this;
+  }
+
+  DepthStencil& withDepthWrite(const bool is_enabled) {
+    setDepthWrite(is_enabled);
+    return *this;
+  }
+
+  DepthStencil& withDepthCompareOp(const CompareOp compare_op) {
+    setDepthCompareOp(compare_op);
+    return *this;
+  }
+
+  DepthStencil& withDepthBoundsTest(const bool is_enabled) {
+    setDepthBoundsTest(is_enabled);
+    return *this;
+  }
+
+  DepthStencil& withStencilTest(const bool is_enabled) {
+    setStencilTest(is_enabled);
+    return *this;
+  }
+
+  DepthStencil& withFrontStencilOp(const StencilOpState& state) {
+    setFrontStencilOp(state);
+    return *this;
+  }
+
+  DepthStencil& withBackStencilOp(const StencilOpState& state) {
+    setBackStencilOp(state);
+    return *this;
+  }
 };
 
 /// @brief Color blending configuration for graphics pipelines
@@ -214,6 +346,17 @@ class ColorBlend {
 
   void setLogicOp(const bool is_enabled, const LogicOp logic_op);
   void appendAttachment(const ColorBlendAttachment& attachment);
+
+  // Fluent interface methods
+  ColorBlend& withLogicOp(const bool is_enabled, const LogicOp logic_op) {
+    setLogicOp(is_enabled, logic_op);
+    return *this;
+  }
+
+  ColorBlend& addAttachment(const ColorBlendAttachment& attachment) {
+    appendAttachment(attachment);
+    return *this;
+  }
 };
 
 /// @brief Dynamic state configuration for graphics pipelines
@@ -229,6 +372,12 @@ class DynamicState {
   ~DynamicState() = default;
 
   void appendState(const DynamicOption option);
+
+  // Fluent interface methods
+  DynamicState& addState(const DynamicOption option) {
+    appendState(option);
+    return *this;
+  }
 };
 
 /// @brief Graphics pipeline configuration structure
@@ -244,6 +393,44 @@ struct GraphicInfo {
   DepthStencil depth_stencil{};
   ColorBlend color_blend{};
   DynamicState dynamic_state{};
+
+  // Fluent interface methods
+  GraphicInfo& setVertexInput(const VertexInput& input) {
+    vertex_input = input;
+    return *this;
+  }
+  GraphicInfo& setInputAssembly(const InputAssembly& assembly) {
+    input_assembly = assembly;
+    return *this;
+  }
+  GraphicInfo& setTessellation(const Tessellation& tess) {
+    tessellation = tess;
+    return *this;
+  }
+  GraphicInfo& setViewportState(const ViewportState& state) {
+    viewport_state = state;
+    return *this;
+  }
+  GraphicInfo& setRasterization(const Rasterization& raster) {
+    rasterization = raster;
+    return *this;
+  }
+  GraphicInfo& setMultisample(const Multisample& multi) {
+    multisample = multi;
+    return *this;
+  }
+  GraphicInfo& setDepthStencil(const DepthStencil& depth) {
+    depth_stencil = depth;
+    return *this;
+  }
+  GraphicInfo& setColorBlend(const ColorBlend& blend) {
+    color_blend = blend;
+    return *this;
+  }
+  GraphicInfo& setDynamicState(const DynamicState& state) {
+    dynamic_state = state;
+    return *this;
+  }
 };
 
 }  // namespace pipeline

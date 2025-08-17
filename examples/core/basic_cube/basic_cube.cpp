@@ -201,43 +201,31 @@ void samples::core::BasicCube::constructRenderpass(const bool is_resized) {
 }
 
 void samples::core::BasicCube::constructGraphicPipeline() {
-  const auto ptr_graphic_info = std::make_unique<plc::pipeline::GraphicInfo>();
-
-  {
-    ptr_graphic_info->vertex_input.appendBinding(0U, sizeof(Vertex), plc::VertexInputRate::Vertex);
-    ptr_graphic_info->vertex_input.appendAttribute(0U, 0U, plc::DataFormat::R32G32B32Sfloat, offsetof(Vertex, pos));
-    ptr_graphic_info->vertex_input.appendAttribute(1U, 0U, plc::DataFormat::R32G32B32Sfloat, offsetof(Vertex, color));
-  }
-
-  {
-    ptr_graphic_info->input_assembly.setTopology(plc::PrimitiveTopology::TriangleList);
-    ptr_graphic_info->input_assembly.setRestart(false);
-  }
-
-  {
-    ptr_graphic_info->viewport_state.setScissor({800U, 600U});
-    ptr_graphic_info->viewport_state.setViewport({800.0f, 600.0f}, 0.0f, 1.0f);
-  }
-
-  {
-    ptr_graphic_info->rasterization.setPolygonMode(plc::PolygonMode::Fill);
-    ptr_graphic_info->rasterization.setCullMode(plc::CullMode::Back);
-    ptr_graphic_info->rasterization.setFrontFace(plc::FrontFace::Clockwise);
-    ptr_graphic_info->rasterization.setLineWidth(1.0f);
-  }
-
-  {
-    plc::ColorBlendAttachment color_blend_attachment;
-    color_blend_attachment.color_components = {
-        plc::ColorComponent::R, plc::ColorComponent::G, plc::ColorComponent::B, plc::ColorComponent::A};
-    ptr_graphic_info->color_blend.setLogicOp(false, plc::LogicOp::Copy);
-    ptr_graphic_info->color_blend.appendAttachment(color_blend_attachment);
-  }
-
-  {
-    ptr_graphic_info->dynamic_state.appendState(plc::DynamicOption::Viewport);
-    ptr_graphic_info->dynamic_state.appendState(plc::DynamicOption::Scissor);
-  }
+  // Create GraphicInfo using fluent interface
+  const auto ptr_graphic_info = std::make_unique<plc::pipeline::GraphicInfo>(
+      plc::pipeline::GraphicInfo{}
+          .setVertexInput(plc::pipeline::VertexInput{}
+                              .addBinding(0U, sizeof(Vertex), plc::VertexInputRate::Vertex)
+                              .addAttribute(0U, 0U, plc::DataFormat::R32G32B32Sfloat, offsetof(Vertex, pos))
+                              .addAttribute(1U, 0U, plc::DataFormat::R32G32B32Sfloat, offsetof(Vertex, color)))
+          .setInputAssembly(
+              plc::pipeline::InputAssembly{}.withTopology(plc::PrimitiveTopology::TriangleList).withRestart(false))
+          .setViewportState(
+              plc::pipeline::ViewportState{}.withScissor({800U, 600U}).withViewport({800.0f, 600.0f}, 0.0f, 1.0f))
+          .setRasterization(plc::pipeline::Rasterization{}
+                                .withPolygonMode(plc::PolygonMode::Fill)
+                                .withCullMode(plc::CullMode::Back)
+                                .withFrontFace(plc::FrontFace::Clockwise)
+                                .withLineWidth(1.0f))
+          .setColorBlend(plc::pipeline::ColorBlend{}
+                             .withLogicOp(false, plc::LogicOp::Copy)
+                             .addAttachment(plc::ColorBlendAttachment{}.setColorComponents({plc::ColorComponent::R,
+                                                                                            plc::ColorComponent::G,
+                                                                                            plc::ColorComponent::B,
+                                                                                            plc::ColorComponent::A})))
+          .setDynamicState(plc::pipeline::DynamicState{}
+                               .addState(plc::DynamicOption::Viewport)
+                               .addState(plc::DynamicOption::Scissor)));
 
   m_ptrPipeline->constructGraphicsPipeline(m_ptrContext,
                                            m_shaderModuleMap,
