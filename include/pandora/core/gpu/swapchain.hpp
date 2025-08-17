@@ -26,8 +26,8 @@ class Swapchain {
   std::vector<vk::Image> m_images;
   std::vector<vk::UniqueImageView> m_imageViews;
 
-  uint32_t m_frameSyncIndex = 0U;
-  uint32_t m_imageIndex = 0U;
+  uint32_t m_frameSyncIndex = 0u;
+  uint32_t m_imageIndex = 0u;
 
   std::vector<vk::UniqueSemaphore> m_imageAvailableSemaphores;
   std::vector<vk::UniqueSemaphore> m_renderFinishedSemaphores;

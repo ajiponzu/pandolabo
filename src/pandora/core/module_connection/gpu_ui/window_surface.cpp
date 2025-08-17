@@ -29,5 +29,5 @@ void pandora::core::gpu_ui::WindowSurface::setWindowSize() {
 
   m_windowSize.width = window_width;
   m_windowSize.height = window_height;
-  m_windowSize.depth = 0U;
+  m_windowSize.depth = 0u;
 }

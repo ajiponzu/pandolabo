@@ -29,8 +29,8 @@ class Image {
   vk::UniqueDeviceMemory m_ptrMemory;
   vk::UniqueImage m_ptrImage;
 
-  uint32_t m_mipLevels = 0U;
-  uint32_t m_arrayLayers = 0U;
+  uint32_t m_mipLevels = 0u;
+  uint32_t m_arrayLayers = 0u;
   vk::Format m_format{};
   ImageDimension m_dimension{};
   gpu_ui::GraphicalSize<uint32_t> m_graphicalSize{};

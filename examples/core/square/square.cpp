@@ -1,7 +1,7 @@
 #include "square.hpp"
 
 samples::core::Square::Square() {
-  m_ptrWindow = std::make_unique<plc::ui::Window>("Square", 800U, 600U);
+  m_ptrWindow = std::make_unique<plc::ui::Window>("Square", 800u, 600u);
   m_ptrContext = std::make_unique<plc::gpu::Context>(m_ptrWindow->getWindowSurface());
 
   m_ptrWindow->addCallback([&]() {
@@ -13,7 +13,7 @@ samples::core::Square::Square() {
     constructRenderpass(true);
   });
 
-  for (size_t idx = 0U; idx < m_ptrContext->getPtrSwapchain()->getImageCount(); idx += 1U) {
+  for (size_t idx = 0u; idx < m_ptrContext->getPtrSwapchain()->getImageCount(); idx += 1u) {
     m_ptrGraphicCommandDriver.push_back(
         std::make_unique<plc::CommandDriver>(m_ptrContext, plc::QueueFamilyType::Graphics));
   }
@@ -36,14 +36,14 @@ void samples::core::Square::run() {
 
     plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
     m_ptrTransferCommandDriver->submit(plc::PipelineStage::BottomOfPipe, semaphore);
-    m_ptrGraphicCommandDriver.at(0U)->submit(plc::PipelineStage::VertexShader, semaphore);
+    m_ptrGraphicCommandDriver.at(0u)->submit(plc::PipelineStage::VertexShader, semaphore);
 
     semaphore.wait(m_ptrContext);
     m_ptrTransferCommandDriver->queueWaitIdle();
-    m_ptrGraphicCommandDriver.at(0U)->queueWaitIdle();
+    m_ptrGraphicCommandDriver.at(0u)->queueWaitIdle();
 
     m_ptrTransferCommandDriver->resetAllCommandPools(m_ptrContext);
-    m_ptrGraphicCommandDriver.at(0U)->resetAllCommandPools(m_ptrContext);
+    m_ptrGraphicCommandDriver.at(0u)->resetAllCommandPools(m_ptrContext);
   }
 
   while (m_ptrWindow->update()) {
@@ -102,12 +102,12 @@ void samples::core::Square::constructRenderpass(const bool is_resized) {
                                             .setStencilStoreOp(plc::AttachmentStoreOp::DontCare)
                                             .setLayouts(plc::ImageLayout::Undefined, plc::ImageLayout::PresentSrc);
 
-    return attachment_list.append(attachment_description, plc::ClearColor{}.setColor(0.0F, 0.0F, 0.0F, 1.0F));
+    return attachment_list.append(attachment_description, plc::ClearColor{}.setColor(0.0f, 0.0f, 0.0f, 1.0f));
   }();
 
   plc::SubpassGraph subpass_graph;
 
-  plc::SubpassNode subpass_node(plc::PipelineBind::Graphics, 0U);
+  plc::SubpassNode subpass_node(plc::PipelineBind::Graphics, 0u);
   subpass_node.attachColor(
       plc::AttachmentReference{}.setIndex(backbuffer_attach_index).setLayout(plc::ImageLayout::ColorAttachmentOptimal));
   m_supassIndexMap["draw"] = subpass_graph.appendNode(subpass_node);
@@ -135,13 +135,13 @@ void samples::core::Square::constructGraphicPipeline() {
   const auto ptr_graphic_info = std::make_unique<plc::pipeline::GraphicInfo>(
       plc::pipeline::GraphicInfo{}
           .setVertexInput(plc::pipeline::VertexInput{}
-                              .addBinding(0U, sizeof(Vertex), plc::VertexInputRate::Vertex)
-                              .addAttribute(0U, 0U, plc::DataFormat::R32G32Sfloat, offsetof(Vertex, pos))
-                              .addAttribute(1U, 0U, plc::DataFormat::R32G32B32Sfloat, offsetof(Vertex, color)))
+                              .addBinding(0u, sizeof(Vertex), plc::VertexInputRate::Vertex)
+                              .addAttribute(0u, 0u, plc::DataFormat::R32G32Sfloat, offsetof(Vertex, pos))
+                              .addAttribute(1u, 0u, plc::DataFormat::R32G32B32Sfloat, offsetof(Vertex, color)))
           .setInputAssembly(
               plc::pipeline::InputAssembly{}.withTopology(plc::PrimitiveTopology::TriangleList).withRestart(false))
           .setViewportState(
-              plc::pipeline::ViewportState{}.withScissor({800U, 600U}).withViewport({800.0f, 600.0f}, 0.0f, 1.0f))
+              plc::pipeline::ViewportState{}.withScissor({800u, 600u}).withViewport({800.0f, 600.0f}, 0.0f, 1.0f))
           .setRasterization(plc::pipeline::Rasterization{}
                                 .withPolygonMode(plc::PolygonMode::Fill)
                                 .withCullMode(plc::CullMode::Back)
@@ -191,7 +191,7 @@ void samples::core::Square::setTransferCommands(std::vector<plc::gpu::Buffer>& s
 
       staging_buffers.push_back(std::move(staging_buffer));
 
-      command_buffer.copyBuffer(staging_buffers.at(0U), *m_ptrVertexBuffer);
+      command_buffer.copyBuffer(staging_buffers.at(0u), *m_ptrVertexBuffer);
 
       auto buffer_barrier = plc::gpu::BufferBarrier(*m_ptrVertexBuffer,
                                                     {plc::AccessFlag::TransferWrite},
@@ -203,7 +203,7 @@ void samples::core::Square::setTransferCommands(std::vector<plc::gpu::Buffer>& s
     }
 
     {
-      const std::vector<uint32_t> indices = {0U, 1U, 2U, 2U, 3U, 0U};
+      const std::vector<uint32_t> indices = {0u, 1u, 2U, 2U, 3u, 0u};
 
       m_ptrIndexBuffer =
           std::make_unique<plc::gpu::Buffer>(plc::createIndexBuffer(m_ptrContext, indices.size() * sizeof(uint32_t)));
@@ -215,7 +215,7 @@ void samples::core::Square::setTransferCommands(std::vector<plc::gpu::Buffer>& s
 
       staging_buffers.push_back(std::move(staging_buffer));
 
-      command_buffer.copyBuffer(staging_buffers.at(1U), *m_ptrIndexBuffer);
+      command_buffer.copyBuffer(staging_buffers.at(1u), *m_ptrIndexBuffer);
 
       auto buffer_barrier = plc::gpu::BufferBarrier(*m_ptrIndexBuffer,
                                                     {plc::AccessFlag::TransferWrite},
@@ -273,7 +273,7 @@ void samples::core::Square::setGraphicCommands() {
 
   static float_t push_timer = 0.0f;
   push_timer += 0.016f;
-  command_buffer.pushConstants(*m_ptrPipeline, {plc::ShaderStage::Fragment}, 0U, {push_timer});
+  command_buffer.pushConstants(*m_ptrPipeline, {plc::ShaderStage::Fragment}, 0u, {push_timer});
 
   const auto& window_size = m_ptrWindow->getWindowSurface()->getWindowSize();
   command_buffer.setViewport(plc::gpu_ui::GraphicalSize<float_t>(static_cast<float_t>(window_size.width),
@@ -282,10 +282,10 @@ void samples::core::Square::setGraphicCommands() {
                              1.0f);
   command_buffer.setScissor(window_size);
 
-  command_buffer.bindVertexBuffer(*m_ptrVertexBuffer, 0U);
-  command_buffer.bindIndexBuffer(*m_ptrIndexBuffer, 0U);
+  command_buffer.bindVertexBuffer(*m_ptrVertexBuffer, 0u);
+  command_buffer.bindIndexBuffer(*m_ptrIndexBuffer, 0u);
 
-  command_buffer.drawIndexed(6U, 1U, 0U, 0, 0U);
+  command_buffer.drawIndexed(6u, 1u, 0u, 0u, 0u);
 
   command_buffer.endRenderpass();
 

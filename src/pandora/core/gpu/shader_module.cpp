@@ -64,7 +64,7 @@ static uint32_t get_type_size(const spirv_cross::Compiler& compiler, const spirv
     return static_cast<uint32_t>(compiler.get_declared_struct_size(type));
   }
 
-  return 0U;
+  return 0u;
 }
 
 static void set_descriptor_infos(std::unordered_map<std::string, pandora::core::DescriptorInfo>& descriptor_info_map,
@@ -110,7 +110,7 @@ std::unordered_map<std::string, pandora::core::PushConstantRange> ShaderCompiler
   const auto& resources = this->get_shader_resources();
   const auto& shader_stage_flags = getShaderStageFlags();
 
-  uint32_t previous_size = 0U;
+  uint32_t previous_size = 0u;
   for (const auto& resource : resources.push_constant_buffers) {
     const auto push_constant_range =
         pandora::core::PushConstantRange{}

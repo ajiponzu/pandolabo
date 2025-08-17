@@ -29,7 +29,7 @@ uint32_t pandora::core::AttachmentList::append(const AttachmentDescription& desc
 
   m_attachments.push_back(vk::ImageView());
 
-  return static_cast<uint32_t>(m_attachments.size()) - 1U;
+  return static_cast<uint32_t>(m_attachments.size()) - 1u;
 }
 
 void pandora::core::AttachmentList::setBackbufferAttachment(const std::unique_ptr<gpu::Context>& ptr_context,
@@ -43,7 +43,7 @@ uint32_t pandora::core::AttachmentList::append(const AttachmentDescription& desc
 
   m_attachments.push_back(image_view.getImageView());
 
-  return static_cast<uint32_t>(m_attachments.size()) - 1U;
+  return static_cast<uint32_t>(m_attachments.size()) - 1u;
 }
 
 const void pandora::core::AttachmentList::appendDescription(const AttachmentDescription& description) {

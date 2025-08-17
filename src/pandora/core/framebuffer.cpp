@@ -9,7 +9,7 @@ pandora::core::Framebuffer::Framebuffer(const std::unique_ptr<gpu::Context>& ptr
           .setRenderPass(render_pass.getRenderPass())
           .setWidth(size.width)
           .setHeight(size.height)
-          .setLayers(1U)
+          .setLayers(1u)
           .setAttachments(attachments.getAttachments()));
 }
 

@@ -12,7 +12,7 @@ namespace pandora::core {
 /// @brief Attachment load operations for render pass attachments
 /// Defines what to do with attachment data at the start of a render pass
 enum class AttachmentLoadOp {
-  Load = 0U,  ///< Load existing attachment data (preserve previous contents)
+  Load = 0u,  ///< Load existing attachment data (preserve previous contents)
   Clear,      ///< Clear attachment to specified clear value
   DontCare,   ///< Don't care about previous contents (undefined behavior but potentially faster)
 };
@@ -20,14 +20,14 @@ enum class AttachmentLoadOp {
 /// @brief Attachment store operations for render pass attachments
 /// Defines what to do with attachment data at the end of a render pass
 enum class AttachmentStoreOp {
-  Store = 0U,  ///< Store attachment data for later use
+  Store = 0u,  ///< Store attachment data for later use
   DontCare,    ///< Don't store attachment data (contents become undefined)
 };
 
 /// @brief Subpass dependency flags
 /// Controls the scope and behavior of subpass dependencies
 enum class DependencyFlag {
-  ByRegion = 0U,  ///< Dependency is by-region (can be more efficient)
+  ByRegion = 0u,  ///< Dependency is by-region (can be more efficient)
   DeviceGroup,    ///< Dependency spans multiple devices in a device group
   ViewLocal,      ///< Dependency is view-local for multiview rendering
   Feedback,       ///< Feedback loop dependency (input and output from same attachment)
@@ -36,14 +36,14 @@ enum class DependencyFlag {
 /// @brief Vertex input rate for vertex attributes
 /// Specifies how vertex data advances during rendering
 enum class VertexInputRate {
-  Vertex = 0U,  ///< Advance per vertex (standard vertex attributes)
+  Vertex = 0u,  ///< Advance per vertex (standard vertex attributes)
   Instance,     ///< Advance per instance (for instanced rendering)
 };
 
 /// @brief Primitive topology types
 /// Defines how vertices are assembled into geometric primitives
 enum class PrimitiveTopology {
-  PointList = 0U,              ///< Each vertex is a separate point
+  PointList = 0u,              ///< Each vertex is a separate point
   LineList,                    ///< Every two vertices form a line
   LineStrip,                   ///< Connected line segments
   TriangleList,                ///< Every three vertices form a triangle
@@ -59,7 +59,7 @@ enum class PrimitiveTopology {
 /// @brief Polygon rendering modes
 /// Defines how polygons should be rendered
 enum class PolygonMode {
-  Fill = 0U,  ///< Fill polygons (solid rendering)
+  Fill = 0u,  ///< Fill polygons (solid rendering)
   Line,       ///< Render polygon edges as lines (wireframe)
   Point,      ///< Render polygon vertices as points
 };
@@ -67,7 +67,7 @@ enum class PolygonMode {
 /// @brief Face culling modes
 /// Defines which polygon faces should be culled (not rendered) based on winding order
 enum class CullMode {
-  None = 0U,     ///< No face culling (render both front and back faces)
+  None = 0u,     ///< No face culling (render both front and back faces)
   Front,         ///< Cull front-facing polygons
   Back,          ///< Cull back-facing polygons (most common for closed objects)
   FrontAndBack,  ///< Cull both front and back faces (renders nothing)
@@ -76,14 +76,14 @@ enum class CullMode {
 /// @brief Front face winding order
 /// Defines which vertex winding order is considered front-facing
 enum class FrontFace {
-  CounterClockwise = 0U,  ///< Counter-clockwise winding is front-facing (OpenGL convention)
+  CounterClockwise = 0u,  ///< Counter-clockwise winding is front-facing (OpenGL convention)
   Clockwise,              ///< Clockwise winding is front-facing (DirectX convention)
 };
 
 /// @brief Depth and stencil comparison operations
 /// Defines comparison functions for depth testing and stencil testing
 enum class CompareOp {
-  Never = 0U,      ///< Comparison never passes
+  Never = 0u,      ///< Comparison never passes
   Less,            ///< Pass if source is less than destination
   Equal,           ///< Pass if source equals destination
   LessOrEqual,     ///< Pass if source is less than or equal to destination
@@ -96,7 +96,7 @@ enum class CompareOp {
 /// @brief Stencil buffer operations
 /// Defines operations performed on stencil buffer values
 enum class StencilOp {
-  Keep = 0U,          ///< Keep current stencil value
+  Keep = 0u,          ///< Keep current stencil value
   Zero,               ///< Set stencil value to zero
   Replace,            ///< Replace with reference value
   IncrementAndClamp,  ///< Increment and clamp to maximum value
@@ -109,7 +109,7 @@ enum class StencilOp {
 /// @brief Logical operations for color blending
 /// Defines bitwise logical operations between source and destination colors
 enum class LogicOp {
-  Clear = 0U,    ///< Result = 0 (clear to black)
+  Clear = 0u,    ///< Result = 0 (clear to black)
   And,           ///< Result = src & dst (bitwise AND)
   AndReverse,    ///< Result = src & ~dst (AND with inverted destination)
   Copy,          ///< Result = src (copy source)
@@ -130,7 +130,7 @@ enum class LogicOp {
 /// @brief Blend factor values for color blending
 /// Defines factors used in blending equations to combine source and destination colors
 enum class BlendFactor {
-  Zero = 0U,              ///< Factor = (0, 0, 0, 0)
+  Zero = 0u,              ///< Factor = (0, 0, 0, 0)
   One,                    ///< Factor = (1, 1, 1, 1)
   SrcColor,               ///< Factor = (Rs, Gs, Bs, As) - source color
   OneMinusSrcColor,       ///< Factor = (1-Rs, 1-Gs, 1-Bs, 1-As)
@@ -154,7 +154,7 @@ enum class BlendFactor {
 /// @brief Blend operations for color blending
 /// Defines mathematical operations between source and destination colors
 enum class BlendOp {
-  Add = 0U,         ///< Result = src + dst (additive blending)
+  Add = 0u,         ///< Result = src + dst (additive blending)
   Subtract,         ///< Result = src - dst (subtractive blending)
   ReverseSubtract,  ///< Result = dst - src (reverse subtractive blending)
   Min,              ///< Result = min(src, dst) (minimum of source and destination)
@@ -164,7 +164,7 @@ enum class BlendOp {
 /// @brief Color component flags
 /// Defines individual color channels for write masking
 enum class ColorComponent {
-  R = 0U,  ///< Red color component
+  R = 0u,  ///< Red color component
   G,       ///< Green color component
   B,       ///< Blue color component
   A,       ///< Alpha (transparency) component
@@ -173,7 +173,7 @@ enum class ColorComponent {
 /// @brief Dynamic pipeline state options
 /// Defines pipeline states that can be changed dynamically without rebuilding the pipeline
 enum class DynamicOption {
-  Viewport = 0U,       ///< Viewport transformation parameters
+  Viewport = 0u,       ///< Viewport transformation parameters
   Scissor,             ///< Scissor rectangle for clipping
   LineWidth,           ///< Line width for line primitives
   DepthBias,           ///< Depth bias values for polygon offset
@@ -187,7 +187,7 @@ enum class DynamicOption {
 /// @brief Command buffer usage flags
 /// Defines how a command buffer will be used and submitted
 enum class CommandBufferUsage {
-  OneTimeSubmit = 0U,  ///< Command buffer will be submitted once and reset
+  OneTimeSubmit = 0u,  ///< Command buffer will be submitted once and reset
   RenderPassContinue,  ///< Secondary command buffer continues a render pass
   SimultaneousUse,     ///< Command buffer can be submitted multiple times simultaneously
 };
@@ -195,7 +195,7 @@ enum class CommandBufferUsage {
 /// @brief Subpass contents specification
 /// Defines how commands within a subpass are provided
 enum class SubpassContents {
-  Inline = 0U,              ///< Commands are recorded directly in primary command buffer
+  Inline = 0u,              ///< Commands are recorded directly in primary command buffer
   SecondaryCommandBuffers,  ///< Commands are provided via secondary command buffers
 };
 

@@ -39,7 +39,7 @@ void pandora::core::gpu::Swapchain::updateImageIndex(const std::unique_ptr<Devic
 }
 
 void pandora::core::gpu::Swapchain::updateFrameSyncIndex() {
-  m_frameSyncIndex = (m_frameSyncIndex + 1U) % static_cast<uint32_t>(m_fences.size());
+  m_frameSyncIndex = (m_frameSyncIndex + 1u) % static_cast<uint32_t>(m_fences.size());
 }
 
 void pandora::core::gpu::Swapchain::constructSwapchain(const std::unique_ptr<Device>& ptr_device,
@@ -47,7 +47,7 @@ void pandora::core::gpu::Swapchain::constructSwapchain(const std::unique_ptr<Dev
   m_imageFormat = DataFormat::R8G8B8A8Srgb;
 
   {
-    static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 3U;
+    static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 3u;
 
     const auto& vk_surface = ptr_surface->getSurface();
 
@@ -65,7 +65,7 @@ void pandora::core::gpu::Swapchain::constructSwapchain(const std::unique_ptr<Dev
             .setImageFormat(vk_helper::getFormat(m_imageFormat))
             .setImageColorSpace(vk::ColorSpaceKHR::eSrgbNonlinear)
             .setImageExtent(vk_helper::getExtent2D(ptr_surface->getWindowSize()))
-            .setImageArrayLayers(1U)
+            .setImageArrayLayers(1u)
             .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
             .setPreTransform(surface_capabilities.currentTransform)
             .setOldSwapchain(m_ptrSwapchain.get())
@@ -84,7 +84,7 @@ void pandora::core::gpu::Swapchain::constructSwapchain(const std::unique_ptr<Dev
                                                vk::ComponentSwizzle::eIdentity,
                                                vk::ComponentSwizzle::eIdentity,
                                                vk::ComponentSwizzle::eIdentity})
-                               .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0U, 1U, 0U, 1U});
+                               .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0u, 1u, 0u, 1u});
 
     const auto& ptr_vk_device = ptr_device->getPtrLogicalDevice();
     for (const auto& image : m_images) {
@@ -107,6 +107,6 @@ void pandora::core::gpu::Swapchain::clear() {
   m_imageAvailableSemaphores.clear();
   m_fences.clear();
 
-  m_frameSyncIndex = 0U;
-  m_imageIndex = 0U;
+  m_frameSyncIndex = 0u;
+  m_imageIndex = 0u;
 }

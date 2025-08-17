@@ -121,8 +121,8 @@ class ImageBarrier {
 class TimelineSemaphore {
  private:
   vk::UniqueSemaphore m_ptrSemaphore;                         ///< Underlying Vulkan timeline semaphore
-  uint64_t m_signalValue = 1U;                                ///< Next value to signal
-  uint64_t m_waitValue = 0U;                                  ///< Current value to wait for
+  uint64_t m_signalValue = 1u;                                ///< Next value to signal
+  uint64_t m_waitValue = 0u;                                  ///< Current value to wait for
   vk::TimelineSemaphoreSubmitInfoKHR m_timelineSubmitInfo{};  ///< Timeline submission info
   std::vector<vk::PipelineStageFlags> m_waitStages{};         ///< Pipeline stages to wait at
 

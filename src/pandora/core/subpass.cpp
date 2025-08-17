@@ -43,7 +43,7 @@ uint32_t pandora::core::SubpassGraph::appendNode(const SubpassNode& node) {
     m_descriptions.push_back(description);
   }
 
-  return static_cast<uint32_t>(m_descriptions.size()) - 1U;
+  return static_cast<uint32_t>(m_descriptions.size()) - 1u;
 }
 
 void pandora::core::SubpassGraph::appendEdge(const SubpassEdge& edge) {

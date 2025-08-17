@@ -18,8 +18,8 @@ void pandora::core::CommandBuffer::begin(const CommandBeginInfo& command_begin_i
     inheritance_info.setRenderPass(command_begin_info.getRenderPass())
         .setSubpass(command_begin_info.subpass_index)
         .setFramebuffer(command_begin_info.getFramebuffer())
-        .setQueryFlags(vk::QueryControlFlags{0U})
-        .setPipelineStatistics(vk::QueryPipelineStatisticFlags{0U})
+        .setQueryFlags(vk::QueryControlFlags{0u})
+        .setPipelineStatistics(vk::QueryPipelineStatisticFlags{0u})
         .setOcclusionQueryEnable(VK_FALSE);
 
     begin_info.setPInheritanceInfo(&inheritance_info);
@@ -40,7 +40,7 @@ void pandora::core::CommandBuffer::setPipelineBarrier(const gpu::BufferBarrier& 
                                                       const PipelineStage dst_stage) const {
   m_commandBuffer.pipelineBarrier(vk_helper::getPipelineStageFlagBits(src_stage),
                                   vk_helper::getPipelineStageFlagBits(dst_stage),
-                                  vk::DependencyFlagBits{0U},
+                                  vk::DependencyFlagBits{0u},
                                   nullptr,
                                   barrier.getBarrier(),
                                   nullptr);
@@ -51,7 +51,7 @@ void pandora::core::CommandBuffer::setPipelineBarrier(const gpu::ImageBarrier& b
                                                       const PipelineStage dst_stage) const {
   m_commandBuffer.pipelineBarrier(vk_helper::getPipelineStageFlagBits(src_stage),
                                   vk_helper::getPipelineStageFlagBits(dst_stage),
-                                  vk::DependencyFlagBits{0U},
+                                  vk::DependencyFlagBits{0u},
                                   nullptr,
                                   nullptr,
                                   barrier.getBarrier());
@@ -64,7 +64,7 @@ void pandora::core::CommandBuffer::bindPipeline(const Pipeline& pipeline) const 
 void pandora::core::CommandBuffer::bindDescriptorSet(const Pipeline& pipeline,
                                                      const gpu::DescriptorSet& descriptor_set) const {
   m_commandBuffer.bindDescriptorSets(
-      pipeline.getBindPoint(), pipeline.getPipelineLayout(), 0U, descriptor_set.getDescriptorSet(), {});
+      pipeline.getBindPoint(), pipeline.getPipelineLayout(), 0u, descriptor_set.getDescriptorSet(), {});
 }
 
 void pandora::core::CommandBuffer::pushConstants(const Pipeline& pipeline,
@@ -103,7 +103,7 @@ void pandora::core::TransferCommandBuffer::copyBufferToImage(const gpu::Buffer& 
                                    .setMipLevel(image_view_info.base_mip_level)
                                    .setBaseArrayLayer(image_view_info.base_array_layer)
                                    .setLayerCount(image_view_info.array_layers))
-          .setImageOffset({0U, 0U, 0U})
+          .setImageOffset({0u, 0u, 0u})
           .setBufferRowLength(graphical_size.width)
           .setBufferImageHeight(graphical_size.height)
           .setImageExtent(vk_helper::getExtent3D(graphical_size));
@@ -130,7 +130,7 @@ void pandora::core::TransferCommandBuffer::copyImageToBuffer(const gpu::Image& i
                                    .setMipLevel(image_view_info.base_mip_level)
                                    .setBaseArrayLayer(image_view_info.base_array_layer)
                                    .setLayerCount(image_view_info.array_layers))
-          .setImageOffset({0U, 0U, 0U})
+          .setImageOffset({0u, 0u, 0u})
           .setBufferRowLength(graphical_size.width)
           .setBufferImageHeight(graphical_size.height)
           .setImageExtent(vk_helper::getExtent3D(graphical_size));
@@ -147,8 +147,8 @@ void pandora::core::TransferCommandBuffer::copyImageToBuffer(const gpu::Image& i
 void pandora::core::TransferCommandBuffer::setMipmaps(const gpu::Image& image, const PipelineStage dst_stage) const {
   const auto image_view_info = ImageViewInfo{}
                                    .setAspect(pandora::core::ImageAspect::Color)
-                                   .setMipRange(0U, 1U)  // for sending each mip level
-                                   .setArrayRange(0U, 1U);
+                                   .setMipRange(0u, 1u)  // for sending each mip level
+                                   .setArrayRange(0u, 1u);
 
   const gpu::ImageBarrier src_image_barrier(image,
                                             {AccessFlag::TransferWrite},
@@ -177,12 +177,12 @@ void pandora::core::TransferCommandBuffer::setMipmaps(const gpu::Image& image, c
   uint32_t mip_width = image.getGraphicalSize().width;
   uint32_t mip_height = image.getGraphicalSize().height;
 
-  uint32_t mip_level = 1U;
-  for (; mip_level < image_view_info.mip_levels; mip_level += 1U) {
-    src_barrier.subresourceRange.setBaseMipLevel(mip_level - 1U);
+  uint32_t mip_level = 1u;
+  for (; mip_level < image_view_info.mip_levels; mip_level += 1u) {
+    src_barrier.subresourceRange.setBaseMipLevel(mip_level - 1u);
     m_commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                                     vk::PipelineStageFlagBits::eTransfer,
-                                    vk::DependencyFlagBits{0U},
+                                    vk::DependencyFlagBits{0u},
                                     nullptr,
                                     nullptr,
                                     src_barrier);
@@ -191,17 +191,17 @@ void pandora::core::TransferCommandBuffer::setMipmaps(const gpu::Image& image, c
         vk::ImageBlit()
             .setSrcSubresource(vk::ImageSubresourceLayers()
                                    .setAspectMask(vk::ImageAspectFlagBits::eColor)
-                                   .setMipLevel(mip_level - 1U)
-                                   .setBaseArrayLayer(0U)
-                                   .setLayerCount(1U))
-            .setSrcOffsets({vk::Offset3D(0U, 0U, 0U), vk::Offset3D(mip_width, mip_height, 1U)})
+                                   .setMipLevel(mip_level - 1u)
+                                   .setBaseArrayLayer(0u)
+                                   .setLayerCount(1u))
+            .setSrcOffsets({vk::Offset3D(0u, 0u, 0u), vk::Offset3D(mip_width, mip_height, 1u)})
             .setDstSubresource(vk::ImageSubresourceLayers()
                                    .setAspectMask(vk::ImageAspectFlagBits::eColor)
                                    .setMipLevel(mip_level)
-                                   .setBaseArrayLayer(0U)
-                                   .setLayerCount(1U))
-            .setDstOffsets({vk::Offset3D(0U, 0U, 0U),
-                            vk::Offset3D(std::max(1U, mip_width / 2U), std::max(1U, mip_height / 2U), 1U)});
+                                   .setBaseArrayLayer(0u)
+                                   .setLayerCount(1u))
+            .setDstOffsets({vk::Offset3D(0u, 0u, 0u),
+                            vk::Offset3D(std::max(1u, mip_width / 2U), std::max(1u, mip_height / 2U), 1u)});
 
     m_commandBuffer.blitImage(image.getImage(),
                               vk::ImageLayout::eTransferSrcOptimal,
@@ -210,16 +210,16 @@ void pandora::core::TransferCommandBuffer::setMipmaps(const gpu::Image& image, c
                               blit,
                               vk::Filter::eLinear);
 
-    dst_barrier.subresourceRange.setBaseMipLevel(mip_level - 1U);
+    dst_barrier.subresourceRange.setBaseMipLevel(mip_level - 1u);
     m_commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                                     vk_helper::getPipelineStageFlagBits(dst_stage),
-                                    vk::DependencyFlagBits{0U},
+                                    vk::DependencyFlagBits{0u},
                                     nullptr,
                                     nullptr,
                                     dst_barrier);
 
-    mip_width = std::max(1U, mip_width / 2U);
-    mip_height = std::max(1U, mip_height / 2U);
+    mip_width = std::max(1u, mip_width / 2U);
+    mip_height = std::max(1u, mip_height / 2U);
   }
 
   dst_barrier.subresourceRange.setBaseMipLevel(mip_level - 1);
@@ -227,7 +227,7 @@ void pandora::core::TransferCommandBuffer::setMipmaps(const gpu::Image& image, c
 
   m_commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                                   vk_helper::getPipelineStageFlagBits(dst_stage),
-                                  vk::DependencyFlagBits{0U},
+                                  vk::DependencyFlagBits{0u},
                                   nullptr,
                                   nullptr,
                                   dst_barrier);
@@ -239,7 +239,7 @@ void pandora::core::TransferCommandBuffer::transferMipmapImages(
     const PipelineStage dst_stage,
     std::pair<uint32_t, uint32_t> queue_family_index) const {
   const auto image_view_info =
-      ImageViewInfo{}.setAspect(pandora::core::ImageAspect::Color).setMipRange(0U, 1U).setArrayRange(0U, 1U);
+      ImageViewInfo{}.setAspect(pandora::core::ImageAspect::Color).setMipRange(0u, 1u).setArrayRange(0u, 1u);
 
   const gpu::ImageBarrier image_barrier(image,
                                         {AccessFlag::TransferWrite},
@@ -251,12 +251,12 @@ void pandora::core::TransferCommandBuffer::transferMipmapImages(
   vk::ImageMemoryBarrier barrier = image_barrier.getBarrier();
   barrier.setSrcQueueFamilyIndex(queue_family_index.first).setDstQueueFamilyIndex(queue_family_index.second);
 
-  for (uint32_t mip_level = 1U; mip_level <= image.getMipLevels(); mip_level += 1U) {
-    barrier.subresourceRange.setBaseMipLevel(mip_level - 1U);
+  for (uint32_t mip_level = 1u; mip_level <= image.getMipLevels(); mip_level += 1u) {
+    barrier.subresourceRange.setBaseMipLevel(mip_level - 1u);
 
     m_commandBuffer.pipelineBarrier(vk_helper::getPipelineStageFlagBits(src_stage),
                                     vk_helper::getPipelineStageFlagBits(dst_stage),
-                                    vk::DependencyFlagBits{0U},
+                                    vk::DependencyFlagBits{0u},
                                     nullptr,
                                     nullptr,
                                     barrier);
@@ -269,10 +269,10 @@ void pandora::core::TransferCommandBuffer::acquireMipmapImages(const gpu::Image&
                                                                std::pair<uint32_t, uint32_t> queue_family_index) const {
   const auto image_view_info = ImageViewInfo{}
                                    .setAspect(pandora::core::ImageAspect::Color)
-                                   .setBaseMipLevel(0U)
-                                   .setMipLevels(1U)
-                                   .setBaseArrayLayer(0U)
-                                   .setArrayLayers(1U);
+                                   .setBaseMipLevel(0u)
+                                   .setMipLevels(1u)
+                                   .setBaseArrayLayer(0u)
+                                   .setArrayLayers(1u);
 
   const gpu::ImageBarrier image_barrier(image,
                                         {AccessFlag::TransferWrite},
@@ -285,12 +285,12 @@ void pandora::core::TransferCommandBuffer::acquireMipmapImages(const gpu::Image&
   barrier.setSrcQueueFamilyIndex(queue_family_index.first);
   barrier.setDstQueueFamilyIndex(queue_family_index.second);
 
-  for (uint32_t mip_level = 1U; mip_level <= image.getMipLevels(); mip_level += 1U) {
-    barrier.subresourceRange.setBaseMipLevel(mip_level - 1U);
+  for (uint32_t mip_level = 1u; mip_level <= image.getMipLevels(); mip_level += 1u) {
+    barrier.subresourceRange.setBaseMipLevel(mip_level - 1u);
 
     m_commandBuffer.pipelineBarrier(vk_helper::getPipelineStageFlagBits(src_stage),
                                     vk_helper::getPipelineStageFlagBits(dst_stage),
-                                    vk::DependencyFlagBits{0U},
+                                    vk::DependencyFlagBits{0u},
                                     nullptr,
                                     nullptr,
                                     barrier);
@@ -302,16 +302,16 @@ void pandora::core::ComputeCommandBuffer::compute(const ComputeWorkGroupSize& wo
 }
 
 void pandora::core::GraphicCommandBuffer::setScissor(const gpu_ui::GraphicalSize<uint32_t>& size) const {
-  m_commandBuffer.setScissor(0U, vk::Rect2D().setOffset({0U, 0U}).setExtent(vk_helper::getExtent2D(size)));
+  m_commandBuffer.setScissor(0u, vk::Rect2D().setOffset({0u, 0u}).setExtent(vk_helper::getExtent2D(size)));
 }
 
 void pandora::core::GraphicCommandBuffer::setViewport(const gpu_ui::GraphicalSize<float_t>& size,
                                                       const float_t min_depth,
                                                       const float_t max_depth) const {
-  m_commandBuffer.setViewport(0U,
+  m_commandBuffer.setViewport(0u,
                               vk::Viewport{}
-                                  .setX(0.0F)
-                                  .setY(0.0F)
+                                  .setX(0.0f)
+                                  .setY(0.0f)
                                   .setWidth(static_cast<float_t>(size.width))
                                   .setHeight(static_cast<float_t>(size.height))
                                   .setMinDepth(min_depth)
@@ -319,7 +319,7 @@ void pandora::core::GraphicCommandBuffer::setViewport(const gpu_ui::GraphicalSiz
 }
 
 void pandora::core::GraphicCommandBuffer::bindVertexBuffer(const gpu::Buffer& buffer, const uint32_t& offset) const {
-  m_commandBuffer.bindVertexBuffers(0U, buffer.getBuffer(), offset);
+  m_commandBuffer.bindVertexBuffers(0u, buffer.getBuffer(), offset);
 }
 
 void pandora::core::GraphicCommandBuffer::bindIndexBuffer(const gpu::Buffer& buffer, const uint32_t& offset) const {
@@ -351,7 +351,7 @@ void pandora::core::GraphicCommandBuffer::beginRenderpass(const RenderKit& rende
   const auto render_pass_info = vk::RenderPassBeginInfo()
                                     .setRenderPass(render_kit.getRenderpass().getRenderPass())
                                     .setFramebuffer(render_kit.getFramebuffer().getFrameBuffer())
-                                    .setRenderArea(vk::Rect2D{{0U, 0U}, vk_helper::getExtent2D(render_area)})
+                                    .setRenderArea(vk::Rect2D{{0u, 0u}, vk_helper::getExtent2D(render_area)})
                                     .setClearValues(render_kit.getClearValues());
 
   m_commandBuffer.beginRenderPass(render_pass_info, vk_helper::getSubpassContents(subpass_contents));

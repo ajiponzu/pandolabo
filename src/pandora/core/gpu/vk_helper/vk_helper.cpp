@@ -280,7 +280,7 @@ vk::SampleCountFlagBits vk_helper::getSampleCount(const pandora::core::ImageSamp
     case v64:
       return e64;
     default:
-      return vk::SampleCountFlagBits{0U};
+      return vk::SampleCountFlagBits{0u};
   }
 }
 
@@ -533,7 +533,7 @@ vk::CommandBufferUsageFlagBits vk_helper::getCommandBufferUsageFlagBits(
     case SimultaneousUse:
       return eSimultaneousUse;
     default:
-      return vk::CommandBufferUsageFlagBits{0U};
+      return vk::CommandBufferUsageFlagBits{0u};
   }
 }
 
@@ -547,7 +547,7 @@ vk::SubpassContents vk_helper::getSubpassContents(const pandora::core::SubpassCo
     case SecondaryCommandBuffers:
       return eSecondaryCommandBuffers;
     default:
-      return vk::SubpassContents{0U};
+      return vk::SubpassContents{0u};
   }
 }
 

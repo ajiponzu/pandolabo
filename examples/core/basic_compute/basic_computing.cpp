@@ -41,10 +41,10 @@ samples::core::BasicComputing::BasicComputing() {
   m_ptrUniformBuffer->unmapMemory(m_ptrContext);
 
   m_ptrInputStorageBuffer =
-      plc::createUniqueStorageBuffer(m_ptrContext, plc::TransferType::TransferDst, sizeof(uint32_t) * 1024U);
+      plc::createUniqueStorageBuffer(m_ptrContext, plc::TransferType::TransferDst, sizeof(uint32_t) * 1024u);
 
   m_ptrOutputStorageBuffer =
-      plc::createUniqueStorageBuffer(m_ptrContext, plc::TransferType::TransferSrcDst, sizeof(uint32_t) * 1024U);
+      plc::createUniqueStorageBuffer(m_ptrContext, plc::TransferType::TransferSrcDst, sizeof(uint32_t) * 1024u);
 }
 
 samples::core::BasicComputing::~BasicComputing() {
@@ -76,7 +76,7 @@ void samples::core::BasicComputing::run() {
       std::memcpy(reinterpret_cast<void*>(result.data()), result_mapped_address, result_buffer.getSize());
       result_buffer.unmapMemory(m_ptrContext);
 
-      for (size_t idx = 0U; const auto& item : result) {
+      for (size_t idx = 0u; const auto& item : result) {
         std::println(stdout, "idx[{}]: {}", idx, item);
       }
     }
@@ -105,7 +105,7 @@ void samples::core::BasicComputing::setTransferCommands(std::vector<plc::gpu::Bu
 
   // multi-threading
   std::thread transfer_thread0([&]() {
-    const size_t thread_index = 0U;
+    const size_t thread_index = 0u;
 
     std::shared_lock lock(mutex);
     const auto command_buffer = m_ptrTransferCommandDriver->getTransfer(thread_index);
@@ -127,7 +127,7 @@ void samples::core::BasicComputing::setTransferCommands(std::vector<plc::gpu::Bu
   });
 
   std::thread transfer_thread1([&]() {
-    const size_t thread_index = 1U;
+    const size_t thread_index = 1u;
 
     std::shared_lock lock(mutex);
     const auto command_buffer = m_ptrTransferCommandDriver->getTransfer(thread_index);
@@ -217,7 +217,7 @@ void samples::core::BasicComputing::setComputeCommands(plc::gpu::Buffer& staging
 
   command_buffer.bindPipeline(*m_ptrComputePipeline);
   command_buffer.bindDescriptorSet(*m_ptrComputePipeline, *m_ptrDescriptorSet);
-  command_buffer.compute(plc::ComputeWorkGroupSize{4U, 1U, 1U});
+  command_buffer.compute(plc::ComputeWorkGroupSize{4u, 1u, 1u});
 
   {
     const auto buffer_barrier = plc::gpu::BufferBarrier(*m_ptrOutputStorageBuffer,

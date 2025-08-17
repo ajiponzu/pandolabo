@@ -13,7 +13,7 @@ static vk::ImageViewType get_image_view_type(const pandora::core::ImageDimension
     case v3D:
       return e3D;
     default:
-      return vk::ImageViewType(0U);
+      return vk::ImageViewType(0u);
   }
 }
 

@@ -21,7 +21,7 @@ pandora::core::CommandDriver::CommandDriver(const std::unique_ptr<gpu::Context>&
     m_ptrCommandPool = ptr_device->getPtrLogicalDevice()->createCommandPoolUnique(pool_info);
   }
 
-  vk::CommandBufferAllocateInfo alloc_info{m_ptrCommandPool.get(), vk::CommandBufferLevel::ePrimary, 1U};
+  vk::CommandBufferAllocateInfo alloc_info{m_ptrCommandPool.get(), vk::CommandBufferLevel::ePrimary, 1u};
 
   m_ptrPrimaryCommandBuffer =
       std::move(ptr_device->getPtrLogicalDevice()->allocateCommandBuffersUnique(alloc_info).front());
@@ -33,7 +33,7 @@ void pandora::core::CommandDriver::constructSecondary(const std::unique_ptr<gpu:
                                                       const uint32_t required_secondary_num) {
   const auto& ptr_vk_device = ptr_context->getPtrDevice()->getPtrLogicalDevice();
 
-  for (uint32_t idx = 0U; idx < required_secondary_num; idx += 1U) {
+  for (uint32_t idx = 0u; idx < required_secondary_num; idx += 1u) {
     m_ptrSecondaryCommandPools.push_back(
         ptr_vk_device->createCommandPoolUnique(vk::CommandPoolCreateInfo{}
                                                    .setQueueFamilyIndex(m_queueFamilyIndex)
@@ -43,7 +43,7 @@ void pandora::core::CommandDriver::constructSecondary(const std::unique_ptr<gpu:
                       ->allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{}
                                                          .setCommandPool(m_ptrSecondaryCommandPools.back().get())
                                                          .setLevel(vk::CommandBufferLevel::eSecondary)
-                                                         .setCommandBufferCount(1U))
+                                                         .setCommandBufferCount(1u))
                       .front()));
   }
 }

@@ -19,8 +19,8 @@ namespace pandora::core {
 /// dimensions, mip levels, array layers, and format specifications
 struct ImageSubInfo {
   gpu_ui::GraphicalSize<uint32_t> graphical_size{};  ///< Width and height dimensions of the image
-  uint32_t mip_levels = 1U;                          ///< Number of mipmap levels (1 = no mipmaps)
-  uint32_t array_layers = 1U;                        ///< Number of array layers (1 = single image)
+  uint32_t mip_levels = 1u;                          ///< Number of mipmap levels (1 = no mipmaps)
+  uint32_t array_layers = 1u;                        ///< Number of array layers (1 = single image)
   ImageSampleCount samples{};                        ///< Multisampling count for MSAA
   DataFormat format{};                               ///< Pixel format (e.g., RGBA8, Depth24Stencil8)
   ImageDimension dimension{};                        ///< Image dimensionality (1D, 2D, 3D)
@@ -63,9 +63,9 @@ struct ImageSubInfo {
 /// to specific binding points in descriptor sets
 struct DescriptorInfo {
   vk::ShaderStageFlags stage_flags{};  ///< Which shader stages can access this resource
-  uint32_t binding = 0U;               ///< Binding index in the descriptor set layout
+  uint32_t binding = 0u;               ///< Binding index in the descriptor set layout
   vk::DescriptorType type{};           ///< Type of descriptor (uniform buffer, sampler, etc.)
-  uint32_t size = 0U;                  ///< Number of descriptors in this binding (for arrays)
+  uint32_t size = 0u;                  ///< Number of descriptors in this binding (for arrays)
 
   // Fluent interface methods
   DescriptorInfo& setStageFlags(vk::ShaderStageFlags flags) {
@@ -91,8 +91,8 @@ struct DescriptorInfo {
 /// transfer to shaders without requiring descriptor sets
 struct PushConstantRange {
   vk::ShaderStageFlags stage_flags{};  ///< Which shader stages can access these push constants
-  uint32_t offset = 0U;                ///< Byte offset within the push constant block
-  size_t size = 0U;                    ///< Size in bytes of this push constant range
+  uint32_t offset = 0u;                ///< Byte offset within the push constant block
+  size_t size = 0u;                    ///< Size in bytes of this push constant range
 
   // Fluent interface methods
   PushConstantRange& setStageFlags(vk::ShaderStageFlags flags) {
@@ -113,10 +113,10 @@ struct PushConstantRange {
 /// @details This struct is not only for image view, but also for image barrier, etc.
 /// It's useful to manage image's miplevel and array layers.
 struct ImageViewInfo {
-  uint32_t base_mip_level = 0U;    ///< First mipmap level accessible through this view
-  uint32_t mip_levels = 0U;        ///< Number of mipmap levels accessible (VK_REMAINING_MIP_LEVELS for all)
-  uint32_t base_array_layer = 0U;  ///< First array layer accessible through this view
-  uint32_t array_layers = 0U;      ///< Number of array layers accessible (VK_REMAINING_ARRAY_LAYERS for all)
+  uint32_t base_mip_level = 0u;    ///< First mipmap level accessible through this view
+  uint32_t mip_levels = 0u;        ///< Number of mipmap levels accessible (VK_REMAINING_MIP_LEVELS for all)
+  uint32_t base_array_layer = 0u;  ///< First array layer accessible through this view
+  uint32_t array_layers = 0u;      ///< Number of array layers accessible (VK_REMAINING_ARRAY_LAYERS for all)
   ImageAspect aspect;              ///< Which aspects of the image to access (color, depth, stencil)
 
   // Fluent interface methods

@@ -75,10 +75,10 @@ pandora::core::gpu::ImageBarrier::ImageBarrier(const std::unique_ptr<Context>& p
       .setNewLayout(vk_helper::getImageLayout(new_layout))
       .setSubresourceRange(vk::ImageSubresourceRange()
                                .setAspectMask(vk::ImageAspectFlagBits::eColor)
-                               .setBaseMipLevel(0U)
-                               .setLevelCount(1U)
-                               .setBaseArrayLayer(0U)
-                               .setLayerCount(1U));
+                               .setBaseMipLevel(0u)
+                               .setLevelCount(1u)
+                               .setBaseArrayLayer(0u)
+                               .setLayerCount(1u));
 }
 
 pandora::core::gpu::ImageBarrier::~ImageBarrier() {}

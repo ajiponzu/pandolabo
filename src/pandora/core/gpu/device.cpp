@@ -34,7 +34,7 @@ static QueueFamilyIndices find_queue_families(const vk::PhysicalDevice& physical
 
   const auto queue_families = physical_device.getQueueFamilyProperties();
 
-  uint32_t family_id = 0U;
+  uint32_t family_id = 0u;
   for (const auto& queue_family : queue_families) {
     const auto graphics_support = queue_family.queueFlags & vk::QueueFlagBits::eGraphics;
     const auto compute_support = queue_family.queueFlags & vk::QueueFlagBits::eCompute;
@@ -48,7 +48,7 @@ static QueueFamilyIndices find_queue_families(const vk::PhysicalDevice& physical
       indices.transfer = family_id;
     }
 
-    family_id += 1U;
+    family_id += 1u;
   }
 
   return indices;
@@ -68,7 +68,7 @@ static bool check_device_extension_support(const vk::PhysicalDevice& physical_de
 
 template <std::integral T>
 static T get_optional_value(const std::optional<T>& option) {
-  return option.value_or(0U);
+  return option.value_or(0u);
 }
 
 pandora::core::gpu::Device::Device(const vk::UniqueInstance& ptr_instance,
@@ -167,7 +167,7 @@ void pandora::core::gpu::Device::constructLogicalDevice(
       if (!queue_family.has_value()) {
         continue;
       }
-      queue_create_infos.emplace_back(vk::DeviceQueueCreateInfo({}, queue_family.value(), 1U, &queue_priority));
+      queue_create_infos.emplace_back(vk::DeviceQueueCreateInfo({}, queue_family.value(), 1u, &queue_priority));
     }
   }
 
@@ -199,12 +199,12 @@ const uint32_t pandora::core::gpu::Device::getQueueFamilyIndex(const QueueFamily
     case Transfer:
       return get_optional_value(m_queueFamilyIndices.transfer);
     default:
-      return 0U;
+      return 0u;
   }
 }
 
 vk::Queue pandora::core::gpu::Device::getQueue(const uint32_t queue_family_index) {
-  return m_ptrLogicalDevice->getQueue(queue_family_index, 0U);
+  return m_ptrLogicalDevice->getQueue(queue_family_index, 0u);
 }
 
 vk::SampleCountFlagBits pandora::core::gpu::Device::getMaxUsableSampleCount() const {

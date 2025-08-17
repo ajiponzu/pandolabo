@@ -32,7 +32,7 @@ class AttachmentList {
   std::vector<vk::AttachmentDescription> m_descriptions;  ///< Vulkan attachment descriptions
   std::vector<vk::ImageView> m_attachments;               ///< Image views for each attachment
   std::vector<vk::ClearValue> m_clearValues;              ///< Clear values for each attachment
-  size_t m_backbufferIndex = 0U;                          ///< Index of the current backbuffer attachment
+  size_t m_backbufferIndex = 0u;                          ///< Index of the current backbuffer attachment
 
  public:
   AttachmentList();
@@ -110,7 +110,7 @@ class SubpassNode {
   std::vector<uint32_t> m_preserves;                           ///< Preserved attachment indices
 
   vk::PipelineBindPoint m_bindPoint{};  ///< Pipeline bind point (graphics/compute)
-  uint32_t m_viewMask = 0U;             ///< View mask for multiview rendering
+  uint32_t m_viewMask = 0u;             ///< View mask for multiview rendering
 
  public:
   /// @brief Construct subpass node
@@ -304,7 +304,7 @@ class RenderKit {
   std::unique_ptr<Renderpass> m_ptrRenderpass;  ///< Managed render pass
   std::vector<Framebuffer> m_framebuffers;      ///< Framebuffers for each swapchain image
   std::vector<vk::ClearValue> m_clearValues;    ///< Clear values for attachments
-  size_t m_currentIndex = 0U;                   ///< Currently active framebuffer index
+  size_t m_currentIndex = 0u;                   ///< Currently active framebuffer index
 
  public:
   /// @brief Construct render kit with render pass and framebuffers

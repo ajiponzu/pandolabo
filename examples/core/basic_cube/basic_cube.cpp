@@ -15,7 +15,7 @@ samples::core::BasicCube::BasicCube() {
     constructRenderpass(true);
   });
 
-  for (size_t idx = 0U; idx < m_ptrContext->getPtrSwapchain()->getImageCount(); idx += 1U) {
+  for (size_t idx = 0u; idx < m_ptrContext->getPtrSwapchain()->getImageCount(); idx += 1u) {
     m_ptrGraphicCommandDriver.push_back(
         std::make_unique<plc::CommandDriver>(m_ptrContext, plc::QueueFamilyType::Graphics));
   }
@@ -47,14 +47,14 @@ void samples::core::BasicCube::run() {
 
     plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
     m_ptrTransferCommandDriver->submit(plc::PipelineStage::BottomOfPipe, semaphore);
-    m_ptrGraphicCommandDriver.at(0U)->submit(plc::PipelineStage::VertexShader, semaphore);
+    m_ptrGraphicCommandDriver.at(0u)->submit(plc::PipelineStage::VertexShader, semaphore);
 
     semaphore.wait(m_ptrContext);
     m_ptrTransferCommandDriver->queueWaitIdle();
-    m_ptrGraphicCommandDriver.at(0U)->queueWaitIdle();
+    m_ptrGraphicCommandDriver.at(0u)->queueWaitIdle();
 
     m_ptrTransferCommandDriver->resetAllCommandPools(m_ptrContext);
-    m_ptrGraphicCommandDriver.at(0U)->resetAllCommandPools(m_ptrContext);
+    m_ptrGraphicCommandDriver.at(0u)->resetAllCommandPools(m_ptrContext);
   }
 
   while (m_ptrWindow->update()) {
@@ -118,9 +118,9 @@ void samples::core::BasicCube::constructRenderpass(const bool is_resized) {
     const auto& window_size = m_ptrWindow->getWindowSurface()->getWindowSize();
 
     const auto image_sub_info = plc::ImageSubInfo{}
-                                    .setSize(window_size.width, window_size.height, 1U)
-                                    .setMipLevels(1U)
-                                    .setArrayLayers(1U)
+                                    .setSize(window_size.width, window_size.height, 1u)
+                                    .setMipLevels(1u)
+                                    .setArrayLayers(1u)
                                     .setSamples(plc::ImageSampleCount::v1)
                                     .setFormat(plc::DataFormat::DepthSfloatStencilUint)
                                     .setDimension(plc::ImageDimension::v2D);
@@ -133,8 +133,8 @@ void samples::core::BasicCube::constructRenderpass(const bool is_resized) {
 
     const auto image_view_info = plc::ImageViewInfo{}
                                      .setAspect(plc::ImageAspect::DepthStencil)
-                                     .setArrayRange(0U, image_sub_info.array_layers)
-                                     .setMipRange(0U, image_sub_info.mip_levels);
+                                     .setArrayRange(0u, image_sub_info.array_layers)
+                                     .setMipRange(0u, image_sub_info.mip_levels);
 
     m_ptrDepthImageView.reset(new plc::gpu::ImageView(m_ptrContext, *m_ptrDepthImage, image_view_info));
   }
@@ -166,13 +166,13 @@ void samples::core::BasicCube::constructRenderpass(const bool is_resized) {
             .setLayouts(plc::ImageLayout::Undefined, plc::ImageLayout::DepthStencilAttachmentOptimal);
 
     return attachment_list.append(
-        attachment_description, *m_ptrDepthImageView, plc::ClearDepthStencil{}.setValues(1.0f, 0U));
+        attachment_description, *m_ptrDepthImageView, plc::ClearDepthStencil{}.setValues(1.0f, 0u));
   }();
 
   plc::SubpassGraph subpass_graph;
 
   {
-    plc::SubpassNode subpass_node(plc::PipelineBind::Graphics, 0U);
+    plc::SubpassNode subpass_node(plc::PipelineBind::Graphics, 0u);
     subpass_node.attachColor(plc::AttachmentReference{}
                                  .setIndex(backbuffer_attach_index)
                                  .setLayout(plc::ImageLayout::ColorAttachmentOptimal));
@@ -205,13 +205,13 @@ void samples::core::BasicCube::constructGraphicPipeline() {
   const auto ptr_graphic_info = std::make_unique<plc::pipeline::GraphicInfo>(
       plc::pipeline::GraphicInfo{}
           .setVertexInput(plc::pipeline::VertexInput{}
-                              .addBinding(0U, sizeof(Vertex), plc::VertexInputRate::Vertex)
-                              .addAttribute(0U, 0U, plc::DataFormat::R32G32B32Sfloat, offsetof(Vertex, pos))
-                              .addAttribute(1U, 0U, plc::DataFormat::R32G32B32Sfloat, offsetof(Vertex, color)))
+                              .addBinding(0u, sizeof(Vertex), plc::VertexInputRate::Vertex)
+                              .addAttribute(0u, 0u, plc::DataFormat::R32G32B32Sfloat, offsetof(Vertex, pos))
+                              .addAttribute(1u, 0u, plc::DataFormat::R32G32B32Sfloat, offsetof(Vertex, color)))
           .setInputAssembly(
               plc::pipeline::InputAssembly{}.withTopology(plc::PrimitiveTopology::TriangleList).withRestart(false))
           .setViewportState(
-              plc::pipeline::ViewportState{}.withScissor({800U, 600U}).withViewport({800.0f, 600.0f}, 0.0f, 1.0f))
+              plc::pipeline::ViewportState{}.withScissor({800u, 600u}).withViewport({800.0f, 600.0f}, 0.0f, 1.0f))
           .setRasterization(plc::pipeline::Rasterization{}
                                 .withPolygonMode(plc::PolygonMode::Fill)
                                 .withCullMode(plc::CullMode::Back)
@@ -274,7 +274,7 @@ void samples::core::BasicCube::setTransferCommands(std::vector<plc::gpu::Buffer>
 
       staging_buffers.push_back(std::move(staging_buffer));
 
-      command_buffer.copyBuffer(staging_buffers.at(0U), *m_ptrVertexBuffer);
+      command_buffer.copyBuffer(staging_buffers.at(0u), *m_ptrVertexBuffer);
 
       auto buffer_barrier = plc::gpu::BufferBarrier(*m_ptrVertexBuffer,
                                                     {plc::AccessFlag::TransferWrite},
@@ -287,8 +287,8 @@ void samples::core::BasicCube::setTransferCommands(std::vector<plc::gpu::Buffer>
 
     {
       const std::vector<uint32_t> indices = {
-          0U,  1U,  2U,  3U,  2U,  1U,  4U,  5U,  6U,  7U,  6U,  5U,  8U,  9U,  10U, 11U, 10U, 9U,
-          12U, 13U, 14U, 15U, 14U, 13U, 16U, 17U, 18U, 19U, 18U, 17U, 20U, 21U, 22U, 23U, 22U, 21U,
+          0u,  1u,  2u,  3u,  2u,  1u,  4u,  5u,  6u,  7u,  6u,  5u,  8u,  9u,  10u, 11u, 10u, 9u,
+          12u, 13u, 14u, 15u, 14u, 13u, 16u, 17u, 18u, 19u, 18u, 17u, 20u, 21u, 22u, 23u, 22u, 21u,
       };
 
       m_ptrIndexBuffer =
@@ -301,7 +301,7 @@ void samples::core::BasicCube::setTransferCommands(std::vector<plc::gpu::Buffer>
 
       staging_buffers.push_back(std::move(staging_buffer));
 
-      command_buffer.copyBuffer(staging_buffers.at(1U), *m_ptrIndexBuffer);
+      command_buffer.copyBuffer(staging_buffers.at(1u), *m_ptrIndexBuffer);
 
       auto buffer_barrier = plc::gpu::BufferBarrier(*m_ptrIndexBuffer,
                                                     {plc::AccessFlag::TransferWrite},
@@ -364,10 +364,10 @@ void samples::core::BasicCube::setGraphicCommands() {
                              1.0f);
   command_buffer.setScissor(window_size);
 
-  command_buffer.bindVertexBuffer(*m_ptrVertexBuffer, 0U);
-  command_buffer.bindIndexBuffer(*m_ptrIndexBuffer, 0U);
+  command_buffer.bindVertexBuffer(*m_ptrVertexBuffer, 0u);
+  command_buffer.bindIndexBuffer(*m_ptrIndexBuffer, 0u);
 
-  command_buffer.drawIndexed(36U, 1U, 0U, 0U, 0U);
+  command_buffer.drawIndexed(36U, 1u, 0u, 0u, 0u);
 
   command_buffer.endRenderpass();
 

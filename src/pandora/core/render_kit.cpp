@@ -18,7 +18,7 @@ void pandora::core::RenderKit::resetFramebuffer(const std::unique_ptr<gpu::Conte
 
   if (is_presented) {
     const auto backbuffer_count = ptr_context->getPtrSwapchain()->getImageCount();
-    for (size_t index = 0U; index < backbuffer_count; index += 1U) {
+    for (size_t index = 0u; index < backbuffer_count; index += 1u) {
       attachment_list.setBackbufferAttachment(ptr_context, index);
 
       m_framebuffers.emplace_back(ptr_context, *m_ptrRenderpass, size, attachment_list);

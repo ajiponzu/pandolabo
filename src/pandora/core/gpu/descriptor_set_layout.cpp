@@ -9,12 +9,12 @@ pandora::core::gpu::DescriptorSetLayout::DescriptorSetLayout(const std::unique_p
   const auto descriptor_set_layout_bindings =
       description_unit.getDescriptorInfoMap() | std::views::values
       | std::views::transform([&m_poolSizes = m_descriptorPoolSizes](const D& x) {
-          m_poolSizes.push_back(vk::DescriptorPoolSize(x.type, 1U));
+          m_poolSizes.push_back(vk::DescriptorPoolSize(x.type, 1u));
 
           return vk::DescriptorSetLayoutBinding()
               .setBinding(x.binding)
               .setDescriptorType(x.type)
-              .setDescriptorCount(1U)
+              .setDescriptorCount(1u)
               .setStageFlags(x.stage_flags);
         })
       | std::ranges::to<std::vector<vk::DescriptorSetLayoutBinding>>();
@@ -30,7 +30,7 @@ pandora::core::gpu::DescriptorSetLayout::~DescriptorSetLayout() {}
 
 vk::DescriptorPoolCreateInfo pandora::core::gpu::DescriptorSetLayout::getDescriptorPoolInfo() const {
   return vk::DescriptorPoolCreateInfo()
-      .setMaxSets(1U)
+      .setMaxSets(1u)
       .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
       .setPoolSizes(m_descriptorPoolSizes);
 }

@@ -42,8 +42,8 @@ void pandora::core::pipeline::Tessellation::setPatchControlPoints(const uint32_t
 void pandora::core::pipeline::ViewportState::setViewport(const gpu_ui::GraphicalSize<float_t>& size,
                                                          const float_t min_depth,
                                                          const float_t max_depth) {
-  m_viewport.setX(0.0F)
-      .setY(0.0F)
+  m_viewport.setX(0.0f)
+      .setY(0.0f)
       .setWidth(size.width)
       .setHeight(size.height)
       .setMinDepth(min_depth)

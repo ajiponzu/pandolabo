@@ -19,7 +19,7 @@ pandora::core::gpu::Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_
 
     if (ptr_window_surface) {
       // Window mode: add GLFW extensions
-      uint32_t extension_count = 0U;
+      uint32_t extension_count = 0u;
       const auto glfw_extensions = glfwGetRequiredInstanceExtensions(&extension_count);
       extensions = std::vector<const char*>(glfw_extensions, glfw_extensions + extension_count);
       extensions.emplace_back(VK_KHR_SURFACE_EXTENSION_NAME);

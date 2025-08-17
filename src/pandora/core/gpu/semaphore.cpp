@@ -21,8 +21,8 @@ void pandora::core::gpu::TimelineSemaphore::wait(const std::unique_ptr<Context>&
   }
 
   // Recycle this semaphore values
-  m_signalValue = 1U;
-  m_waitValue = 0U;
+  m_signalValue = 1u;
+  m_waitValue = 0u;
   m_waitStages.clear();
 
   m_timelineSubmitInfo =

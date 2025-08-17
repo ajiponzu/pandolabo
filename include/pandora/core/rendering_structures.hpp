@@ -87,7 +87,7 @@ struct AttachmentDescription {
 /// @brief Reference to an attachment within a subpass
 /// Links a subpass to a specific attachment with the required layout
 struct AttachmentReference {
-  uint32_t index = 0U;   ///< Index of the attachment in the attachment list
+  uint32_t index = 0u;   ///< Index of the attachment in the attachment list
   ImageLayout layout{};  ///< Layout the attachment should be in during this subpass
 
   // Fluent interface methods
@@ -106,7 +106,7 @@ struct AttachmentReference {
 /// to ensure proper ordering and memory coherency
 struct SubpassEdge {
   uint32_t src_index = VK_SUBPASS_EXTERNAL;  ///< Source subpass index (VK_SUBPASS_EXTERNAL for external)
-  uint32_t dst_index = 0U;                   ///< Destination subpass index
+  uint32_t dst_index = 0u;                   ///< Destination subpass index
   std::vector<PipelineStage> src_stages{};   ///< Pipeline stages that must complete in source
   std::vector<PipelineStage> dst_stages{};   ///< Pipeline stages that wait in destination
   std::vector<AccessFlag> src_access{};      ///< Memory access that must complete in source
@@ -167,9 +167,9 @@ struct StencilOpState {
   StencilOp pass_op = StencilOp::Keep;        ///< Operation when stencil test passes
   StencilOp depth_fail_op = StencilOp::Keep;  ///< Operation when depth test fails but stencil passes
   CompareOp compare_op = CompareOp::Always;   ///< Comparison function for stencil test
-  uint32_t compare_mask = 0U;                 ///< Mask applied to stencil value before comparison
-  uint32_t write_mask = 0U;                   ///< Mask applied when writing to stencil buffer
-  uint32_t reference = 0U;                    ///< Reference value for stencil comparison
+  uint32_t compare_mask = 0u;                 ///< Mask applied to stencil value before comparison
+  uint32_t write_mask = 0u;                   ///< Mask applied when writing to stencil buffer
+  uint32_t reference = 0u;                    ///< Reference value for stencil comparison
 
   // Fluent interface methods
   StencilOpState& setFailOp(StencilOp op) {
@@ -340,7 +340,7 @@ struct ClearColor {
 /// Specifies the depth and stencil values to use when clearing depth/stencil buffers
 struct ClearDepthStencil {
   float_t depth = 0.0f;   ///< Depth clear value (typically 0.0 or 1.0)
-  uint32_t stencil = 0U;  ///< Stencil clear value (typically 0)
+  uint32_t stencil = 0u;  ///< Stencil clear value (typically 0)
 
   // Fluent interface methods
   ClearDepthStencil& setDepth(float_t depth_value) {

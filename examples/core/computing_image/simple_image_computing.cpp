@@ -62,9 +62,9 @@ void samples::core::SimpleImageComputing::initializeImageResources() {
 
   const auto image_sub_info =
       plc::ImageSubInfo{}
-          .setSize(static_cast<uint32_t>(m_image.width), static_cast<uint32_t>(m_image.height), 1U)
-          .setMipLevels(1U)
-          .setArrayLayers(1U)
+          .setSize(static_cast<uint32_t>(m_image.width), static_cast<uint32_t>(m_image.height), 1u)
+          .setMipLevels(1u)
+          .setArrayLayers(1u)
           .setSamples(plc::ImageSampleCount::v1)
           .setFormat(plc::DataFormat::R8G8B8A8Unorm)
           .setDimension(plc::ImageDimension::v2D);
@@ -84,8 +84,8 @@ void samples::core::SimpleImageComputing::initializeImageResources() {
   {
     const auto image_view_info = plc::ImageViewInfo{}
                                      .setAspect(plc::ImageAspect::Color)
-                                     .setArrayRange(0U, image_sub_info.array_layers)
-                                     .setMipRange(0U, image_sub_info.mip_levels);
+                                     .setArrayRange(0u, image_sub_info.array_layers)
+                                     .setMipRange(0u, image_sub_info.mip_levels);
 
     m_ptrImageView = std::make_unique<plc::gpu::ImageView>(m_ptrContext, *m_ptrImage, image_view_info);
 
@@ -212,11 +212,11 @@ void samples::core::SimpleImageComputing::setComputeCommands(const plc::gpu::Buf
     command_buffer.setPipelineBarrier(image_barrier, plc::PipelineStage::TopOfPipe, plc::PipelineStage::ComputeShader);
   }
 
-  command_buffer.pushConstants(*m_ptrComputePipeline, {plc::ShaderStage::Compute}, 0U, {push_timer});
+  command_buffer.pushConstants(*m_ptrComputePipeline, {plc::ShaderStage::Compute}, 0u, {push_timer});
   command_buffer.bindPipeline(*m_ptrComputePipeline);
   command_buffer.bindDescriptorSet(*m_ptrComputePipeline, *m_ptrDescriptorSet);
   command_buffer.compute(plc::ComputeWorkGroupSize{
-      m_ptrImage->getGraphicalSize().width / 4U, m_ptrImage->getGraphicalSize().height / 4U, 1U});
+      m_ptrImage->getGraphicalSize().width / 4u, m_ptrImage->getGraphicalSize().height / 4u, 1u});
 
   {
     const auto image_barrier = plc::gpu::ImageBarrier(*m_ptrStorageImage,

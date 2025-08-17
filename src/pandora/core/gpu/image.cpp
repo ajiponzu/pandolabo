@@ -17,7 +17,7 @@ static vk::ImageUsageFlags get_transfer_usage(const pandora::core::TransferType 
     case TransferSrcDst:
       return eTransferSrc | eTransferDst;
     default:
-      return vk::ImageUsageFlagBits(0U);
+      return vk::ImageUsageFlagBits(0u);
   }
 }
 
@@ -33,7 +33,7 @@ static vk::ImageType get_image_type(pandora::core::ImageDimension dimension) {
     case v3D:
       return e3D;
     default:
-      return vk::ImageType(0U);
+      return vk::ImageType(0u);
   }
 }
 
@@ -74,7 +74,7 @@ pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
         .setTiling(vk::ImageTiling::eOptimal)
         .setSharingMode(vk::SharingMode::eExclusive)
         .setInitialLayout(vk::ImageLayout::eUndefined)
-        .setQueueFamilyIndexCount(0U)
+        .setQueueFamilyIndexCount(0u)
         .setPQueueFamilyIndices(nullptr);
 
     m_ptrImage = ptr_vk_device->createImageUnique(image_info);
@@ -85,9 +85,9 @@ pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
     const auto vk_memory_usage = vk_helper::getMemoryPropertyFlags(memory_usage);
     const auto memory_props = ptr_context->getPtrDevice()->getPhysicalDevice().getMemoryProperties();
 
-    uint32_t memory_type_idx = 0U;
-    for (; memory_type_idx < memory_props.memoryTypeCount; memory_type_idx += 1U) {
-      if ((memory_requirements.memoryTypeBits & (1U << memory_type_idx))
+    uint32_t memory_type_idx = 0u;
+    for (; memory_type_idx < memory_props.memoryTypeCount; memory_type_idx += 1u) {
+      if ((memory_requirements.memoryTypeBits & (1u << memory_type_idx))
           && (memory_props.memoryTypes.at(memory_type_idx).propertyFlags & vk_memory_usage) == vk_memory_usage) {
         break;
       }
@@ -97,7 +97,7 @@ pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
         vk::MemoryAllocateInfo{}.setMemoryTypeIndex(memory_type_idx).setAllocationSize(memory_requirements.size));
   }
 
-  ptr_vk_device->bindImageMemory(m_ptrImage.get(), m_ptrMemory.get(), 0U);
+  ptr_vk_device->bindImageMemory(m_ptrImage.get(), m_ptrMemory.get(), 0u);
 }
 
 pandora::core::gpu::Image::~Image() {}

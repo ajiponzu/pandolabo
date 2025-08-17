@@ -29,7 +29,7 @@ class Buffer {
  protected:
   vk::UniqueDeviceMemory m_ptrMemory;
   vk::UniqueBuffer m_ptrBuffer;
-  size_t m_size = 0U;
+  size_t m_size = 0u;
 
  public:
   Buffer() = default;

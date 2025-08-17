@@ -11,14 +11,14 @@ namespace pandora::core {
 
 /// @brief Queue family types for different GPU operations
 enum class QueueFamilyType {
-  Graphics = 0U,
+  Graphics = 0u,
   Compute,
   Transfer,
 };
 
 /// @brief Memory usage patterns for buffer allocation
 enum class MemoryUsage {
-  Unknown = 0U,
+  Unknown = 0u,
   GpuOnly,
   CpuOnly,
   CpuToGpu,
@@ -27,7 +27,7 @@ enum class MemoryUsage {
 
 /// @brief Transfer operation types
 enum class TransferType {
-  Unknown = 0U,
+  Unknown = 0u,
   TransferSrc,
   TransferDst,
   TransferSrcDst,
@@ -35,7 +35,7 @@ enum class TransferType {
 
 /// @brief Buffer usage types
 enum class BufferUsage {
-  Unknown = 0U,
+  Unknown = 0u,
   VertexBuffer,
   IndexBuffer,
   UniformBuffer,
@@ -45,7 +45,7 @@ enum class BufferUsage {
 
 /// @brief Image usage types
 enum class ImageUsage {
-  Unknown = 0U,
+  Unknown = 0u,
   Sampled,
   Storage,
   ColorAttachment,
@@ -56,7 +56,7 @@ enum class ImageUsage {
 
 /// @brief Data format types for images and buffers
 enum class DataFormat {
-  Unknown = 0U,
+  Unknown = 0u,
   R8Unorm,
   R8Snorm,
   R8Uscaled,
@@ -96,7 +96,7 @@ enum class DataFormat {
 
 /// @brief Image dimension types
 enum class ImageDimension {
-  Unknown = 0U,
+  Unknown = 0u,
   v1D,
   v2D,
   v3D,
@@ -104,7 +104,7 @@ enum class ImageDimension {
 
 /// @brief Image sample count for multisampling
 enum class ImageSampleCount {
-  Unknown = 0U,
+  Unknown = 0u,
   v1,
   v2,
   v4,
@@ -116,14 +116,14 @@ enum class ImageSampleCount {
 
 /// @brief Shader types
 enum class ShaderType {
-  Vertex = 0U,
+  Vertex = 0u,
   Fragment,
   Compute,
 };
 
 /// @brief Image aspect flags
 enum class ImageAspect {
-  Unknown = 0U,
+  Unknown = 0u,
   Color,
   Depth,
   Stencil,
@@ -132,20 +132,20 @@ enum class ImageAspect {
 
 /// @brief Sampler filter modes
 enum class SamplerFilter {
-  Linear = 0U,
+  Linear = 0u,
   Nearest,
   Cubic,
 };
 
 /// @brief Sampler mipmap modes
 enum class SamplerMipmapMode {
-  Nearest = 0U,
+  Nearest = 0u,
   Linear,
 };
 
 /// @brief Sampler address modes
 enum class SamplerAddressMode {
-  Repeat = 0U,
+  Repeat = 0u,
   MirroredRepeat,
   ClampToEdge,
   ClampToBorder,
@@ -154,7 +154,7 @@ enum class SamplerAddressMode {
 
 /// @brief Sampler border colors
 enum class SamplerBorderColor {
-  FloatTransparentBlack = 0U,
+  FloatTransparentBlack = 0u,
   IntTransparentBlack,
   FloatOpaqueBlack,
   IntOpaqueBlack,
@@ -164,7 +164,7 @@ enum class SamplerBorderColor {
 
 /// @brief Sampler wrap modes
 enum class SamplerWrapMode {
-  Repeat = 0U,
+  Repeat = 0u,
   MirroredRepeat,
   ClampToEdge,
   ClampToBorder,
@@ -173,7 +173,7 @@ enum class SamplerWrapMode {
 
 /// @brief Sampler comparison operations
 enum class SamplerCompareOp {
-  Never = 0U,
+  Never = 0u,
   Less,
   Equal,
   LessOrEqual,
@@ -185,7 +185,7 @@ enum class SamplerCompareOp {
 
 /// @brief Image layout types
 enum class ImageLayout {
-  Undefined = 0U,
+  Undefined = 0u,
   General,
   ColorAttachmentOptimal,
   DepthStencilAttachmentOptimal,
@@ -202,7 +202,7 @@ enum class ImageLayout {
 
 /// @brief Pipeline stage flags
 enum class PipelineStage {
-  TopOfPipe = 0U,
+  TopOfPipe = 0u,
   DrawIndirect,
   VertexInput,
   VertexShader,
@@ -223,7 +223,7 @@ enum class PipelineStage {
 
 /// @brief Memory access flags
 enum class AccessFlag {
-  Unknown = 0U,
+  Unknown = 0u,
   IndirectCommandRead,
   IndexRead,
   VertexAttributeRead,
@@ -245,7 +245,7 @@ enum class AccessFlag {
 
 /// @brief Shader stage flags
 enum class ShaderStage {
-  Vertex = 0U,
+  Vertex = 0u,
   TessellationControl,
   TessellationEvaluation,
   Geometry,
@@ -255,7 +255,7 @@ enum class ShaderStage {
 
 /// @brief Pipeline bind points
 enum class PipelineBind {
-  Graphics = 0U,
+  Graphics = 0u,
   Compute,
   RayTracing,
 };

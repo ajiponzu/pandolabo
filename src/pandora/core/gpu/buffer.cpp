@@ -65,8 +65,8 @@ pandora::core::gpu::Buffer::Buffer(const std::unique_ptr<Context>& ptr_context,
     const auto vk_memory_usage = vk_helper::getMemoryPropertyFlags(memory_usage);
     const auto memory_props = ptr_context->getPtrDevice()->getPhysicalDevice().getMemoryProperties();
 
-    uint32_t memory_type_idx = 0U;
-    for (; memory_type_idx < memory_props.memoryTypeCount; memory_type_idx += 1U) {
+    uint32_t memory_type_idx = 0u;
+    for (; memory_type_idx < memory_props.memoryTypeCount; memory_type_idx += 1u) {
       if ((memory_requirements.memoryTypeBits & (1 << memory_type_idx))
           && (memory_props.memoryTypes.at(memory_type_idx).propertyFlags & vk_memory_usage) == vk_memory_usage) {
         break;
@@ -77,13 +77,13 @@ pandora::core::gpu::Buffer::Buffer(const std::unique_ptr<Context>& ptr_context,
         vk::MemoryAllocateInfo{}.setMemoryTypeIndex(memory_type_idx).setAllocationSize(memory_requirements.size));
   }
 
-  ptr_vk_device->bindBufferMemory(m_ptrBuffer.get(), m_ptrMemory.get(), 0U);
+  ptr_vk_device->bindBufferMemory(m_ptrBuffer.get(), m_ptrMemory.get(), 0u);
 }
 
 pandora::core::gpu::Buffer::~Buffer() = default;
 
 void* pandora::core::gpu::Buffer::mapMemory(const std::unique_ptr<Context>& ptr_context) const {
-  return ptr_context->getPtrDevice()->getPtrLogicalDevice()->mapMemory(m_ptrMemory.get(), 0U, m_size, {});
+  return ptr_context->getPtrDevice()->getPtrLogicalDevice()->mapMemory(m_ptrMemory.get(), 0u, m_size, {});
 }
 
 void pandora::core::gpu::Buffer::unmapMemory(const std::unique_ptr<Context>& ptr_context) const {

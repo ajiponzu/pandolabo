@@ -50,7 +50,7 @@ class CommandBeginInfo {
 
  public:
   CommandBufferUsage usage = CommandBufferUsage::OneTimeSubmit;  ///< How the command buffer will be used
-  uint32_t subpass_index = 0U;                                   ///< Subpass index for inheritance
+  uint32_t subpass_index = 0u;                                   ///< Subpass index for inheritance
 
   // Rule of Zero
   CommandBeginInfo() = default;
@@ -360,7 +360,7 @@ class CommandDriver {
   /// Secondary command buffers enable parallel command recording across multiple threads.
   /// @param ptr_context Vulkan context for device operations
   /// @param required_secondary_num Number of secondary command buffers to allocate
-  void constructSecondary(const std::unique_ptr<gpu::Context>& ptr_context, const uint32_t required_secondary_num = 1U);
+  void constructSecondary(const std::unique_ptr<gpu::Context>& ptr_context, const uint32_t required_secondary_num = 1u);
 
   /// @brief Reset all command buffers to initial state
   void resetAllCommands() const;
