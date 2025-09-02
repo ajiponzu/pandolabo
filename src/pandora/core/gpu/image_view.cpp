@@ -1,7 +1,9 @@
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
 
-static vk::ImageViewType get_image_view_type(
+namespace {
+
+vk::ImageViewType get_image_view_type(
     const pandora::core::ImageDimension image_dimension) {
   switch (image_dimension) {
     using enum pandora::core::ImageDimension;
@@ -17,6 +19,8 @@ static vk::ImageViewType get_image_view_type(
       return vk::ImageViewType(0u);
   }
 }
+
+}  // namespace
 
 pandora::core::gpu::ImageView::ImageView(
     const std::unique_ptr<Context>& ptr_context,

@@ -7,7 +7,9 @@
 // Namespace alias for cleaner code in examples
 namespace plc = pandora::core;
 
-static void set_transfer_secondary_command(
+namespace {
+
+void set_transfer_secondary_command(
     const plc::TransferCommandBuffer& command_buffer,
     const std::unique_ptr<plc::gpu::Buffer>& transfered_buffer,
     const std::pair<uint32_t, uint32_t> queue_family_indices,
@@ -33,6 +35,8 @@ static void set_transfer_secondary_command(
 
   command_buffer.end();
 }
+
+}  // namespace
 
 samples::core::BasicComputing::BasicComputing() {
   m_ptrContext = std::make_unique<plc::gpu::Context>(nullptr);

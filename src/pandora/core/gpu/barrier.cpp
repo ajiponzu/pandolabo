@@ -6,13 +6,17 @@
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
 
-inline static constexpr auto g_lamda_convert_access_flags =
+namespace {
+
+constexpr auto g_lamda_convert_access_flags =
     [](const std::span<const pandora::core::AccessFlag>& access_flags) {
       return std::ranges::fold_left(
           access_flags | std::views::transform(vk_helper::getAccessFlagBits),
           vk::AccessFlags{},
           std::bit_or());
     };
+
+}  // namespace
 
 pandora::core::gpu::BufferBarrier::BufferBarrier(
     const Buffer& buffer,

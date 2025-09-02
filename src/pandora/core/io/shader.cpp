@@ -9,7 +9,9 @@
 
 #include "pandora/core/io.hpp"
 
-static std::pair<std::string, ::EShLanguage> translate_shader_stage(
+namespace {
+
+std::pair<std::string, ::EShLanguage> translate_shader_stage(
     const std::string& shader_code_path) {
   static const std::unordered_map<std::string,
                                   std::pair<std::string, ::EShLanguage>>
@@ -30,7 +32,7 @@ static std::pair<std::string, ::EShLanguage> translate_shader_stage(
   throw std::runtime_error("Unknown shader stage");
 }
 
-static TBuiltInResource init_t_built_in_resources() {
+TBuiltInResource init_t_built_in_resources() {
   TBuiltInResource resources{};
 
   resources.maxLights = 32;
@@ -139,8 +141,8 @@ static TBuiltInResource init_t_built_in_resources() {
   return resources;
 }
 
-static std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage,
-                                            const std::string& shader_code) {
+std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage,
+                                     const std::string& shader_code) {
   glslang::InitializeProcess();
 
   std::vector shader_c_strings = {shader_code.data()};
@@ -170,6 +172,8 @@ static std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage,
 
   return shader_binary;
 }
+
+}  // namespace
 
 std::vector<uint32_t> pandora::core::io::shader::readText(
     const std::string& file_path) {

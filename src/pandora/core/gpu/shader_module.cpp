@@ -62,8 +62,10 @@ vk::ShaderStageFlags ShaderCompiler::getShaderStageFlags() const {
   return flags;
 }
 
-static uint32_t get_type_size(const spirv_cross::Compiler& compiler,
-                              const spirv_cross::SPIRType& type) {
+namespace {
+
+uint32_t get_type_size(const spirv_cross::Compiler& compiler,
+                       const spirv_cross::SPIRType& type) {
   if (type.basetype == spirv_cross::SPIRType::Struct) {
     return static_cast<uint32_t>(compiler.get_declared_struct_size(type));
   }
@@ -71,7 +73,7 @@ static uint32_t get_type_size(const spirv_cross::Compiler& compiler,
   return 0u;
 }
 
-static void set_descriptor_infos(
+void set_descriptor_infos(
     std::unordered_map<std::string, pandora::core::DescriptorInfo>&
         descriptor_info_map,
     const spirv_cross::Compiler& compiler,
@@ -91,6 +93,8 @@ static void set_descriptor_infos(
     descriptor_info_map.insert({resource.name, descriptor_info});
   }
 }
+
+}  // namespace
 
 std::unordered_map<std::string, pandora::core::DescriptorInfo>
 ShaderCompiler::getDescriptorInfos() const {

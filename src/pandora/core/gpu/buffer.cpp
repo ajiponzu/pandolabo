@@ -5,7 +5,9 @@
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
 
-static vk::BufferUsageFlags get_transfer_usage_flags(
+namespace {
+
+vk::BufferUsageFlags get_transfer_usage_flags(
     const pandora::core::TransferType transfer_type) {
   switch (transfer_type) {
     using enum pandora::core::TransferType;
@@ -22,7 +24,7 @@ static vk::BufferUsageFlags get_transfer_usage_flags(
   }
 }
 
-static vk::BufferUsageFlagBits get_buffer_usage(
+vk::BufferUsageFlagBits get_buffer_usage(
     const pandora::core::BufferUsage buffer_usage) {
   switch (buffer_usage) {
     using enum pandora::core::BufferUsage;
@@ -42,6 +44,8 @@ static vk::BufferUsageFlagBits get_buffer_usage(
       return eVertexBuffer;
   }
 }
+
+}  // namespace
 
 pandora::core::gpu::Buffer::Buffer(
     const std::unique_ptr<Context>& ptr_context,

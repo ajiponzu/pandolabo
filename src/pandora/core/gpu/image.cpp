@@ -5,7 +5,9 @@
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
 
-static vk::ImageUsageFlags get_transfer_usage(
+namespace {
+
+vk::ImageUsageFlags get_transfer_usage(
     const pandora::core::TransferType transfer_type) {
   switch (transfer_type) {
     using enum pandora::core::TransferType;
@@ -22,7 +24,7 @@ static vk::ImageUsageFlags get_transfer_usage(
   }
 }
 
-static vk::ImageType get_image_type(pandora::core::ImageDimension dimension) {
+vk::ImageType get_image_type(pandora::core::ImageDimension dimension) {
   switch (dimension) {
     using enum pandora::core::ImageDimension;
     using enum vk::ImageType;
@@ -37,6 +39,8 @@ static vk::ImageType get_image_type(pandora::core::ImageDimension dimension) {
       return vk::ImageType(0u);
   }
 }
+
+}  // namespace
 
 pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
                                  const MemoryUsage memory_usage,

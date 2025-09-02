@@ -8,17 +8,19 @@ std::unordered_map<uint64_t, pandora::core::Mouse>
     pandora::core::ui::Window::s_mouseMap;
 std::unordered_map<uint64_t, bool> pandora::core::ui::Window::s_resizedBoolMap;
 
+namespace {
+
 #ifdef _DEBUG
-static void error_callback(int error, const char* description) {
+void error_callback(int error, const char* description) {
   std::cerr << "GLFW Error " << error << ": " << description << std::endl;
 }
 #endif
 
-static void callback_input_key(GLFWwindow* window,
-                               int key,
-                               int /*scancode*/,
-                               int action,
-                               int /*mods*/) {
+void callback_input_key(GLFWwindow* window,
+                        int key,
+                        int /*scancode*/,
+                        int action,
+                        int /*mods*/) {
   using namespace pandora::core::ui;
 
   if (action == GLFW_PRESS) {
@@ -28,25 +30,25 @@ static void callback_input_key(GLFWwindow* window,
   }
 }
 
-static void callback_cursor_pos(GLFWwindow* window, double x, double y) {
+void callback_cursor_pos(GLFWwindow* window, double x, double y) {
   using namespace pandora::core::ui;
 
   Window::setMousePos(window, x, y);
 }
 
-static void callback_scroll(GLFWwindow* window, double x, double y) {
+void callback_scroll(GLFWwindow* window, double x, double y) {
   using namespace pandora::core::ui;
 
   Window::setMouseScroll(window, x, y);
 }
 
-static void callback_resized(GLFWwindow* window,
-                             int /*width*/,
-                             int /*height*/) {
+void callback_resized(GLFWwindow* window, int /*width*/, int /*height*/) {
   using namespace pandora::core::ui;
 
   Window::setResizedBool(window, true);
 }
+
+}  // namespace
 
 pandora::core::ui::Window::Window(const std::string& title,
                                   const int32_t width,

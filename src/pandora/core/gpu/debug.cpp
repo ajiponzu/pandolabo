@@ -12,9 +12,11 @@ std::vector<const char*>
         "VK_LAYER_KHRONOS_validation",
 };
 
+namespace {
+
   #pragma warning(push)
   #pragma warning(disable : 4100)
-static VKAPI_ATTR VkBool32 VKAPI_CALL debug_utils_messenger_callback(
+VKAPI_ATTR VkBool32 VKAPI_CALL debug_utils_messenger_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
     VkDebugUtilsMessageTypeFlagsEXT message_types,
     VkDebugUtilsMessengerCallbackDataEXT const* p_callback_data,
@@ -26,7 +28,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_utils_messenger_callback(
 }
   #pragma warning(pop)
 
-static bool check_validation_layer_support(
+bool check_validation_layer_support(
     const std::vector<const char*>& validation_layers) {
   const auto available_layers = vk::enumerateInstanceLayerProperties();
 
@@ -46,6 +48,8 @@ static bool check_validation_layer_support(
 
   return true;
 }
+
+}  // namespace
 
 pandora::core::gpu::debug::Messenger::~Messenger() {
   m_ptrMessenger.release();

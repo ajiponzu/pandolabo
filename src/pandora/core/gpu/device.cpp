@@ -5,7 +5,9 @@
 
 #include "pandora/core/gpu.hpp"
 
-static std::vector<const char*> getDeviceExtensions(bool has_window_surface) {
+namespace {
+
+std::vector<const char*> getDeviceExtensions(bool has_window_surface) {
   std::vector<const char*> extensions = {
       VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
       VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME,
@@ -29,7 +31,7 @@ struct QueueFamilyIndices {
   }
 };
 
-static QueueFamilyIndices find_queue_families(
+QueueFamilyIndices find_queue_families(
     const vk::PhysicalDevice& physical_device) {
   QueueFamilyIndices indices;
 
@@ -58,7 +60,7 @@ static QueueFamilyIndices find_queue_families(
   return indices;
 }
 
-static bool check_device_extension_support(
+bool check_device_extension_support(
     const vk::PhysicalDevice& physical_device,
     const std::vector<const char*>& device_extension_list) {
   std::set<std::string> device_extensions(device_extension_list.begin(),
@@ -74,9 +76,11 @@ static bool check_device_extension_support(
 }
 
 template <std::integral T>
-static T get_optional_value(const std::optional<T>& option) {
+T get_optional_value(const std::optional<T>& option) {
   return option.value_or(0u);
 }
+
+}  // namespace
 
 pandora::core::gpu::Device::Device(
     const vk::UniqueInstance& ptr_instance,
