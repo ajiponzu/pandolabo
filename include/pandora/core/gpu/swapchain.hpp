@@ -106,16 +106,16 @@ class Swapchain {
     return m_fences.at(m_frameSyncIndex).get();
   }
 
-  /// @brief Get current image available semaphore
+  /// @brief Get current image available semaphore (for acquire)
   /// @return Image available semaphore
   const auto& getImageSemaphore() const {
     return m_imageAvailableSemaphores.at(m_frameSyncIndex).get();
   }
 
-  /// @brief Get current render finished semaphore
+  /// @brief Get current render finished semaphore (for presentation)
   /// @return Render finished semaphore
   const auto& getFinishedSemaphore() const {
-    return m_renderFinishedSemaphores.at(m_frameSyncIndex).get();
+    return m_renderFinishedSemaphores.at(m_imageIndex).get();
   }
 
   /// @brief Get swapchain image format

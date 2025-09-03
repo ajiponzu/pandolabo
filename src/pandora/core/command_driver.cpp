@@ -118,7 +118,7 @@ void pandora::core::CommandDriver::submit(
           .setSignalSemaphores(signal_semaphore.getSemaphore())
           .setWaitDstStageMask(vk_stage_flags);
 
-  m_queue.submit(submit_info, signal_semaphore.getFence());
+  m_queue.submit(submit_info, wait_semaphore.getFence());
 }
 
 void pandora::core::CommandDriver::present(

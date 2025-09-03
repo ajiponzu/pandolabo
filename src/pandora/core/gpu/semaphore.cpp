@@ -86,7 +86,7 @@ void pandora::core::gpu::SolidBinarySemaphore::wait(
 pandora::core::gpu::AcquireImageSemaphore::AcquireImageSemaphore(
     const std::unique_ptr<Context>& ptr_context) {
   m_semaphore = ptr_context->getPtrSwapchain()->getImageSemaphore();
-  m_fence = nullptr;
+  m_fence = ptr_context->getPtrSwapchain()->getFence();
 }
 
 pandora::core::gpu::AcquireImageSemaphore::~AcquireImageSemaphore() {}
@@ -94,7 +94,7 @@ pandora::core::gpu::AcquireImageSemaphore::~AcquireImageSemaphore() {}
 pandora::core::gpu::RenderSemaphore::RenderSemaphore(
     const std::unique_ptr<Context>& ptr_context) {
   m_semaphore = ptr_context->getPtrSwapchain()->getFinishedSemaphore();
-  m_fence = ptr_context->getPtrSwapchain()->getFence();
+  m_fence = nullptr;
 }
 
 pandora::core::gpu::RenderSemaphore::~RenderSemaphore() {}

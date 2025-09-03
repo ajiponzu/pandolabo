@@ -111,9 +111,13 @@ void pandora::core::gpu::Swapchain::constructSwapchain(
       m_imageViews.emplace_back(
           ptr_vk_device->createImageViewUnique(image_view_info));
 
-      m_imageAvailableSemaphores.emplace_back(
-          ptr_vk_device->createSemaphoreUnique({}));
+      // for swapchain image rendering
+      // with the image index(or image): waiting rendered, and present
       m_renderFinishedSemaphores.emplace_back(
+          ptr_vk_device->createSemaphoreUnique({}));
+
+      // for acquiring next image
+      m_imageAvailableSemaphores.emplace_back(
           ptr_vk_device->createSemaphoreUnique({}));
       m_fences.emplace_back(ptr_vk_device->createFenceUnique(
           vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled}));
