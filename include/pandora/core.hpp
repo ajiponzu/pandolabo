@@ -18,3 +18,4 @@
 #include "pandora/core/rendering_structures.hpp"
 #include "pandora/core/rendering_types.hpp"
 #include "pandora/core/renderpass.hpp"
+#include "pandora/core/synchronization_helpers.hpp"

@@ -74,9 +74,6 @@ class Context {
     return m_ptrSwapchain;
   }
 
-  /// @brief Acquire the next image from the swapchain
-  void acquireNextImage();
-
   /// @brief Reset the swapchain (e.g., after window resize)
   void resetSwapchain();
 

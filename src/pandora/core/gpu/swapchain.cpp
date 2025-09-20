@@ -19,20 +19,19 @@ void pandora::core::gpu::Swapchain::resetSwapchain(
 }
 
 void pandora::core::gpu::Swapchain::updateImageIndex(
-    const std::unique_ptr<Device>& ptr_device) {
+    const std::unique_ptr<Device>& ptr_device,
+    uint64_t timeout) {
   const auto& ptr_vk_device = ptr_device->getPtrLogicalDevice();
 
-  const auto vk_result =
-      ptr_vk_device->waitForFences(m_fences.at(m_frameSyncIndex).get(),
-                                   VK_TRUE,
-                                   std::numeric_limits<uint64_t>::max());
+  const auto vk_result = ptr_vk_device->waitForFences(
+      m_fences.at(m_frameSyncIndex).get(), VK_TRUE, timeout);
   if (vk_result != vk::Result::eSuccess) {
     throw std::runtime_error("Failed to wait for fence.");
   }
 
   const auto next_image_opt = ptr_vk_device->acquireNextImageKHR(
       m_ptrSwapchain.get(),
-      std::numeric_limits<uint64_t>::max(),
+      timeout,
       m_imageAvailableSemaphores.at(m_frameSyncIndex).get(),
       nullptr);
 

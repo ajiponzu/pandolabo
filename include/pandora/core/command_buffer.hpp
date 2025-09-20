@@ -21,6 +21,7 @@
 #include "rendering_types.hpp"
 #include "renderpass.hpp"
 #include "structures.hpp"
+#include "synchronization_helpers.hpp"
 #include "types.hpp"
 
 // Forward declarations
@@ -413,25 +414,18 @@ class CommandDriver {
   void mergeSecondaryCommands() const;
 
   /// @brief Submit GPU commands with timeline semaphore synchronization
-  /// @param dst_stage Pipeline stage to wait for
-  /// @param semaphore Timeline semaphore for synchronization
-  void submit(const PipelineStage dst_stage,
-              gpu::TimelineSemaphore& semaphore) const;
-
-  /// @brief Submit GPU commands for graphics with binary semaphore
-  /// synchronization
-  /// @param wait_semaphore Semaphore to wait on before execution
-  /// @param dst_stage Pipeline stage to wait for
-  /// @param signal_semaphore Semaphore to signal after completion
-  void submit(gpu::BinarySemaphore& wait_semaphore,
-              const PipelineStage dst_stage,
-              gpu::BinarySemaphore& signal_semaphore) const;
+  /// @param dst_stages Pipeline stages to wait for
+  /// @param semaphore_group Semaphore group containing wait/signal semaphores
+  /// @param fence Fence to wait on before execution
+  void submit(const std::vector<PipelineStage>& dst_stages,
+              const gpu::SubmitSemaphoreGroup& semaphore_group,
+              const gpu::Fence& fence = {}) const;
 
   /// @brief Present rendered image to display
   /// @param ptr_context Vulkan context for presentation
   /// @param wait_semaphore Semaphore to wait for before presentation
   void present(const std::unique_ptr<gpu::Context>& ptr_context,
-               gpu::BinarySemaphore& wait_semaphore) const;
+               const gpu::BinarySemaphore& wait_semaphore) const;
 
   /// @brief Wait for all operations on this queue to complete
   void queueWaitIdle() const {

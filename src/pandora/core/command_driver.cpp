@@ -1,6 +1,7 @@
 #include <ranges>
 
 #include "pandora/core/command_buffer.hpp"
+#include "pandora/core/gpu/synchronization.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
 #include "pandora/core/pipeline.hpp"
 #include "pandora/core/renderpass.hpp"
@@ -87,49 +88,31 @@ void pandora::core::CommandDriver::mergeSecondaryCommands() const {
 }
 
 void pandora::core::CommandDriver::submit(
-    const PipelineStage dst_stage,
-    gpu::TimelineSemaphore& semaphore) const {
-  auto submit_info = vk::SubmitInfo()
-                         .setPNext(semaphore.getPtrTimelineSubmitInfo())
-                         .setCommandBuffers(m_ptrPrimaryCommandBuffer.get())
-                         .setWaitSemaphores(semaphore.getSemaphore())
-                         .setSignalSemaphores(semaphore.getSemaphore());
-
-  semaphore.setWaitStage(vk_helper::getPipelineStageFlagBits(dst_stage));
-  submit_info.setWaitDstStageMask(semaphore.getBackWaitStage());
-
-  m_queue.submit(submit_info);
-
-  semaphore.updateWaitValue();
-  semaphore.updateSignalValue();
-}
-
-void pandora::core::CommandDriver::submit(
-    gpu::BinarySemaphore& wait_semaphore,
-    const PipelineStage dst_stage,
-    gpu::BinarySemaphore& signal_semaphore) const {
-  const vk::PipelineStageFlags vk_stage_flags =
-      vk_helper::getPipelineStageFlagBits(dst_stage);
-
-  const auto submit_info =
+    const std::vector<PipelineStage>& dst_stages,
+    const gpu::SubmitSemaphoreGroup& semaphore_group,
+    const gpu::Fence& fence) const {
+  auto submit_info =
       vk::SubmitInfo()
+          .setPNext(semaphore_group.getPtrTimelineSubmitInfo())
           .setCommandBuffers(m_ptrPrimaryCommandBuffer.get())
-          .setWaitSemaphores(wait_semaphore.getSemaphore())
-          .setSignalSemaphores(signal_semaphore.getSemaphore())
-          .setWaitDstStageMask(vk_stage_flags);
+          .setWaitSemaphores(semaphore_group.getWaitSemaphores())
+          .setSignalSemaphores(semaphore_group.getSignalSemaphores());
 
-  m_queue.submit(submit_info, wait_semaphore.getFence());
+  semaphore_group.setWaitStages(dst_stages);
+  submit_info.setWaitDstStageMask(semaphore_group.getWaitStages());
+
+  m_queue.submit(submit_info, fence.getFence());
 }
 
 void pandora::core::CommandDriver::present(
     const std::unique_ptr<gpu::Context>& ptr_context,
-    gpu::BinarySemaphore& wait_semaphore) const {
+    const gpu::BinarySemaphore& wait_semaphore) const {
   if (m_queueFamilyType != pandora::core::QueueFamilyType::Graphics) {
     throw std::runtime_error("Queue family type is not present.");
   }
 
   const auto& ptr_swapchain = ptr_context->getPtrSwapchain();
-  const auto image_index = ptr_swapchain->getImageIndex();
+  const auto& image_index = ptr_swapchain->getImageIndex();
 
   try {
     static_cast<void>(

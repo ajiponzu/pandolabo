@@ -94,12 +94,3 @@ void pandora::core::gpu::Context::resetSwapchain() {
   m_ptrWindowSurface->setWindowSize();
   m_ptrSwapchain->resetSwapchain(m_ptrDevice, m_ptrWindowSurface);
 }
-
-void pandora::core::gpu::Context::acquireNextImage() {
-  if (!m_ptrSwapchain) {
-    throw std::runtime_error(
-        "Swapchain is not initialized. Cannot acquire next image.");
-  }
-
-  m_ptrSwapchain->updateImageIndex(m_ptrDevice);
-}

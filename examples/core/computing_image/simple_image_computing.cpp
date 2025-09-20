@@ -45,11 +45,21 @@ void samples::core::SimpleImageComputing::run() {
 
     setComputeCommands(result_buffer);
 
-    m_ptrTransferCommandDriver->submit(plc::PipelineStage::BottomOfPipe,
-                                       semaphore);
-    m_ptrComputeCommandDriver->submit(plc::PipelineStage::ComputeShader,
-                                      semaphore);
-    semaphore.wait(m_ptrContext);
+    m_ptrTransferCommandDriver->submit(
+        {plc::PipelineStage::BottomOfPipe},
+        plc::gpu::SubmitSemaphoreGroup{}
+            .setWaitSemaphores(semaphore.forWait(0u))
+            .setSignalSemaphores(semaphore.forSignal(1u)));
+    m_ptrComputeCommandDriver->submit(
+        {plc::PipelineStage::ComputeShader},
+        plc::gpu::SubmitSemaphoreGroup{}
+            .setWaitSemaphores(semaphore.forWait(1u))
+            .setSignalSemaphores(semaphore.forSignal(2u)));
+
+    plc::TimelineSemaphoreDriver{}
+        .setSemaphores({semaphore})
+        .setValues({2u})
+        .wait(m_ptrContext);
   }
 
   const auto result_mapped_address = result_buffer.mapMemory(m_ptrContext);

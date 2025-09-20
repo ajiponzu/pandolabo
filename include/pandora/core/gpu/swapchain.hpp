@@ -15,6 +15,7 @@
 #include "../module_connection/gpu_ui.hpp"
 #include "../types.hpp"
 #include "device.hpp"
+#include "synchronization.hpp"
 
 namespace pandora::core::gpu {
 
@@ -102,20 +103,21 @@ class Swapchain {
 
   /// @brief Get current frame fence
   /// @return Current frame fence
-  const auto& getFence() const {
-    return m_fences.at(m_frameSyncIndex).get();
+  auto getFence() const {
+    return Fence(m_fences.at(m_frameSyncIndex).get());
   }
 
   /// @brief Get current image available semaphore (for acquire)
   /// @return Image available semaphore
-  const auto& getImageSemaphore() const {
-    return m_imageAvailableSemaphores.at(m_frameSyncIndex).get();
+  auto getImageAvailableSemaphore() const {
+    return BinarySemaphore(
+        m_imageAvailableSemaphores.at(m_frameSyncIndex).get());
   }
 
   /// @brief Get current render finished semaphore (for presentation)
   /// @return Render finished semaphore
-  const auto& getFinishedSemaphore() const {
-    return m_renderFinishedSemaphores.at(m_imageIndex).get();
+  auto getFinishedSemaphore() const {
+    return BinarySemaphore(m_renderFinishedSemaphores.at(m_imageIndex).get());
   }
 
   /// @brief Get swapchain image format
@@ -127,7 +129,10 @@ class Swapchain {
   /// @brief Acquire image index for updating
   /// @details You must call this function before rendering in each frame.
   /// @param ptr_device GPU device wrapper pointer
-  void updateImageIndex(const std::unique_ptr<Device>& ptr_device);
+  /// @param timeout Timeout in nanoseconds for image acquisition
+  void updateImageIndex(
+      const std::unique_ptr<Device>& ptr_device,
+      uint64_t timeout = std::numeric_limits<uint64_t>::max());
 
   /// @brief Update frame sync image index
   /// @details You must call this function after presenting rendered image in

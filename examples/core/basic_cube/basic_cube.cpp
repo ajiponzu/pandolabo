@@ -52,12 +52,22 @@ void samples::core::BasicCube::run() {
     setTransferCommands(staging_buffers);
 
     plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
-    m_ptrTransferCommandDriver->submit(plc::PipelineStage::BottomOfPipe,
-                                       semaphore);
-    m_ptrGraphicCommandDriver.at(0u)->submit(plc::PipelineStage::VertexShader,
-                                             semaphore);
+    m_ptrTransferCommandDriver->submit(
+        {plc::PipelineStage::BottomOfPipe},
+        plc::gpu::SubmitSemaphoreGroup{}
+            .setWaitSemaphores(semaphore.forWait(0u))
+            .setSignalSemaphores(semaphore.forSignal(1u)));
+    m_ptrGraphicCommandDriver.at(0u)->submit(
+        {plc::PipelineStage::VertexShader},
+        plc::gpu::SubmitSemaphoreGroup{}
+            .setWaitSemaphores(semaphore.forWait(1u))
+            .setSignalSemaphores(semaphore.forSignal(2u)));
 
-    semaphore.wait(m_ptrContext);
+    plc::TimelineSemaphoreDriver{}
+        .setSemaphores({semaphore})
+        .setValues({2u})
+        .wait(m_ptrContext);
+
     m_ptrTransferCommandDriver->queueWaitIdle();
     m_ptrGraphicCommandDriver.at(0u)->queueWaitIdle();
 
@@ -77,28 +87,28 @@ void samples::core::BasicCube::run() {
                 reinterpret_cast<void*>(m_ptrCubePosition.get()),
                 sizeof(CubePosition));
 
-    m_ptrContext->acquireNextImage();
-    m_ptrRenderKit->updateIndex(
-        m_ptrContext->getPtrSwapchain()->getImageIndex());
+    const auto& ptr_swapchain = m_ptrContext->getPtrSwapchain();
+    ptr_swapchain->updateImageIndex(m_ptrContext->getPtrDevice());
+    m_ptrRenderKit->updateIndex(ptr_swapchain->getImageIndex());
 
-    m_ptrGraphicCommandDriver
-        .at(m_ptrContext->getPtrSwapchain()->getFrameSyncIndex())
+    m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
         ->resetAllCommandPools(m_ptrContext);
     setGraphicCommands();
 
-    plc::gpu::AcquireImageSemaphore acquire_semaphore(m_ptrContext);
-    plc::gpu::RenderSemaphore render_semaphore(m_ptrContext);
+    const auto image_semaphore = ptr_swapchain->getImageAvailableSemaphore();
+    const auto finished_semaphore = ptr_swapchain->getFinishedSemaphore();
+    const auto finished_fence = ptr_swapchain->getFence();
 
-    m_ptrGraphicCommandDriver
-        .at(m_ptrContext->getPtrSwapchain()->getFrameSyncIndex())
-        ->submit(acquire_semaphore,
-                 plc::PipelineStage::ColorAttachmentOutput,
-                 render_semaphore);
-    m_ptrGraphicCommandDriver
-        .at(m_ptrContext->getPtrSwapchain()->getFrameSyncIndex())
-        ->present(m_ptrContext, render_semaphore);
+    m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
+        ->submit({plc::PipelineStage::ColorAttachmentOutput},
+                 plc::gpu::SubmitSemaphoreGroup{}
+                     .setWaitSemaphores(image_semaphore)
+                     .setSignalSemaphores(finished_semaphore),
+                 finished_fence);
+    m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
+        ->present(m_ptrContext, finished_semaphore);
 
-    m_ptrContext->getPtrSwapchain()->updateFrameSyncIndex();
+    ptr_swapchain->updateFrameSyncIndex();
   }
 
   m_ptrCubePositionMapping = nullptr;
