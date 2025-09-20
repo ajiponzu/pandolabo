@@ -148,7 +148,6 @@ find_package(VulkanLoader REQUIRED)
 find_package(VulkanHeaders REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(glfw3 REQUIRED)
-find_package(glm REQUIRED)
 
 # テストオプション
 option(BUILD_TESTS "Build tests" ON)
@@ -196,6 +195,13 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 # 外部ライブラリのリンク
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
+        # 公開ヘッダや実行時に利用者側へ伝播すべき最低限の依存
+        Vulkan::Loader
+        Vulkan::Headers
+        vulkan-headers::vulkan-headers
+        glfw
+    PRIVATE
+        # 内部実装でのみ利用する依存（ヘッダ公開は不要）
         glslang::_glslang-do-not-use
         glslang::glslang
         glslang::SPIRV
@@ -210,101 +216,12 @@ target_link_libraries(${PROJECT_NAME}
         spirv-cross-reflect
         spirv-tools::spirv-tools
         SPIRV-Headers::SPIRV-Headers
-        Vulkan::Loader
-        vulkan-headers::vulkan-headers
         nlohmann_json::nlohmann_json
-        glfw
-        glm::glm
 )
 
-# Conanパッケージのインクルードディレクトリを手動で追加
-# CMakeDepsが正しく動作しない場合の対策
-target_include_directories(${PROJECT_NAME} PUBLIC
-    "C:/Users/cpjvm/.conan2/p/vulkae153e7dd6b61a/p/include"
-    "C:/Users/cpjvm/.conan2/p/b/spirv51f92ea85c2f6/p/include"
-    "C:/Users/cpjvm/.conan2/p/b/glsla3085496846f77/b/src"
-)
-
-# Conanキャッシュから動的にパスを探す
-file(GLOB CONAN_VULKAN_HEADERS "C:/Users/cpjvm/.conan2/p/vulka*/p/include")
-file(GLOB CONAN_SPIRV_CROSS "C:/Users/cpjvm/.conan2/p/b/spirv*/p/include")
-file(GLOB CONAN_GLSLANG "C:/Users/cpjvm/.conan2/p/b/glsla*/b/src")
-
-foreach(VULKAN_INCLUDE ${CONAN_VULKAN_HEADERS})
-    if(EXISTS "${VULKAN_INCLUDE}/vulkan/vulkan.hpp")
-        target_include_directories(${PROJECT_NAME} PUBLIC ${VULKAN_INCLUDE})
-        message(STATUS "Found Vulkan headers: ${VULKAN_INCLUDE}")
-    endif()
-endforeach()
-
-foreach(SPIRV_INCLUDE ${CONAN_SPIRV_CROSS})
-    if(EXISTS "${SPIRV_INCLUDE}/spirv_cross/spirv_cross.hpp")
-        target_include_directories(${PROJECT_NAME} PUBLIC ${SPIRV_INCLUDE})
-        message(STATUS "Found SPIRV-Cross headers: ${SPIRV_INCLUDE}")
-    endif()
-endforeach()
-
-foreach(GLSLANG_INCLUDE ${CONAN_GLSLANG})
-    if(EXISTS "${GLSLANG_INCLUDE}/glslang/Public/ShaderLang.h")
-        target_include_directories(${PROJECT_NAME} PUBLIC ${GLSLANG_INCLUDE})
-        message(STATUS "Found glslang headers: ${GLSLANG_INCLUDE}")
-    endif()
-endforeach()
-
-# Glslangの追加パスを探す
-file(GLOB CONAN_GLSLANG_INCLUDES "C:/Users/cpjvm/.conan2/p/*/p/include")
-foreach(GLSLANG_INCLUDE ${CONAN_GLSLANG_INCLUDES})
-    if(EXISTS "${GLSLANG_INCLUDE}/glslang/SPIRV/GlslangToSpv.h")
-        target_include_directories(${PROJECT_NAME} PUBLIC ${GLSLANG_INCLUDE})
-        message(STATUS "Found glslang SPIRV headers: ${GLSLANG_INCLUDE}")
-    endif()
-endforeach()
-
-# Catch2のパスを探す
-file(GLOB CONAN_CATCH2_INCLUDES "C:/Users/cpjvm/.conan2/p/*/p/include")
-foreach(CATCH2_INCLUDE ${CONAN_CATCH2_INCLUDES})
-    if(EXISTS "${CATCH2_INCLUDE}/catch2/catch_test_macros.hpp")
-        target_include_directories(${PROJECT_NAME} PUBLIC ${CATCH2_INCLUDE})
-        message(STATUS "Found Catch2 headers: ${CATCH2_INCLUDE}")
-    endif()
-endforeach()
-
-# Conanパッケージのインクルードディレクトリを取得
-# CMakeDepsが正しく動作しない場合のフォールバック
-if(NOT TARGET vulkan-headers::vulkan-headers OR NOT TARGET glfw)
-    # Conanホームディレクトリを動的に取得
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E env .venv/Scripts/conan config home
-        OUTPUT_VARIABLE CONAN_HOME
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    )
-
-    if(CONAN_HOME)
-        file(GLOB CONAN_PACKAGES "${CONAN_HOME}/p/*/p/include")
-        file(GLOB CONAN_BUILD_PACKAGES "${CONAN_HOME}/p/*/s/*/include")
-
-        # パッケージディレクトリからヘッダを探索
-        foreach(PACKAGE_INCLUDE ${CONAN_PACKAGES})
-            if(EXISTS "${PACKAGE_INCLUDE}/vulkan/vulkan.hpp")
-                target_include_directories(${PROJECT_NAME} PUBLIC ${PACKAGE_INCLUDE})
-                message(STATUS "Found Vulkan headers: ${PACKAGE_INCLUDE}")
-            endif()
-            if(EXISTS "${PACKAGE_INCLUDE}/GLFW/glfw3.h")
-                target_include_directories(${PROJECT_NAME} PUBLIC ${PACKAGE_INCLUDE})
-                message(STATUS "Found GLFW headers: ${PACKAGE_INCLUDE}")
-            endif()
-        endforeach()
-
-        # ビルドソースディレクトリからも探索
-        foreach(PACKAGE_INCLUDE ${CONAN_BUILD_PACKAGES})
-            if(EXISTS "${PACKAGE_INCLUDE}/GLFW/glfw3.h")
-                target_include_directories(${PROJECT_NAME} PUBLIC ${PACKAGE_INCLUDE})
-                message(STATUS "Found GLFW headers (build source): ${PACKAGE_INCLUDE}")
-            endif()
-        endforeach()
-    endif()
-endif()
+## Conan/CMakeDeps/Toolchain に一本化
+# 依存のインクルードパスはCMakeDepsのパッケージターゲット経由で伝播させる。
+# ユーザー環境に依存するハードコードされたinclude検索は削除。
 
 if(BUILD_TESTS)
     enable_testing()

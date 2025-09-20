@@ -16,11 +16,8 @@ void error_callback(int error, const char* description) {
 }
 #endif
 
-void callback_input_key(GLFWwindow* window,
-                        int key,
-                        int /*scancode*/,
-                        int action,
-                        int /*mods*/) {
+void callback_input_key(
+    GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/) {
   using namespace pandora::core::ui;
 
   if (action == GLFW_PRESS) {

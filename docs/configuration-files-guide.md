@@ -199,7 +199,7 @@ target_link_libraries(${PROJECT_NAME}
             "name": "🚀 Debug Example (Release)",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/examples/Release/basic_usage.exe",
+            "program": "${workspaceFolder}/build/examples/Release/example_basic_cube.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

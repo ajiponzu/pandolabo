@@ -25,8 +25,7 @@ uint32_t pandora::core::AttachmentList::append(
 }
 
 uint32_t pandora::core::AttachmentList::append(
-    const AttachmentDescription& description,
-    const ClearColor& clear_value) {
+    const AttachmentDescription& description, const ClearColor& clear_value) {
   m_clearValues.push_back(vk::ClearColorValue(clear_value.color));
 
   appendDescription(description);
@@ -37,8 +36,7 @@ uint32_t pandora::core::AttachmentList::append(
 }
 
 void pandora::core::AttachmentList::setBackbufferAttachment(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t index) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t index) {
   m_attachments[m_backbufferIndex] =
       ptr_context->getPtrSwapchain()->getImageViews().at(index).get();
 }

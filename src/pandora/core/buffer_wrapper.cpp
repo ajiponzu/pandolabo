@@ -1,8 +1,7 @@
 #include "pandora/core/buffer_helpers.hpp"
 
 pandora::core::gpu::Buffer pandora::core::createStagingBufferToGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::CpuToGpu,
                      TransferType::TransferSrc,
@@ -12,8 +11,7 @@ pandora::core::gpu::Buffer pandora::core::createStagingBufferToGPU(
 
 std::unique_ptr<pandora::core::gpu::Buffer>
 pandora::core::createUniqueStagingBufferToGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::CpuToGpu,
@@ -23,8 +21,7 @@ pandora::core::createUniqueStagingBufferToGPU(
 }
 
 pandora::core::gpu::Buffer pandora::core::createStagingBufferFromGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::GpuToCpu,
                      TransferType::TransferDst,
@@ -34,8 +31,7 @@ pandora::core::gpu::Buffer pandora::core::createStagingBufferFromGPU(
 
 std::unique_ptr<pandora::core::gpu::Buffer>
 pandora::core::createUniqueStagingBufferFromGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::GpuToCpu,
@@ -69,8 +65,7 @@ pandora::core::createUniqueStorageBuffer(
 }
 
 pandora::core::gpu::Buffer pandora::core::createUniformBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::CpuToGpu,
                      TransferType::TransferDst,
@@ -80,8 +75,7 @@ pandora::core::gpu::Buffer pandora::core::createUniformBuffer(
 
 std::unique_ptr<pandora::core::gpu::Buffer>
 pandora::core::createUniqueUniformBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::CpuToGpu,
@@ -91,8 +85,7 @@ pandora::core::createUniqueUniformBuffer(
 }
 
 pandora::core::gpu::Buffer pandora::core::createVertexBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::GpuOnly,
                      TransferType::TransferDst,
@@ -102,8 +95,7 @@ pandora::core::gpu::Buffer pandora::core::createVertexBuffer(
 
 std::unique_ptr<pandora::core::gpu::Buffer>
 pandora::core::createUniqueVertexBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::GpuOnly,
@@ -113,8 +105,7 @@ pandora::core::createUniqueVertexBuffer(
 }
 
 pandora::core::gpu::Buffer pandora::core::createIndexBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::GpuOnly,
                      TransferType::TransferDst,
@@ -124,8 +115,7 @@ pandora::core::gpu::Buffer pandora::core::createIndexBuffer(
 
 std::unique_ptr<pandora::core::gpu::Buffer>
 pandora::core::createUniqueIndexBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size) {
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::GpuOnly,

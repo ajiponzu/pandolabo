@@ -1,7 +1,4 @@
-/*
-This header file is part of the Hephics project.
-This file contains the functions for convert Hephics enum to Vulkan API's enum.
-*/
+/* Utility: Vulkan enum conversion helpers for Pandolabo */
 
 #pragma once
 

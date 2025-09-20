@@ -80,10 +80,13 @@ vk::UniqueInstance pandora::core::gpu::debug::Messenger::createDebugInstance(
   const vk::StructureChain<vk::InstanceCreateInfo,
                            vk::ValidationFeaturesEXT,
                            vk::DebugUtilsMessengerCreateInfoEXT>
-      create_info_chain(
-          {{}, &app_info, s_validationLayers, extensions},
-          validation_features,
-          {{}, severity_flags, type_flags, &debug_utils_messenger_callback});
+      create_info_chain({{}, &app_info, s_validationLayers, extensions},
+                        validation_features,
+                        {{},
+                         severity_flags,
+                         type_flags,
+                         reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT>(
+                             &debug_utils_messenger_callback)});
 
   auto ptr_vk_instance =
       vk::createInstanceUnique(create_info_chain.get<vk::InstanceCreateInfo>());

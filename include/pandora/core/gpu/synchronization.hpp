@@ -465,13 +465,11 @@ concept SemaphoreConcept = requires(T a) {
 
 template <typename T>
 concept WaitConcept = SemaphoreConcept<T> && requires(T a) {
-  { a.m_waitValue };
   { a.getWaitValue() } -> std::same_as<uint64_t>;
 };
 
 template <typename T>
 concept SignalConcept = SemaphoreConcept<T> && requires(T a) {
-  { a.m_signalValue };
   { a.getSignalValue() } -> std::same_as<uint64_t>;
 };
 

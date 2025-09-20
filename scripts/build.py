@@ -193,19 +193,21 @@ class PandolaboBuilder:
             return self.setup_environment()
         return False
 
-    def run_example(self):
-        """Example実行"""
+    def run_example(self, example: str | None = None):
+        """Example実行（個別指定対応）"""
+        target = example or "example_basic_cube"
+        exe_name = target
         if self.is_windows:
-            example_path = f"build/examples/{self.config}/basic_usage.exe"
+            example_path = Path("build") / "examples" / self.config / f"{exe_name}.exe"
         else:
-            example_path = "build/examples/basic_usage"
+            example_path = Path("build") / "examples" / exe_name
 
-        if Path(example_path).exists():
-            self.log(f"🚀 Example ({self.config}) を実行中...", "green")
-            return self.run_command([example_path])
+        if example_path.exists():
+            self.log(f"🚀 Example '{exe_name}' ({self.config}) を実行中...", "green")
+            return self.run_command([str(example_path)])
         else:
             self.log(
-                f"❌ Example ({self.config}) が見つかりません。先にビルドしてください。",
+                f"❌ Example '{exe_name}' ({self.config}) が見つかりません。先にビルドしてください。",
                 "red",
             )
             return False
@@ -255,6 +257,11 @@ def main():
         help="ビルド設定 (デフォルト: Release)",
     )
 
+    parser.add_argument(
+        "--example",
+        help="個別Example名 (例: example_basic_cube, example_square)。build/run/all と併用可",
+    )
+
     args = parser.parse_args()
 
     print("🚀 Pandolabo ビルドスクリプト開始")
@@ -267,11 +274,11 @@ def main():
         if args.command == "setup":
             success = builder.setup_environment()
         elif args.command == "build":
-            success = builder.build()
+            success = builder.build(args.example or "all")
         elif args.command == "lib":
             success = builder.build("pandolabo")
         elif args.command == "examples":
-            success = builder.build("basic_usage")
+            success = builder.build(args.example or "examples_all")
         elif args.command == "tests":
             success = builder.build("tests")
         elif args.command == "clean":
@@ -279,12 +286,13 @@ def main():
         elif args.command == "rebuild":
             success = builder.clean_and_setup()
         elif args.command == "run":
-            success = builder.run_example()
+            success = builder.run_example(args.example)
         elif args.command == "all":
+            target = args.example or "example_basic_cube"
             success = (
                 builder.setup_environment()
-                and builder.build()
-                and builder.run_example()
+                and builder.build(target)
+                and builder.run_example(target)
             )
         else:
             builder.log(f"❓ 不明なコマンド: {args.command}", "red")

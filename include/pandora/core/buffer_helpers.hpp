@@ -32,8 +32,7 @@ class ShaderModule;
 /// @param size Buffer size in bytes
 /// @return Buffer object configured for CPU-to-GPU transfer
 gpu::Buffer createStagingBufferToGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size);
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size);
 
 /// @brief Create staging buffer for CPU to GPU data transfer (unique_ptr
 /// version) Provides explicit ownership management for cases where heap
@@ -42,8 +41,7 @@ gpu::Buffer createStagingBufferToGPU(
 /// @param size Buffer size in bytes
 /// @return Unique pointer to buffer object configured for CPU-to-GPU transfer
 std::unique_ptr<gpu::Buffer> createUniqueStagingBufferToGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size);
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size);
 
 /// @brief Create staging buffer for GPU to CPU data transfer
 /// Creates a buffer optimized for transferring data from GPU memory to CPU
@@ -52,8 +50,7 @@ std::unique_ptr<gpu::Buffer> createUniqueStagingBufferToGPU(
 /// @param size Buffer size in bytes
 /// @return Buffer object configured for GPU-to-CPU transfer
 gpu::Buffer createStagingBufferFromGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size);
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size);
 
 /// @brief Create staging buffer for GPU to CPU data transfer (unique_ptr
 /// version) Provides explicit ownership management for cases where heap
@@ -62,8 +59,7 @@ gpu::Buffer createStagingBufferFromGPU(
 /// @param size Buffer size in bytes
 /// @return Unique pointer to buffer object configured for GPU-to-CPU transfer
 std::unique_ptr<gpu::Buffer> createUniqueStagingBufferFromGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size);
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size);
 
 /// @brief Create storage buffer for compute shader operations
 /// Creates a buffer that can be read and written by compute shaders.
@@ -94,8 +90,7 @@ std::unique_ptr<gpu::Buffer> createUniqueStorageBuffer(
 /// @param size Buffer size in bytes
 /// @return Buffer object configured for uniform data
 gpu::Buffer createUniformBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size);
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size);
 
 /// @brief Create uniform buffer for shader uniform data (unique_ptr version)
 /// Provides explicit ownership management for cases where heap allocation is
@@ -104,8 +99,7 @@ gpu::Buffer createUniformBuffer(
 /// @param size Buffer size in bytes
 /// @return Unique pointer to buffer object configured for uniform data
 std::unique_ptr<gpu::Buffer> createUniqueUniformBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size);
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size);
 
 /// @brief Create vertex buffer for vertex data
 /// Creates a buffer optimized for storing vertex attribute data.
@@ -122,8 +116,7 @@ gpu::Buffer createVertexBuffer(const std::unique_ptr<gpu::Context>& ptr_context,
 /// @param size Buffer size in bytes
 /// @return Unique pointer to buffer object configured for vertex data
 std::unique_ptr<gpu::Buffer> createUniqueVertexBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size);
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size);
 
 /// @brief Create index buffer for indexed rendering
 /// Creates a buffer optimized for storing vertex indices for indexed drawing.
@@ -140,8 +133,7 @@ gpu::Buffer createIndexBuffer(const std::unique_ptr<gpu::Context>& ptr_context,
 /// @param size Buffer size in bytes
 /// @return Unique pointer to buffer object configured for index data
 std::unique_ptr<gpu::Buffer> createUniqueIndexBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const size_t size);
+    const std::unique_ptr<gpu::Context>& ptr_context, const size_t size);
 
 /* End: Buffer creation helper functions */
 

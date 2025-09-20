@@ -48,7 +48,7 @@
 
 param(
     [Parameter(Position=0)]
-    [ValidateSet("setup", "build", "lib", "examples", "tests", "clean", "rebuild", "run", "all", "vscode", "format", "")]
+    [ValidateSet("setup", "build", "lib", "examples", "tests", "test", "clean", "rebuild", "run", "all", "vscode", "format", "")]
     [string]$Command = "",
 
     [Parameter()]
@@ -56,7 +56,10 @@ param(
     [string]$Configuration = "Release",
 
     [Parameter()]
-    [switch]$Interactive
+    [switch]$Interactive,
+
+    [Parameter()]
+    [string]$Example
 )
 
 # スクリプトディレクトリを取得
@@ -73,18 +76,21 @@ function Show-Menu {
     Write-Host "================================" -ForegroundColor Green
     Write-Host "現在の設定: $Configuration ビルド" -ForegroundColor Magenta
     Write-Host ""
-    Write-Host "利用可能なコマンド:" -ForegroundColor Yellow
+    Write-Host "[環境]" -ForegroundColor Yellow
     Write-Host "  1. setup     - 環境セットアップ (.venv + Conan 2.x)" -ForegroundColor Cyan
-    Write-Host "  2. build     - 全体ビルド ($Configuration)" -ForegroundColor Cyan
-    Write-Host "  3. lib       - ライブラリのみ ($Configuration)" -ForegroundColor Cyan
-    Write-Host "  4. examples  - Exampleのみ ($Configuration)" -ForegroundColor Cyan
-    Write-Host "  5. tests     - テストのみ ($Configuration)" -ForegroundColor Cyan
-    Write-Host "  6. clean     - ビルドディレクトリ削除のみ" -ForegroundColor Cyan
-    Write-Host "  7. rebuild   - クリーン + セットアップ ($Configuration)" -ForegroundColor Cyan
-    Write-Host "  8. vscode    - VSCode設定一式生成 ($Configuration)" -ForegroundColor Cyan
-    Write-Host "  9. run       - Example実行 ($Configuration)" -ForegroundColor Cyan
-    Write-Host "  0. all       - setup + build + run ($Configuration)" -ForegroundColor Cyan
+    Write-Host "  2. clean     - ビルドディレクトリ削除" -ForegroundColor Cyan
+    Write-Host "  3. rebuild   - クリーン + セットアップ ($Configuration)" -ForegroundColor Cyan
+    Write-Host "  4. vscode    - VSCode設定一式生成 ($Configuration)" -ForegroundColor Cyan
     Write-Host "  f. format    - C++ファイル一括フォーマット" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "[ビルド/実行]" -ForegroundColor Yellow
+    Write-Host "  5. build     - 全体ビルド ($Configuration)" -ForegroundColor Cyan
+    Write-Host "  6. lib       - ライブラリのみビルド ($Configuration)" -ForegroundColor Cyan
+    Write-Host "  7. examples  - Exampleをビルドして実行 ($Configuration)" -ForegroundColor Cyan
+    Write-Host "  8. tests     - テストをビルドして実行 ($Configuration)" -ForegroundColor Cyan
+    Write-Host "  9. run       - Example実行のみ ($Configuration)" -ForegroundColor Cyan
+    Write-Host "  0. all       - setup + build + run ($Configuration)" -ForegroundColor Cyan
+    Write-Host "  t. test      - テスト実行 (エイリアス)" -ForegroundColor Green
     Write-Host ""
     Write-Host "設定変更:" -ForegroundColor Yellow
     Write-Host "  d. debug     - Debug ビルドに切り替え" -ForegroundColor Green
@@ -96,19 +102,48 @@ function Show-Menu {
     Write-Host ""
 }
 
+function Select-Example {
+    # 既知のExampleターゲット一覧（CMakeLists.txtに合わせて更新）
+    $examples = @(
+        "example_basic_compute",
+        "example_basic_cube",
+        "example_simple_image",
+        "example_square"
+    )
+
+    Write-Host ""; Write-Host "🎯 実行するExampleを選択してください:" -ForegroundColor Yellow
+    for ($i = 0; $i -lt $examples.Count; $i++) {
+        Write-Host ("  {0}. {1}" -f ($i+1), $examples[$i]) -ForegroundColor Cyan
+    }
+    Write-Host "  0. キャンセル" -ForegroundColor Red
+
+    do {
+        $idx = Read-Host "番号を入力 (0-{0})" -f $examples.Count
+        if ($idx -match '^[0-9]+$') {
+            $num = [int]$idx
+            if ($num -eq 0) { return $null }
+            if ($num -ge 1 -and $num -le $examples.Count) {
+                return $examples[$num-1]
+            }
+        }
+        Write-Host "無効な選択です。0-{0} の番号を入力してください。" -f $examples.Count -ForegroundColor Red
+    } while ($true)
+}
+
 function Get-UserChoice {
     $choices = @{
         "1" = "setup"
-        "2" = "build"
-        "3" = "lib"
-        "4" = "examples"
-        "5" = "tests"
-        "6" = "clean"
-        "7" = "rebuild"
-        "8" = "vscode"
+        "2" = "clean"
+        "3" = "rebuild"
+        "4" = "vscode"
+        "5" = "build"
+        "6" = "lib"
+        "7" = "examples"
+        "8" = "tests"
         "9" = "run"
         "0" = "all"
         "f" = "format"
+        "t" = "test"
         "d" = "debug"
         "r" = "release"
         "w" = "relwithdebinfo"
@@ -117,18 +152,19 @@ function Get-UserChoice {
     }
 
     do {
-        $input = Read-Host "選択してください (0-9, f, d/r/w/m, x)"
+        $input = Read-Host "選択してください (0-9, f, t, d/r/w/m, x)"
         if ($choices.ContainsKey($input)) {
             return $choices[$input]
         }
-        Write-Host "無効な選択です。0-9, f, d/r/w/m, xを入力してください。" -ForegroundColor Red
+        Write-Host "無効な選択です。0-9, f, t, d/r/w/m, xを入力してください。" -ForegroundColor Red
     } while ($true)
 }
 
 function Invoke-PythonBuild {
     param(
         [string]$BuildCommand,
-        [string]$BuildConfiguration = "Release"
+        [string]$BuildConfiguration = "Release",
+        [string]$BuildExample = $null
     )
 
     if ($BuildCommand -eq "exit") {
@@ -248,11 +284,15 @@ function Invoke-PythonBuild {
     # Pythonスクリプト実行
     Write-Host ""
     Write-Host "🐍 Python ビルドスクリプトを実行中..." -ForegroundColor Green
-    Write-Host "実行コマンド: $VenvPython $PythonScript $BuildCommand --config $BuildConfiguration" -ForegroundColor Cyan
+    $argsList = @($PythonScript, $BuildCommand, "--config", $BuildConfiguration)
+    if ($BuildExample -and $BuildExample.Trim() -ne "") {
+        $argsList += @("--example", $BuildExample)
+    }
+    Write-Host ("実行コマンド: {0} {1}" -f $VenvPython, ($argsList -join ' ')) -ForegroundColor Cyan
 
     # バッファリングを無効にしてリアルタイム出力
     $env:PYTHONUNBUFFERED = "1"
-    $process = Start-Process -FilePath $VenvPython -ArgumentList $PythonScript, $BuildCommand, "--config", $BuildConfiguration -NoNewWindow -Wait -PassThru
+    $process = Start-Process -FilePath $VenvPython -ArgumentList $argsList -NoNewWindow -Wait -PassThru
     $exitCode = $process.ExitCode
 
     Write-Host "終了コード: $exitCode" -ForegroundColor Cyan
@@ -274,6 +314,7 @@ try {
             # 設定変更コマンドの処理
             if ($selectedCommand -in @("debug", "release", "relwithdebinfo", "minsize")) {
                 $result = Invoke-PythonBuild $selectedCommand $Configuration
+                Start-Sleep -Seconds 2
                 continue
             }
 
@@ -303,6 +344,7 @@ try {
                 } else {
                     Write-Host "❌ VSCode設定スクリプトが見つかりません" -ForegroundColor Red
                 }
+                Start-Sleep -Seconds 2
                 continue
             }
 
@@ -318,6 +360,7 @@ try {
                     Write-Host "❌ clang-formatが見つかりません。" -ForegroundColor Red
                     Write-Host "   LLVM/Clangをインストールしてください。" -ForegroundColor Yellow
                     Write-Host "   または、Visual Studio 2022のC++ツールをインストールしてください。" -ForegroundColor Yellow
+                    Start-Sleep -Seconds 2
                     continue
                 }
 
@@ -326,6 +369,7 @@ try {
                 if (-not (Test-Path $clangFormatFile)) {
                     Write-Host "⚠️  .clang-formatファイルが見つかりません。VSCode設定を再生成してください。" -ForegroundColor Yellow
                     Write-Host "   実行: .\scripts\build.ps1 vscode" -ForegroundColor Cyan
+                    Start-Sleep -Seconds 2
                     continue
                 }
 
@@ -334,6 +378,7 @@ try {
 
                 if ($cppFiles.Count -eq 0) {
                     Write-Host "🔍 フォーマット対象のC++ファイルが見つかりません。" -ForegroundColor Yellow
+                    Start-Sleep -Seconds 2
                     continue
                 }
 
@@ -364,10 +409,88 @@ try {
                 if ($errorCount -gt 0) {
                     Write-Host "   ❌ 失敗: $errorCount ファイル" -ForegroundColor Red
                 }
+                Start-Sleep -Seconds 2
                 continue
             }
 
-            $result = Invoke-PythonBuild $selectedCommand $Configuration
+            if ($selectedCommand -eq "test") {
+                Write-Host ""
+                Write-Host "🧪 テストをビルドして実行します ($Configuration)" -ForegroundColor Green
+                $buildOk = (Invoke-PythonBuild "tests" $Configuration) -eq 0
+                if (-not $buildOk) {
+                    Write-Host "❌ テストのビルドに失敗しました" -ForegroundColor Red
+                    Start-Sleep -Seconds 2
+                    continue
+                }
+                $exe = Join-Path $ProjectRoot ("build/tests/{0}/tests.exe" -f $Configuration)
+                if (-not (Test-Path $exe)) {
+                    Write-Host "❌ テスト実行ファイルが見つかりません: $exe" -ForegroundColor Red
+                    Start-Sleep -Seconds 2
+                    continue
+                }
+
+                # JUnit出力先
+                $resultsDir = Join-Path $ProjectRoot "build/test-results"
+                New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null
+                $junit = Join-Path $resultsDir ("junit-{0}.xml" -f $Configuration)
+
+                # GPUテストの有効/無効を案内
+                if (-not $env:PANDOLABO_ENABLE_GPU_TESTS -or $env:PANDOLABO_ENABLE_GPU_TESTS -eq "0") {
+                    Write-Host "ℹ️  GPUテストは無効です。有効化するには 'setx PANDOLABO_ENABLE_GPU_TESTS 1' を設定してください (新しいシェルで有効)。" -ForegroundColor Yellow
+                }
+
+                Write-Host "🚀 テスト実行中..." -ForegroundColor Cyan
+                & $exe
+                $exitCode = $LASTEXITCODE
+
+                # 併せてJUnitレポートも生成
+                & $exe --reporter junit --out $junit | Out-Null
+
+                if ($exitCode -eq 0) {
+                    Write-Host "✅ すべてのテストに合格しました ($Configuration)" -ForegroundColor Green
+                } else {
+                    Write-Host "❌ テストに失敗が含まれます (終了コード: $exitCode)" -ForegroundColor Red
+                }
+                Write-Host "📄 JUnit: $junit" -ForegroundColor DarkCyan
+                Start-Sleep -Seconds 2
+                continue
+            }
+
+            # run/build/all/examples で -Example 未指定の場合は対話選択を促す
+            $exampleToUse = $Example
+            if ($selectedCommand -in @("run", "build", "all", "examples") -and (-not $exampleToUse -or $exampleToUse.Trim() -eq "")) {
+                $chosen = Select-Example
+                if ($null -eq $chosen) {
+                    Write-Host "⏭️  キャンセルしました。" -ForegroundColor Yellow
+                    Start-Sleep -Seconds 2
+                    continue
+                }
+                $exampleToUse = $chosen
+            }
+
+            if ($selectedCommand -eq "examples") {
+                Write-Host ""
+                Write-Host "🎯 Exampleをビルドして実行します: $exampleToUse ($Configuration)" -ForegroundColor Green
+                $b = Invoke-PythonBuild "examples" $Configuration $exampleToUse
+                if ($b -ne 0) {
+                    Write-Host "❌ Exampleのビルドに失敗しました" -ForegroundColor Red
+                    Start-Sleep -Seconds 2
+                    continue
+                }
+                $exePath = Join-Path $ProjectRoot ("build/examples/{0}/{1}.exe" -f $Configuration,$exampleToUse)
+                if (-not (Test-Path $exePath)) {
+                    Write-Host "❌ 実行ファイルが見つかりません: $exePath" -ForegroundColor Red
+                    Start-Sleep -Seconds 2
+                    continue
+                }
+                Write-Host "🚀 実行: $exampleToUse" -ForegroundColor Cyan
+                & $exePath
+                Write-Host "✅ 完了: $exampleToUse" -ForegroundColor Green
+                Start-Sleep -Seconds 2
+                continue
+            }
+
+            $result = Invoke-PythonBuild $selectedCommand $Configuration $exampleToUse
 
             if ($result -eq 0) {
                 Write-Host ""
@@ -377,8 +500,7 @@ try {
                 Write-Host "❌ コマンド '$selectedCommand' が失敗しました。(終了コード: $result)" -ForegroundColor Red
             }
 
-            Write-Host ""
-            Read-Host "Enterキーを押して続行"
+            Start-Sleep -Seconds 2
 
         } while ($true)
     } else {
@@ -470,8 +592,49 @@ try {
             }
             exit 0
         } else {
-            $result = Invoke-PythonBuild $Command $Configuration
-            exit $result
+            if ($Command -eq "test") {
+                Write-Host "🧪 テストをビルドして実行します ($Configuration)" -ForegroundColor Green
+                $buildCode = Invoke-PythonBuild "tests" $Configuration
+                if ($buildCode -ne 0) {
+                    Write-Host "❌ テストのビルドに失敗しました" -ForegroundColor Red
+                    exit $buildCode
+                }
+                $exe = Join-Path $ProjectRoot ("build/tests/{0}/tests.exe" -f $Configuration)
+                if (-not (Test-Path $exe)) {
+                    Write-Host "❌ テスト実行ファイルが見つかりません: $exe" -ForegroundColor Red
+                    exit 1
+                }
+                $resultsDir = Join-Path $ProjectRoot "build/test-results"
+                New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null
+                $junit = Join-Path $resultsDir ("junit-{0}.xml" -f $Configuration)
+
+                if (-not $env:PANDOLABO_ENABLE_GPU_TESTS -or $env:PANDOLABO_ENABLE_GPU_TESTS -eq "0") {
+                    Write-Host "ℹ️  GPUテストは無効です。'setx PANDOLABO_ENABLE_GPU_TESTS 1' で有効化可能です。" -ForegroundColor Yellow
+                }
+
+                & $exe
+                $code = $LASTEXITCODE
+                & $exe --reporter junit --out $junit | Out-Null
+                Write-Host "📄 JUnit: $junit" -ForegroundColor DarkCyan
+                exit $code
+            } elseif ($Command -eq "examples") {
+                $exampleToUse = $Example
+                if (-not $exampleToUse -or $exampleToUse.Trim() -eq "") {
+                    $chosen = Select-Example
+                    if ($null -eq $chosen) { Write-Host "⏭️  キャンセルしました。" -ForegroundColor Yellow; exit 0 }
+                    $exampleToUse = $chosen
+                }
+                Write-Host "🎯 Exampleをビルドして実行します: $exampleToUse ($Configuration)" -ForegroundColor Green
+                $b = Invoke-PythonBuild "examples" $Configuration $exampleToUse
+                if ($b -ne 0) { Write-Host "❌ Exampleのビルドに失敗しました" -ForegroundColor Red; exit $b }
+                $exePath = Join-Path $ProjectRoot ("build/examples/{0}/{1}.exe" -f $Configuration,$exampleToUse)
+                if (-not (Test-Path $exePath)) { Write-Host "❌ 実行ファイルが見つかりません: $exePath" -ForegroundColor Red; exit 1 }
+                & $exePath
+                exit $LASTEXITCODE
+            } else {
+                $result = Invoke-PythonBuild $Command $Configuration $Example
+                exit $result
+            }
         }
     }
 } catch {

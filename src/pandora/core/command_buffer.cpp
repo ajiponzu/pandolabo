@@ -68,8 +68,7 @@ void pandora::core::CommandBuffer::bindPipeline(
 }
 
 void pandora::core::CommandBuffer::bindDescriptorSet(
-    const Pipeline& pipeline,
-    const gpu::DescriptorSet& descriptor_set) const {
+    const Pipeline& pipeline, const gpu::DescriptorSet& descriptor_set) const {
   m_commandBuffer.bindDescriptorSets(pipeline.getBindPoint(),
                                      pipeline.getPipelineLayout(),
                                      0u,
@@ -98,8 +97,7 @@ void pandora::core::CommandBuffer::resetCommands() const {
 }
 
 void pandora::core::TransferCommandBuffer::copyBuffer(
-    const gpu::Buffer& staging_buffer,
-    const gpu::Buffer& dst_buffer) const {
+    const gpu::Buffer& staging_buffer, const gpu::Buffer& dst_buffer) const {
   m_commandBuffer.copyBuffer(
       staging_buffer.getBuffer(),
       dst_buffer.getBuffer(),
@@ -171,8 +169,7 @@ void pandora::core::TransferCommandBuffer::copyImageToBuffer(
 }
 
 void pandora::core::TransferCommandBuffer::setMipmaps(
-    const gpu::Image& image,
-    const PipelineStage dst_stage) const {
+    const gpu::Image& image, const PipelineStage dst_stage) const {
   const auto image_view_info =
       ImageViewInfo{}
           .setAspect(pandora::core::ImageAspect::Color)
@@ -382,14 +379,12 @@ void pandora::core::GraphicCommandBuffer::setViewport(
 }
 
 void pandora::core::GraphicCommandBuffer::bindVertexBuffer(
-    const gpu::Buffer& buffer,
-    const uint32_t& offset) const {
+    const gpu::Buffer& buffer, const uint32_t& offset) const {
   m_commandBuffer.bindVertexBuffers(0u, buffer.getBuffer(), offset);
 }
 
 void pandora::core::GraphicCommandBuffer::bindIndexBuffer(
-    const gpu::Buffer& buffer,
-    const uint32_t& offset) const {
+    const gpu::Buffer& buffer, const uint32_t& offset) const {
   m_commandBuffer.bindIndexBuffer(
       buffer.getBuffer(), offset, vk::IndexType::eUint32);
 }

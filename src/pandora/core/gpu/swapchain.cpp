@@ -19,8 +19,7 @@ void pandora::core::gpu::Swapchain::resetSwapchain(
 }
 
 void pandora::core::gpu::Swapchain::updateImageIndex(
-    const std::unique_ptr<Device>& ptr_device,
-    uint64_t timeout) {
+    const std::unique_ptr<Device>& ptr_device, uint64_t timeout) {
   const auto& ptr_vk_device = ptr_device->getPtrLogicalDevice();
 
   const auto vk_result = ptr_vk_device->waitForFences(

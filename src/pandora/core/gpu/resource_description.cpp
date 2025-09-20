@@ -2,8 +2,7 @@
 #include "pandora/core/gpu/vk_helper.hpp"
 
 pandora::core::gpu::BufferDescription::BufferDescription(
-    const DescriptorInfo& descriptor_info,
-    const Buffer& buffer) {
+    const DescriptorInfo& descriptor_info, const Buffer& buffer) {
   m_bufferInfo.buffer = buffer.getBuffer();
   m_bufferInfo.size = buffer.getSize();
 

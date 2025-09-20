@@ -1,5 +1,7 @@
 # Pandolabo - Modern C++ Graphic
 
+[![CI](https://github.com/ajiponzu/pandolabo/actions/workflows/ci.yml/badge.svg)](https://github.com/ajiponzu/pandolabo/actions/workflows/ci.yml)
+
 ## 注意
 
 - このプロジェクトは開発者本人の自己満足のためのものです．ドキュメントは自分向けの備忘録となっておりますのでご了承ください．
@@ -16,6 +18,7 @@
 ## 🚀 自動セットアップ
 
 ### 🖥️ Windows (MSVC + C++23)
+
 ```powershell
 # 🎯 ワンクリック環境構築 + ビルド + 実行
 .\scripts\build.ps1 all
@@ -42,6 +45,7 @@
 ## 📋 前提条件
 
 ### 🖥️ すべてのプラットフォーム共通
+
 - **Python 3.6+** (Conan パッケージマネージャー用)
 - **CMake 3.16+**
 - **Git** (依存関係の取得用)
@@ -49,41 +53,52 @@
   - 公式からSDKをインストール
 
 ### 🖥️ Windows
+
 - **Visual Studio 2022** または **Build Tools for Visual Studio 2022**
 - **PowerShell 5.1+** (Windows標準搭載)
 
 ### 🐧 Linux/macOS
-- 念のため設定として考慮しているものの，おそらく動作しないと思います
-- 製作者の都合で必要になり次第，別途対応するかもしれません
+
+- 現時点では動作未保証です（CMake/Conan定義は用意済み）
+- 必要に応じて将来対応予定です
 
 ## 🎯 プロジェクト概要
 
 **Pandolabo**は、Vulkan.hppを使用したモダンC++グラフィックスライブラリ
 
+
 ### 🌟 主な機能
+
 - **Vulkan.hpp** による現代的なVulkanAPI活用
 - **クロスプラットフォーム対応** (Windows/Linux/macOS)
 - **自動化されたビルドシステム** (Conan + CMake)
 - **完全なデバッグサポート** (VS Code統合)
 - **包括的なサンプルとテスト**
 
+
 ### 📦 技術スタック
+
 - **グラフィックスAPI**: Vulkan 1.4+
 - **C++標準**: C++23 (Windows)
-- **パッケージマネージャー**: Conan 2.x
-- **ビルドシステム**: CMake 3.16+
+- **パッケージマネージャー**: Conan 2.x（CMakeDeps/Toolchainに一本化）
+- **ビルドシステム**: CMake 3.16+（CMakePresets準備中）
 - **開発環境**: VS Code (推奨)
 
 ## 🏗️ VS Codeでの開発
 
+
 ### 🎯 自動セットアップ（推奨）
+
 ```powershell
 # VS Code設定を自動生成
 .\scripts\build.ps1 vscode -Configuration Debug
 ```
 
+
 ### 📋 手動セットアップ
+
 1. **プロジェクトを開く：**
+
    ```bash
    code .
    ```
@@ -97,7 +112,9 @@
 
 VS Codeでブレークポイントを使ったデバッグが可能：
 
+
 ### 🎮 デバッグ設定
+
 - **🐛 Debug Tests (Debug)** - テストをデバッグモードで実行
 - **🐛 Debug Example (Debug)** - サンプルをデバッグモードで実行
 - **🚀 Debug Tests (Release)** - テストをリリースモードでデバッグ
@@ -114,7 +131,7 @@ target_link_libraries(your_target PRIVATE pandolabo::pandolabo)
 
 ## 📁 プロジェクト構造
 
-```
+```text
 pandolabo/
 ├── CMakeLists.txt          # メインCMakeファイル
 ├── README.md               # このファイル
@@ -137,7 +154,7 @@ pandolabo/
 │   └── pandora/
 │       └── core/       # Vulkan.hpp実装
 ├── examples/           # 使用例・サンプル
-│   ├── basic_usage.cpp
+│   ├── (removed) basic_usage.cpp
 │   └── core/          # コア機能サンプル
 ├── tests/             # テストファイル
 │   ├── CMakeLists.txt
@@ -153,13 +170,17 @@ pandolabo/
 
 ## 🛠️ 開発ガイド
 
+
 ### 📝 コード編集 & フォーマット
+
 ```powershell
 # C++コードの一括フォーマット（Clang-Format）
 .\scripts\build.ps1 format
 ```
 
+
 ### 🔧 VS Code設定の更新
+
 ```powershell
 # デバッグモード用設定生成（_DEBUG マクロ付き）
 .\scripts\build.ps1 vscode -Configuration Debug
@@ -171,6 +192,7 @@ pandolabo/
 ### 🏗️ 開発フロー
 
 1. **環境セットアップ**
+
    ```powershell
    .\scripts\build.ps1 setup
    ```
@@ -181,6 +203,7 @@ pandolabo/
    - IntelliSense によるコード補完
 
 3. **ビルド & テスト**
+
    ```powershell
    .\scripts\build.ps1 build    # ビルド
    .\scripts\build.ps1 tests    # テスト実行
@@ -207,9 +230,11 @@ pandolabo/
 
 ## 📦 ビルド成果物
 
+
 ### 🏗️ ライブラリ出力
+
 - **静的ライブラリ**: `build/src/{Debug|Release}/pandolabo.lib` (Windows) / `libpandolabo.a` (Linux/macOS)
-- **実行ファイル**: `build/examples/{Debug|Release}/basic_usage.exe`
+- **実行ファイル**: `build/examples/{Debug|Release}/example_basic_cube.exe`
 - **テスト実行ファイル**: `build/tests/{Debug|Release}/tests.exe`
 
 ## 📚 開発環境備忘録

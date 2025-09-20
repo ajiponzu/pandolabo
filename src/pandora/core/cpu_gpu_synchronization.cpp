@@ -44,8 +44,7 @@ pandora::core::TimelineSemaphoreDriver::setValues(
 }
 
 bool pandora::core::TimelineSemaphoreDriver::wait(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    uint64_t timeout) {
+    const std::unique_ptr<gpu::Context>& ptr_context, uint64_t timeout) {
   const auto& ptr_vk_device =
       ptr_context->getPtrDevice()->getPtrLogicalDevice();
 

@@ -62,7 +62,7 @@ pandolabo/
 │
 ├── examples/                  # 使用例・サンプル
 │   ├── CMakeLists.txt
-│   ├── basic_usage.cpp
+│   ├── (removed) basic_usage.cpp
 │   └── core/                 # コア機能サンプル
 │       ├── basic_compute/    # 基本コンピュート
 │       └── computing_image/  # 画像処理サンプル
@@ -390,7 +390,7 @@ ctest -C Debug --verbose
 ### **サンプル実行**
 ```bash
 # 使用例の実行
-.\build\examples\Debug\basic_usage.exe
+.\build\examples\Debug\example_basic_cube.exe
 ```
 
 ## 📊 プロジェクトメトリクス

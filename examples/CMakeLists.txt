@@ -3,79 +3,70 @@ cmake_minimum_required(VERSION 3.16)
 # 親プロジェクトで定義された変数を使用
 if(NOT DEFINED PROJECT_NAME)
     project(pandolabo_examples)
-
-    # ライブラリを探す
     find_package(pandolabo REQUIRED)
+    set(LIB_TARGET pandolabo::pandolabo)
 else()
-    # 親プロジェクトの一部として実行される場合
     set(LIB_TARGET ${PROJECT_NAME})
 endif()
 
-# 例のターゲット作成
-# すべてのC++ソースファイルを自動検出
-file(GLOB_RECURSE EXAMPLE_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.cxx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.cc"
-)
+# glm is used only by examples (e.g., BasicCube)
+find_package(glm REQUIRED)
 
-# すべてのヘッダーファイルを自動検出
-file(GLOB_RECURSE EXAMPLE_HEADERS
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
-)
+function(pdl_add_example name)
+    cmake_parse_arguments(PDL "" "" "SOURCES;INCLUDES" ${ARGN})
+    add_executable(${name} ${PDL_SOURCES})
 
-# デバッグ: 検出されたファイルを表示
-message(STATUS "検出されたソースファイル:")
-foreach(source ${EXAMPLE_SOURCES})
-    message(STATUS "  ${source}")
-endforeach()
-
-message(STATUS "検出されたヘッダーファイル:")
-foreach(header ${EXAMPLE_HEADERS})
-    message(STATUS "  ${header}")
-endforeach()
-
-add_executable(basic_usage ${EXAMPLE_SOURCES} ${EXAMPLE_HEADERS})
-
-# WindowsでC++23を使用する場合、特別な設定
-if(WIN32 AND DEFINED PANDOLABO_CXX_STANDARD AND PANDOLABO_CXX_STANDARD STREQUAL "23")
-    # 明示的にコンパイラフラグのみ使用（CXX_STANDARDプロパティは設定しない）
-    target_compile_options(basic_usage PRIVATE /std:c++23preview)
-    message(STATUS "Applied C++23 preview settings to basic_usage target")
-endif()
-
-# プラットフォーム別設定
-if(WIN32)
-    # Windows: MSVC最適化設定
-    if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_CONFIGURATION_TYPES)
-        target_compile_options(basic_usage PRIVATE
-            $<$<CONFIG:Release>:/O2>
-            $<$<CONFIG:Debug>:/Od>
-        )
-        message(STATUS "Building example with MSVC optimization on Windows")
+    if(WIN32 AND DEFINED PANDOLABO_CXX_STANDARD AND PANDOLABO_CXX_STANDARD STREQUAL "23")
+        target_compile_options(${name} PRIVATE /std:c++23preview)
+    else()
+        target_compile_features(${name} PRIVATE cxx_std_20)
     endif()
-    message(STATUS "Building example with MSVC on Windows")
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    # Linux/macOS: Clang最適化設定
-    target_compile_options(basic_usage PRIVATE
-        $<$<CONFIG:Release>:-O3>
-        $<$<CONFIG:Debug>:-O0>
-        -Wall -Wextra
-    )
-    message(STATUS "Building example with Clang on ${CMAKE_SYSTEM_NAME}")
-endif()
 
-# ライブラリとのリンク
-if(DEFINED LIB_TARGET)
-    # 親プロジェクトの一部として実行される場合
-    target_link_libraries(basic_usage PRIVATE ${LIB_TARGET})
-    target_include_directories(basic_usage PRIVATE
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-else()
-    # 独立して実行される場合
-    target_link_libraries(basic_usage PRIVATE pandolabo::pandolabo)
-    target_include_directories(basic_usage PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-endif()
+    if(WIN32)
+        target_compile_options(${name} PRIVATE
+            $<$\<CONFIG:Release\>:/O2>
+            $<$\<CONFIG:Debug\>:/Od>
+        )
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(${name} PRIVATE
+            $<$\<CONFIG:Release\>:-O3>
+            $<$\<CONFIG:Debug\>:-O0>
+            -Wall -Wextra
+        )
+    endif()
+
+    target_link_libraries(${name} PRIVATE ${LIB_TARGET} glm::glm)
+    target_include_directories(${name} PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR} ${PDL_INCLUDES})
+endfunction()
+
+# すべての個別Exampleをまとめる仮想ターゲット
+add_custom_target(examples_all)
+
+# 個別実行ターゲット
+pdl_add_example(example_basic_compute
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/basic_compute/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/basic_compute/basic_computing.cpp
+)
+add_dependencies(examples_all example_basic_compute)
+
+pdl_add_example(example_basic_cube
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/basic_cube/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/basic_cube/basic_cube.cpp
+)
+add_dependencies(examples_all example_basic_cube)
+
+pdl_add_example(example_simple_image
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/computing_image/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/computing_image/simple_image_computing.cpp
+)
+add_dependencies(examples_all example_simple_image)
+
+pdl_add_example(example_square
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/square/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/square/square.cpp
+)
+add_dependencies(examples_all example_square)

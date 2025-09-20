@@ -215,8 +215,7 @@ std::vector<uint32_t> pandora::core::io::shader::read(
 }
 
 void pandora::core::io::shader::write(
-    const std::string& file_path,
-    const std::vector<uint32_t>& shader_binary) {
+    const std::string& file_path, const std::vector<uint32_t>& shader_binary) {
   std::ofstream output_file(file_path, std::ios::binary);
 
   output_file.write(reinterpret_cast<const char*>(shader_binary.data()),

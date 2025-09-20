@@ -107,9 +107,9 @@ cmake --install build
 | 設定名 | 説明 | 実行ファイル |
 |--------|------|--------------|
 | 🐛 Debug Tests (Debug) | テストをデバッグモードで実行 | `tests.exe` |
-| 🐛 Debug Example (Debug) | サンプルをデバッグモードで実行 | `basic_usage.exe` |
+| 🐛 Debug Example (Debug) | サンプルをデバッグモードで実行 | `example_basic_cube.exe` |
 | 🚀 Debug Tests (Release) | テストをリリースモードでデバッグ | `tests.exe` |
-| 🚀 Debug Example (Release) | サンプルをリリースモードでデバッグ | `basic_usage.exe` |
+| 🚀 Debug Example (Release) | サンプルをリリースモードでデバッグ | `example_basic_cube.exe` |
 
 ## 🛠️ 必須VS Code拡張機能
 

@@ -188,21 +188,12 @@ STBIWDEF int stbi_write_png(char const* filename,
                             int comp,
                             const void* data,
                             int stride_in_bytes);
-STBIWDEF int stbi_write_bmp(char const* filename,
-                            int w,
-                            int h,
-                            int comp,
-                            const void* data);
-STBIWDEF int stbi_write_tga(char const* filename,
-                            int w,
-                            int h,
-                            int comp,
-                            const void* data);
-STBIWDEF int stbi_write_hdr(char const* filename,
-                            int w,
-                            int h,
-                            int comp,
-                            const float* data);
+STBIWDEF int stbi_write_bmp(
+    char const* filename, int w, int h, int comp, const void* data);
+STBIWDEF int stbi_write_tga(
+    char const* filename, int w, int h, int comp, const void* data);
+STBIWDEF int stbi_write_hdr(
+    char const* filename, int w, int h, int comp, const float* data);
 STBIWDEF int stbi_write_jpg(char const* filename,
                             int x,
                             int y,
@@ -352,12 +343,12 @@ static void stbi__stdio_write(void* context, void* data, int size) {
         #define STBIW_EXTERN extern
       #endif
 STBIW_EXTERN
-    __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int cp,
-                                                            unsigned long flags,
-                                                            const char* str,
-                                                            int cbmb,
-                                                            wchar_t* widestr,
-                                                            int cchwide);
+__declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int cp,
+                                                        unsigned long flags,
+                                                        const char* str,
+                                                        int cbmb,
+                                                        wchar_t* widestr,
+                                                        int cchwide);
 STBIW_EXTERN __declspec(dllimport) int __stdcall WideCharToMultiByte(
     unsigned int cp,
     unsigned long flags,
@@ -600,11 +591,8 @@ static int stbiw__outfile(stbi__write_context* s,
   }
 }
 
-static int stbi_write_bmp_core(stbi__write_context* s,
-                               int x,
-                               int y,
-                               int comp,
-                               const void* data) {
+static int stbi_write_bmp_core(
+    stbi__write_context* s, int x, int y, int comp, const void* data) {
   if (comp != 4) {
     // write RGB bitmap
     int pad = (-x * 3) & 3;
@@ -702,11 +690,8 @@ STBIWDEF int stbi_write_bmp_to_func(stbi_write_func* func,
 }
 
   #ifndef STBI_WRITE_NO_STDIO
-STBIWDEF int stbi_write_bmp(char const* filename,
-                            int x,
-                            int y,
-                            int comp,
-                            const void* data) {
+STBIWDEF int stbi_write_bmp(
+    char const* filename, int x, int y, int comp, const void* data) {
   stbi__write_context s = {0};
   if (stbi__start_write_file(&s, filename)) {
     int r = stbi_write_bmp_core(&s, x, y, comp, data);
@@ -717,11 +702,8 @@ STBIWDEF int stbi_write_bmp(char const* filename,
 }
   #endif  //! STBI_WRITE_NO_STDIO
 
-static int stbi_write_tga_core(stbi__write_context* s,
-                               int x,
-                               int y,
-                               int comp,
-                               void* data) {
+static int stbi_write_tga_core(
+    stbi__write_context* s, int x, int y, int comp, void* data) {
   int has_alpha = (comp == 2 || comp == 4);
   int colorbytes = has_alpha ? comp - 1 : comp;
   int format =
@@ -848,11 +830,8 @@ STBIWDEF int stbi_write_tga_to_func(stbi_write_func* func,
 }
 
   #ifndef STBI_WRITE_NO_STDIO
-STBIWDEF int stbi_write_tga(char const* filename,
-                            int x,
-                            int y,
-                            int comp,
-                            const void* data) {
+STBIWDEF int stbi_write_tga(
+    char const* filename, int x, int y, int comp, const void* data) {
   stbi__write_context s = {0};
   if (stbi__start_write_file(&s, filename)) {
     int r = stbi_write_tga_core(&s, x, y, comp, (void*)data);
@@ -1004,11 +983,8 @@ static void stbiw__write_hdr_scanline(stbi__write_context* s,
   }
 }
 
-static int stbi_write_hdr_core(stbi__write_context* s,
-                               int x,
-                               int y,
-                               int comp,
-                               float* data) {
+static int stbi_write_hdr_core(
+    stbi__write_context* s, int x, int y, int comp, float* data) {
   if (y <= 0 || x <= 0 || data == NULL)
     return 0;
   else {
@@ -1056,11 +1032,8 @@ STBIWDEF int stbi_write_hdr_to_func(stbi_write_func* func,
   return stbi_write_hdr_core(&s, x, y, comp, (float*)data);
 }
 
-STBIWDEF int stbi_write_hdr(char const* filename,
-                            int x,
-                            int y,
-                            int comp,
-                            const float* data) {
+STBIWDEF int stbi_write_hdr(
+    char const* filename, int x, int y, int comp, const float* data) {
   stbi__write_context s = {0};
   if (stbi__start_write_file(&s, filename)) {
     int r = stbi_write_hdr_core(&s, x, y, comp, (float*)data);
