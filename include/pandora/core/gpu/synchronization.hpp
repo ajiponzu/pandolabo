@@ -49,8 +49,8 @@ class BufferBarrier {
   /// this barrier
   /// @param wait_access_flags Memory access types that wait for this barrier
   BufferBarrier(const Buffer& buffer,
-                std::span<const AccessFlag> priority_access_flags,
-                std::span<const AccessFlag> wait_access_flags,
+                const std::vector<AccessFlag>& priority_access_flags,
+                const std::vector<AccessFlag>& wait_access_flags,
                 uint32_t src_queue_family = 0u,
                 uint32_t dst_queue_family = 0u);
   ~BufferBarrier();
@@ -79,8 +79,8 @@ class BufferBarrier {
 class BufferBarrierBuilder {
  private:
   const Buffer* m_ptrBuffer = nullptr;
-  std::span<const AccessFlag> m_priorityAccessFlags{};
-  std::span<const AccessFlag> m_waitAccessFlags{};
+  std::vector<AccessFlag> m_priorityAccessFlags{};
+  std::vector<AccessFlag> m_waitAccessFlags{};
   uint32_t m_srcQueueFamily = 0u;
   uint32_t m_dstQueueFamily = 0u;
 
@@ -106,7 +106,7 @@ class BufferBarrierBuilder {
   /// @param flags Memory access types that must complete before this barrier
   /// @return Reference to this builder for method chaining
   BufferBarrierBuilder& setPriorityAccessFlags(
-      std::span<const AccessFlag> flags) {
+      const std::vector<AccessFlag>& flags) {
     m_priorityAccessFlags = flags;
     return *this;
   }
@@ -114,7 +114,8 @@ class BufferBarrierBuilder {
   /// @brief Set wait access flags
   /// @param flags Memory access types that wait for this barrier
   /// @return Reference to this builder for method chaining
-  BufferBarrierBuilder& setWaitAccessFlags(std::span<const AccessFlag> flags) {
+  BufferBarrierBuilder& setWaitAccessFlags(
+      const std::vector<AccessFlag>& flags) {
     m_waitAccessFlags = flags;
     return *this;
   }
@@ -171,16 +172,16 @@ class ImageBarrier {
 
  public:
   ImageBarrier(const Image& image,
-               std::span<const AccessFlag> priority_access_flags,
-               std::span<const AccessFlag> wait_access_flags,
+               const std::vector<AccessFlag>& priority_access_flags,
+               const std::vector<AccessFlag>& wait_access_flags,
                const ImageLayout old_layout,
                const ImageLayout new_layout,
                const ImageViewInfo& image_view_info,
                uint32_t src_queue_family = 0u,
                uint32_t dst_queue_family = 0u);
   ImageBarrier(const std::unique_ptr<Context>& ptr_context,
-               std::span<const AccessFlag> priority_access_flags,
-               std::span<const AccessFlag> wait_access_flags,
+               const std::vector<AccessFlag>& priority_access_flags,
+               const std::vector<AccessFlag>& wait_access_flags,
                const ImageLayout old_layout,
                const ImageLayout new_layout,
                uint32_t src_queue_family = 0u,
@@ -205,8 +206,8 @@ class ImageBarrier {
 class ImageBarrierBuilder {
  private:
   const Image* m_ptrImage = nullptr;
-  std::span<const AccessFlag> m_priorityAccessFlags{};
-  std::span<const AccessFlag> m_waitAccessFlags{};
+  std::vector<AccessFlag> m_priorityAccessFlags{};
+  std::vector<AccessFlag> m_waitAccessFlags{};
   ImageLayout m_oldLayout = ImageLayout::Undefined;
   ImageLayout m_newLayout = ImageLayout::Undefined;
   std::optional<ImageViewInfo> m_imageViewInfo{};
@@ -235,7 +236,7 @@ class ImageBarrierBuilder {
   /// @param flags Memory access types that must complete before this barrier
   /// @return Reference to this builder for method chaining
   ImageBarrierBuilder& setPriorityAccessFlags(
-      std::span<const AccessFlag> flags) {
+      const std::vector<AccessFlag>& flags) {
     m_priorityAccessFlags = flags;
     return *this;
   }
@@ -243,7 +244,8 @@ class ImageBarrierBuilder {
   /// @brief Set wait access flags
   /// @param flags Memory access types that wait for this barrier
   /// @return Reference to this builder for method chaining
-  ImageBarrierBuilder& setWaitAccessFlags(std::span<const AccessFlag> flags) {
+  ImageBarrierBuilder& setWaitAccessFlags(
+      const std::vector<AccessFlag>& flags) {
     m_waitAccessFlags = flags;
     return *this;
   }

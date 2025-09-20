@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <functional>
 #include <ranges>
-#include <span>
 
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
@@ -9,7 +8,7 @@
 namespace {
 
 constexpr auto g_lamda_convert_access_flags =
-    [](const std::span<const pandora::core::AccessFlag>& access_flags) {
+    [](const std::vector<pandora::core::AccessFlag>& access_flags) {
       return std::ranges::fold_left(
           access_flags | std::views::transform(vk_helper::getAccessFlagBits),
           vk::AccessFlags{},
@@ -20,8 +19,8 @@ constexpr auto g_lamda_convert_access_flags =
 
 pandora::core::gpu::BufferBarrier::BufferBarrier(
     const Buffer& buffer,
-    std::span<const AccessFlag> priority_access_flags,
-    std::span<const AccessFlag> wait_access_flags,
+    const std::vector<AccessFlag>& priority_access_flags,
+    const std::vector<AccessFlag>& wait_access_flags,
     uint32_t src_queue_family,
     uint32_t dst_queue_family) {
   m_bufferMemoryBarrier.setBuffer(buffer.getBuffer())
@@ -36,8 +35,8 @@ pandora::core::gpu::BufferBarrier::~BufferBarrier() {}
 
 pandora::core::gpu::ImageBarrier::ImageBarrier(
     const Image& image,
-    std::span<const AccessFlag> priority_access_flags,
-    std::span<const AccessFlag> wait_access_flags,
+    const std::vector<AccessFlag>& priority_access_flags,
+    const std::vector<AccessFlag>& wait_access_flags,
     const ImageLayout old_layout,
     const ImageLayout new_layout,
     const ImageViewInfo& image_view_info,
@@ -82,8 +81,8 @@ pandora::core::gpu::ImageBarrier::ImageBarrier(
 
 pandora::core::gpu::ImageBarrier::ImageBarrier(
     const std::unique_ptr<Context>& ptr_context,
-    std::span<const AccessFlag> priority_access_flags,
-    std::span<const AccessFlag> wait_access_flags,
+    const std::vector<AccessFlag>& priority_access_flags,
+    const std::vector<AccessFlag>& wait_access_flags,
     const ImageLayout old_layout,
     const ImageLayout new_layout,
     uint32_t src_queue_family,

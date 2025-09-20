@@ -22,9 +22,9 @@ void set_transfer_secondary_command(
   const auto buffer_barrier =
       plc::gpu::BufferBarrierBuilder::create()
           .setBuffer(*transfered_buffer)
-          .setPriorityAccessFlags(std::vector{plc::AccessFlag::TransferWrite})
-          .setWaitAccessFlags(std::vector{plc::AccessFlag::ShaderRead,
-                                          plc::AccessFlag::ShaderWrite})
+          .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
+          .setWaitAccessFlags(
+              {plc::AccessFlag::ShaderRead, plc::AccessFlag::ShaderWrite})
           .setSrcQueueFamilyIndex(queue_family_indices.first)
           .setDstQueueFamilyIndex(queue_family_indices.second)
           .build();
@@ -265,9 +265,9 @@ void samples::core::BasicComputing::setComputeCommands(
     const auto buffer_barrier =
         plc::gpu::BufferBarrierBuilder::create()
             .setBuffer(*m_ptrInputStorageBuffer)
-            .setPriorityAccessFlags(std::vector{plc::AccessFlag::TransferWrite})
-            .setWaitAccessFlags(std::vector{plc::AccessFlag::ShaderRead,
-                                            plc::AccessFlag::ShaderWrite})
+            .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
+            .setWaitAccessFlags(
+                {plc::AccessFlag::ShaderRead, plc::AccessFlag::ShaderWrite})
             .setSrcQueueFamilyIndex(
                 m_ptrTransferCommandDriver->getQueueFamilyIndex())
             .setDstQueueFamilyIndex(
@@ -284,9 +284,9 @@ void samples::core::BasicComputing::setComputeCommands(
     const auto buffer_barrier =
         plc::gpu::BufferBarrierBuilder::create()
             .setBuffer(*m_ptrOutputStorageBuffer)
-            .setPriorityAccessFlags(std::vector{plc::AccessFlag::TransferWrite})
-            .setWaitAccessFlags(std::vector{plc::AccessFlag::ShaderRead,
-                                            plc::AccessFlag::ShaderWrite})
+            .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
+            .setWaitAccessFlags(
+                {plc::AccessFlag::ShaderRead, plc::AccessFlag::ShaderWrite})
             .setSrcQueueFamilyIndex(
                 m_ptrTransferCommandDriver->getQueueFamilyIndex())
             .setDstQueueFamilyIndex(
@@ -306,9 +306,9 @@ void samples::core::BasicComputing::setComputeCommands(
     const auto buffer_barrier =
         plc::gpu::BufferBarrierBuilder::create()
             .setBuffer(*m_ptrOutputStorageBuffer)
-            .setPriorityAccessFlags(std::vector{plc::AccessFlag::ShaderRead,
-                                                plc::AccessFlag::ShaderWrite})
-            .setWaitAccessFlags(std::vector{plc::AccessFlag::TransferRead})
+            .setPriorityAccessFlags(
+                {plc::AccessFlag::ShaderRead, plc::AccessFlag::ShaderWrite})
+            .setWaitAccessFlags({plc::AccessFlag::TransferRead})
             .setSrcQueueFamilyIndex(
                 m_ptrComputeCommandDriver->getQueueFamilyIndex())
             .setDstQueueFamilyIndex(
@@ -326,8 +326,8 @@ void samples::core::BasicComputing::setComputeCommands(
     const auto buffer_barrier =
         plc::gpu::BufferBarrierBuilder::create()
             .setBuffer(*m_ptrOutputStorageBuffer)
-            .setPriorityAccessFlags(std::vector{plc::AccessFlag::TransferRead})
-            .setWaitAccessFlags(std::vector{plc::AccessFlag::Unknown})
+            .setPriorityAccessFlags({plc::AccessFlag::TransferRead})
+            .setWaitAccessFlags({plc::AccessFlag::Unknown})
             .build();
 
     command_buffer.setPipelineBarrier(buffer_barrier,
