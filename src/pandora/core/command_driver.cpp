@@ -2,7 +2,6 @@
 
 #include "pandora/core/command_buffer.hpp"
 #include "pandora/core/gpu/synchronization.hpp"
-#include "pandora/core/gpu/vk_helper.hpp"
 #include "pandora/core/pipeline.hpp"
 #include "pandora/core/renderpass.hpp"
 
@@ -37,7 +36,7 @@ pandora::core::CommandDriver::~CommandDriver() {}
 
 void pandora::core::CommandDriver::constructSecondary(
     const std::unique_ptr<gpu::Context>& ptr_context,
-    const uint32_t required_secondary_num) {
+    uint32_t required_secondary_num) {
   const auto& ptr_vk_device =
       ptr_context->getPtrDevice()->getPtrLogicalDevice();
 

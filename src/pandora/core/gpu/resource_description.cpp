@@ -33,7 +33,7 @@ pandora::core::gpu::BufferDescription::createVkWriteDescriptorSet(
 pandora::core::gpu::ImageDescription::ImageDescription(
     const DescriptorInfo& descriptor_info,
     const ImageView& image_view,
-    const ImageLayout dst_image_layout) {
+    ImageLayout dst_image_layout) {
   m_imageInfo.layout = vk_helper::getImageLayout(dst_image_layout);
   m_imageInfo.view = image_view.getImageView();
 
@@ -43,7 +43,7 @@ pandora::core::gpu::ImageDescription::ImageDescription(
 
 pandora::core::gpu::ImageDescription::ImageDescription(
     const DescriptorInfo& descriptor_info,
-    const ImageLayout dst_image_layout,
+    ImageLayout dst_image_layout,
     const Sampler& sampler) {
   m_imageInfo.layout = vk_helper::getImageLayout(dst_image_layout);
   m_imageInfo.sampler = sampler.getSampler();
@@ -55,7 +55,7 @@ pandora::core::gpu::ImageDescription::ImageDescription(
 pandora::core::gpu::ImageDescription::ImageDescription(
     const DescriptorInfo& descriptor_info,
     const ImageView& image_view,
-    const ImageLayout dst_image_layout,
+    ImageLayout dst_image_layout,
     const Sampler& sampler) {
   m_imageInfo.layout = vk_helper::getImageLayout(dst_image_layout);
   m_imageInfo.view = image_view.getImageView();

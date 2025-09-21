@@ -12,7 +12,6 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
-#include "gpu.hpp"
 #include "module_connection/gpu_ui.hpp"
 #include "rendering_structures.hpp"
 
@@ -91,7 +90,7 @@ class AttachmentList {
   /// @param ptr_context GPU context for swapchain access
   /// @param index Swapchain image index to use
   void setBackbufferAttachment(const std::unique_ptr<gpu::Context>& ptr_context,
-                               const size_t index);
+                               size_t index);
 
  private:
   /// @brief Internal method to add attachment with image view
@@ -103,7 +102,7 @@ class AttachmentList {
 
   /// @brief Internal method to add attachment description only
   /// @param description Attachment configuration to add
-  const void appendDescription(const AttachmentDescription& description);
+  void appendDescription(const AttachmentDescription& description);
 };
 
 /// @brief Subpass node representing a single rendering subpass
@@ -130,7 +129,7 @@ class SubpassNode {
   /// @brief Construct subpass node
   /// @param bind_point Pipeline bind point (graphics, compute, ray tracing)
   /// @param view_mask View mask for multiview rendering (0 for single view)
-  SubpassNode(const PipelineBind bind_point, const uint32_t view_mask);
+  SubpassNode(const PipelineBind bind_point, uint32_t view_mask);
   ~SubpassNode();
 
   /// @brief Get input attachment references
@@ -205,7 +204,7 @@ class SubpassNode {
   /// @brief Preserve attachment during this subpass
   /// @param attachment_index Index of attachment to preserve (not read or
   /// written)
-  void attachPreserve(const uint32_t attachment_index) {
+  void attachPreserve(uint32_t attachment_index) {
     m_preserves.push_back(attachment_index);
   }
 
@@ -340,7 +339,7 @@ class RenderKit {
             AttachmentList& attachment_list,
             const SubpassGraph& subpass_graph,
             const gpu_ui::GraphicalSize<uint32_t>& size,
-            const bool is_presented);
+            bool is_presented);
 
   // Rule of Five
   ~RenderKit() = default;
@@ -370,7 +369,7 @@ class RenderKit {
   /// @brief Update current framebuffer index
   /// @param index New framebuffer index to use (should match swapchain image
   /// index)
-  void updateIndex(const size_t index) {
+  void updateIndex(size_t index) {
     m_currentIndex = index;
   }
 
@@ -382,7 +381,7 @@ class RenderKit {
   void resetFramebuffer(const std::unique_ptr<gpu::Context>& ptr_context,
                         AttachmentList& attachment_list,
                         const gpu_ui::GraphicalSize<uint32_t>& size,
-                        const bool is_presented);
+                        bool is_presented);
 };
 
 }  // namespace pandora::core

@@ -145,30 +145,25 @@ class Window {
   }
 
  public:
-  static void insertInputKey(const GLFWwindow* ptr_window, const int32_t key) {
+  static void insertInputKey(const GLFWwindow* ptr_window, int32_t key) {
     s_inputKeySetMap[convertWindowPtr(ptr_window)].insert(key);
   }
-  static void eraseInputKey(const GLFWwindow* ptr_window, const int32_t key) {
+  static void eraseInputKey(const GLFWwindow* ptr_window, int32_t key) {
     s_inputKeySetMap[convertWindowPtr(ptr_window)].erase(key);
   }
-  static void setMousePos(const GLFWwindow* ptr_window,
-                          const double x,
-                          const double y) {
+  static void setMousePos(const GLFWwindow* ptr_window, double x, double y) {
     s_mouseMap[convertWindowPtr(ptr_window)].pos_x = x;
     s_mouseMap[convertWindowPtr(ptr_window)].pos_y = y;
   }
-  static void setMouseScroll(const GLFWwindow* ptr_window,
-                             const double x,
-                             const double y) {
+  static void setMouseScroll(const GLFWwindow* ptr_window, double x, double y) {
     s_mouseMap[convertWindowPtr(ptr_window)].scroll_x = x;
     s_mouseMap[convertWindowPtr(ptr_window)].scroll_y = y;
   }
-  static void setResizedBool(const GLFWwindow* ptr_window,
-                             const bool is_resized) {
+  static void setResizedBool(const GLFWwindow* ptr_window, bool is_resized) {
     s_resizedBoolMap[convertWindowPtr(ptr_window)] = is_resized;
   }
 
-  Window(const std::string& title, const int32_t width, const int32_t height);
+  Window(const std::string& title, int32_t width, int32_t height);
 
   // Rule of Five
   ~Window();
@@ -183,7 +178,7 @@ class Window {
   const auto& getWindowSurface() const {
     return m_ptrWindowSurface;
   }
-  const auto isResized() const {
+  auto isResized() const {
     return s_resizedBoolMap.at(convertWindowPtr(m_ptrWindow));
   }
 

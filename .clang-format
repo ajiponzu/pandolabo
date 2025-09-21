@@ -37,12 +37,12 @@ AccessModifierOffset: -1
 PointerAlignment: Left
 ReferenceAlignment: Left
 ReflowComments: true
-CommentPragmas: '^ IWYU pragma:'
-MacroBlockBegin: ''
-MacroBlockEnd: ''
+CommentPragmas: "^ IWYU pragma:"
+MacroBlockBegin: ""
+MacroBlockEnd: ""
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 DerivePointerAlignment: false
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
-...
+UseCRLF: true

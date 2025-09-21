@@ -37,8 +37,8 @@ pandora::core::gpu::ImageBarrier::ImageBarrier(
     const Image& image,
     const std::vector<AccessFlag>& priority_access_flags,
     const std::vector<AccessFlag>& wait_access_flags,
-    const ImageLayout old_layout,
-    const ImageLayout new_layout,
+    ImageLayout old_layout,
+    ImageLayout new_layout,
     const ImageViewInfo& image_view_info,
     uint32_t src_queue_family,
     uint32_t dst_queue_family) {
@@ -83,8 +83,8 @@ pandora::core::gpu::ImageBarrier::ImageBarrier(
     const std::unique_ptr<Context>& ptr_context,
     const std::vector<AccessFlag>& priority_access_flags,
     const std::vector<AccessFlag>& wait_access_flags,
-    const ImageLayout old_layout,
-    const ImageLayout new_layout,
+    ImageLayout old_layout,
+    ImageLayout new_layout,
     uint32_t src_queue_family,
     uint32_t dst_queue_family) {
   m_imageMemoryBarrier.setImage(ptr_context->getPtrSwapchain()->getImage())

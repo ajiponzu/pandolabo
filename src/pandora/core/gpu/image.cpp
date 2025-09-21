@@ -43,8 +43,8 @@ vk::ImageType get_image_type(pandora::core::ImageDimension dimension) {
 }  // namespace
 
 pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
-                                 const MemoryUsage memory_usage,
-                                 const TransferType transfer_type,
+                                 MemoryUsage memory_usage,
+                                 TransferType transfer_type,
                                  const std::vector<ImageUsage>& image_usages,
                                  const ImageSubInfo& image_sub_info) {
   const auto& ptr_vk_device =

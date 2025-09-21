@@ -52,7 +52,7 @@ class BasicCube {
 
  private:
   void constructShaderResources();
-  void constructRenderpass(const bool is_resized = false);
+  void constructRenderpass(bool is_resized = false);
   void constructGraphicPipeline();
   void setTransferCommands(std::vector<plc::gpu::Buffer>& staging_buffers);
   void setGraphicCommands();

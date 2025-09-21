@@ -78,13 +78,13 @@ class Device {
   /// purposes and allowed operations.
   /// @param family_type Queue target selection enum
   /// @return Queue family index
-  const uint32_t getQueueFamilyIndex(const QueueFamilyType family_type) const;
+  uint32_t getQueueFamilyIndex(QueueFamilyType family_type) const;
 
   /// @brief Get GPU command queue
   /// @param queue_family_index Queue family index (0 or result from
   /// getQueueFamilyIndex)
   /// @return Vulkan queue object
-  vk::Queue getQueue(const uint32_t queue_family_index);
+  vk::Queue getQueue(uint32_t queue_family_index);
 
   /// @brief Get maximum usable sample count for multisampling
   /// @return Maximum sample count supported by the device

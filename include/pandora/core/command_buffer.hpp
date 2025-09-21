@@ -96,7 +96,7 @@ class CommandBuffer {
   /// @param ptr_command_buffer Unique Vulkan command buffer to wrap
   /// @param is_secondary Whether this is a secondary command buffer
   CommandBuffer(const vk::UniqueCommandBuffer& ptr_command_buffer,
-                const bool is_secondary = false)
+                bool is_secondary = false)
       : m_commandBuffer(ptr_command_buffer.get()),
         m_isSecondary(is_secondary) {}
 
@@ -154,7 +154,7 @@ class CommandBuffer {
   /// @param data Push constant data as float values
   void pushConstants(const Pipeline& pipeline,
                      const std::vector<ShaderStage>& dst_stages,
-                     const uint32_t offset,
+                     uint32_t offset,
                      const std::vector<float_t>& data) const;
 
   /// @brief Reset GPU command buffer
@@ -171,7 +171,7 @@ class TransferCommandBuffer : public CommandBuffer {
   friend class CommandDriver;
 
   TransferCommandBuffer(const vk::UniqueCommandBuffer& ptr_command_buffer,
-                        const bool is_secondary = false)
+                        bool is_secondary = false)
       : CommandBuffer(ptr_command_buffer, is_secondary) {}
 
  public:
@@ -253,7 +253,7 @@ class ComputeCommandBuffer : public TransferCommandBuffer {
   friend class CommandDriver;
 
   ComputeCommandBuffer(const vk::UniqueCommandBuffer& ptr_command_buffer,
-                       const bool is_secondary = false)
+                       bool is_secondary = false)
       : TransferCommandBuffer(ptr_command_buffer, is_secondary) {}
 
  public:
@@ -279,7 +279,7 @@ class GraphicCommandBuffer : public ComputeCommandBuffer {
   friend class CommandDriver;
 
   GraphicCommandBuffer(const vk::UniqueCommandBuffer& ptr_command_buffer,
-                       const bool is_secondary = false)
+                       bool is_secondary = false)
       : ComputeCommandBuffer(ptr_command_buffer, is_secondary) {}
 
  public:
@@ -300,8 +300,8 @@ class GraphicCommandBuffer : public ComputeCommandBuffer {
   /// @param min_depth Minimum depth value (typically 0.0)
   /// @param max_depth Maximum depth value (typically 1.0)
   void setViewport(const gpu_ui::GraphicalSize<float_t>& size,
-                   const float_t min_depth,
-                   const float_t max_depth) const;
+                   float_t min_depth,
+                   float_t max_depth) const;
   /* End: dynamic state setters */
 
   /// @brief Bind vertex buffer for vertex input
@@ -320,10 +320,10 @@ class GraphicCommandBuffer : public ComputeCommandBuffer {
   /// @param instance_count Number of instances to draw
   /// @param first_vertex First vertex to draw
   /// @param first_instance First instance to draw
-  void draw(const uint32_t vertex_count,
-            const uint32_t instance_count,
-            const uint32_t first_vertex,
-            const uint32_t first_instance) const;
+  void draw(uint32_t vertex_count,
+            uint32_t instance_count,
+            uint32_t first_vertex,
+            uint32_t first_instance) const;
 
   /// @brief Draw indexed vertices
   /// @param index_count Number of indices to draw
@@ -331,11 +331,11 @@ class GraphicCommandBuffer : public ComputeCommandBuffer {
   /// @param first_index First index to draw
   /// @param vertex_offset Offset added to vertex indices
   /// @param first_instance First instance to draw
-  void drawIndexed(const uint32_t index_count,
-                   const uint32_t instance_count,
-                   const uint32_t first_index,
-                   const int32_t vertex_offset,
-                   const uint32_t first_instance) const;
+  void drawIndexed(uint32_t index_count,
+                   uint32_t instance_count,
+                   uint32_t first_index,
+                   int32_t vertex_offset,
+                   uint32_t first_instance) const;
 
   /// @brief Begin render pass execution
   /// @param render_kit Render kit containing render pass and framebuffer
@@ -377,7 +377,7 @@ class CommandDriver {
   /// @param ptr_context Vulkan context for device operations
   /// @param queue_family Queue family type to use for commands
   CommandDriver(const std::unique_ptr<gpu::Context>& ptr_context,
-                const QueueFamilyType queue_family);
+                QueueFamilyType queue_family);
 
   // Rule of Five
   ~CommandDriver();
@@ -398,7 +398,7 @@ class CommandDriver {
   /// @param required_secondary_num Number of secondary command buffers to
   /// allocate
   void constructSecondary(const std::unique_ptr<gpu::Context>& ptr_context,
-                          const uint32_t required_secondary_num = 1u);
+                          uint32_t required_secondary_num = 1u);
 
   /// @brief Reset all command buffers to initial state
   void resetAllCommands() const;

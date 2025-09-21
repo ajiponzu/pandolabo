@@ -11,7 +11,6 @@
 #include <concepts>
 #include <memory>
 #include <optional>
-#include <span>
 #include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan.hpp>
@@ -63,13 +62,13 @@ class BufferBarrier {
 
   /// @brief Set source queue family index for ownership transfer
   /// @param index Queue family index that currently owns the buffer
-  void setSrcQueueFamilyIndex(const uint32_t index) {
+  void setSrcQueueFamilyIndex(uint32_t index) {
     m_bufferMemoryBarrier.setSrcQueueFamilyIndex(index);
   }
 
   /// @brief Set destination queue family index for ownership transfer
   /// @param index Queue family index that will receive buffer ownership
-  void setDstQueueFamilyIndex(const uint32_t index) {
+  void setDstQueueFamilyIndex(uint32_t index) {
     m_bufferMemoryBarrier.setDstQueueFamilyIndex(index);
   }
 };
@@ -123,7 +122,7 @@ class BufferBarrierBuilder {
   /// @brief Set source queue family index for ownership transfer
   /// @param index Queue family index that currently owns the buffer
   /// @return Reference to this builder for method chaining
-  BufferBarrierBuilder& setSrcQueueFamilyIndex(const uint32_t index) {
+  BufferBarrierBuilder& setSrcQueueFamilyIndex(uint32_t index) {
     m_srcQueueFamily = index;
     return *this;
   }
@@ -131,7 +130,7 @@ class BufferBarrierBuilder {
   /// @brief Set destination queue family index for ownership transfer
   /// @param index Queue family index that will receive buffer ownership
   /// @return Reference to this builder for method chaining
-  BufferBarrierBuilder& setDstQueueFamilyIndex(const uint32_t index) {
+  BufferBarrierBuilder& setDstQueueFamilyIndex(uint32_t index) {
     m_dstQueueFamily = index;
     return *this;
   }
@@ -174,16 +173,16 @@ class ImageBarrier {
   ImageBarrier(const Image& image,
                const std::vector<AccessFlag>& priority_access_flags,
                const std::vector<AccessFlag>& wait_access_flags,
-               const ImageLayout old_layout,
-               const ImageLayout new_layout,
+               ImageLayout old_layout,
+               ImageLayout new_layout,
                const ImageViewInfo& image_view_info,
                uint32_t src_queue_family = 0u,
                uint32_t dst_queue_family = 0u);
   ImageBarrier(const std::unique_ptr<Context>& ptr_context,
                const std::vector<AccessFlag>& priority_access_flags,
                const std::vector<AccessFlag>& wait_access_flags,
-               const ImageLayout old_layout,
-               const ImageLayout new_layout,
+               ImageLayout old_layout,
+               ImageLayout new_layout,
                uint32_t src_queue_family = 0u,
                uint32_t dst_queue_family = 0u);
   ~ImageBarrier();
@@ -192,11 +191,11 @@ class ImageBarrier {
     return m_imageMemoryBarrier;
   }
 
-  void setSrcQueueFamilyIndex(const uint32_t index) {
+  void setSrcQueueFamilyIndex(uint32_t index) {
     m_imageMemoryBarrier.setSrcQueueFamilyIndex(index);
   }
 
-  void setDstQueueFamilyIndex(const uint32_t index) {
+  void setDstQueueFamilyIndex(uint32_t index) {
     m_imageMemoryBarrier.setDstQueueFamilyIndex(index);
   }
 };
@@ -253,7 +252,7 @@ class ImageBarrierBuilder {
   /// @brief Set old image layout
   /// @param layout The current layout of the image
   /// @return Reference to this builder for method chaining
-  ImageBarrierBuilder& setOldLayout(const ImageLayout layout) {
+  ImageBarrierBuilder& setOldLayout(ImageLayout layout) {
     m_oldLayout = layout;
     return *this;
   }
@@ -278,7 +277,7 @@ class ImageBarrierBuilder {
   /// @brief Set source queue family index for ownership transfer
   /// @param index Queue family index that currently owns the buffer
   /// @return Reference to this builder for method chaining
-  ImageBarrierBuilder& setSrcQueueFamilyIndex(const uint32_t index) {
+  ImageBarrierBuilder& setSrcQueueFamilyIndex(uint32_t index) {
     m_srcQueueFamily = index;
     return *this;
   }
@@ -286,7 +285,7 @@ class ImageBarrierBuilder {
   /// @brief Set destination queue family index for ownership transfer
   /// @param index Queue family index that will receive buffer ownership
   /// @return Reference to this builder for method chaining
-  ImageBarrierBuilder& setDstQueueFamilyIndex(const uint32_t index) {
+  ImageBarrierBuilder& setDstQueueFamilyIndex(uint32_t index) {
     m_dstQueueFamily = index;
     return *this;
   }
@@ -388,9 +387,10 @@ class TimelineSemaphore {
 
     WaitInfo(const vk::Semaphore& semaphore, uint64_t wait_value)
         : m_semaphore(semaphore), m_waitValue(wait_value) {}
-    ~WaitInfo() = default;
 
    public:
+    ~WaitInfo() = default;
+
     /// @brief Get current wait value
     /// @return Current wait value
     uint64_t getWaitValue() const {
@@ -413,9 +413,10 @@ class TimelineSemaphore {
 
     SignalInfo(const vk::Semaphore& semaphore, uint64_t signal_value)
         : m_semaphore(semaphore), m_signalValue(signal_value) {}
-    ~SignalInfo() = default;
 
    public:
+    ~SignalInfo() = default;
+
     /// @brief Get current signal value
     /// @return Current signal value
     uint64_t getSignalValue() const {
@@ -544,7 +545,7 @@ class SubmitSemaphoreGroup {
 
   /// @brief Get pointer to timeline submit info for vk::SubmitInfo
   /// @return Pointer to vk::TimelineSemaphoreSubmitInfoKHR
-  const auto getPtrTimelineSubmitInfo() const {
+  auto getPtrTimelineSubmitInfo() const {
     return &m_timelineSubmitInfo;
   }
 

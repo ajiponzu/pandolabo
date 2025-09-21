@@ -122,7 +122,7 @@ class Swapchain {
 
   /// @brief Get swapchain image format
   /// @return Image format
-  const auto getImageFormat() const {
+  auto getImageFormat() const {
     return m_imageFormat;
   }
 

@@ -38,8 +38,8 @@ void pandora::core::CommandBuffer::end() const {
 
 void pandora::core::CommandBuffer::setPipelineBarrier(
     const gpu::BufferBarrier& barrier,
-    const PipelineStage src_stage,
-    const PipelineStage dst_stage) const {
+    PipelineStage src_stage,
+    PipelineStage dst_stage) const {
   m_commandBuffer.pipelineBarrier(
       vk_helper::getPipelineStageFlagBits(src_stage),
       vk_helper::getPipelineStageFlagBits(dst_stage),
@@ -51,8 +51,8 @@ void pandora::core::CommandBuffer::setPipelineBarrier(
 
 void pandora::core::CommandBuffer::setPipelineBarrier(
     const gpu::ImageBarrier& barrier,
-    const PipelineStage src_stage,
-    const PipelineStage dst_stage) const {
+    PipelineStage src_stage,
+    PipelineStage dst_stage) const {
   m_commandBuffer.pipelineBarrier(
       vk_helper::getPipelineStageFlagBits(src_stage),
       vk_helper::getPipelineStageFlagBits(dst_stage),
@@ -79,7 +79,7 @@ void pandora::core::CommandBuffer::bindDescriptorSet(
 void pandora::core::CommandBuffer::pushConstants(
     const Pipeline& pipeline,
     const std::vector<ShaderStage>& dst_stages,
-    const uint32_t offset,
+    uint32_t offset,
     const std::vector<float_t>& data) const {
   m_commandBuffer.pushConstants(
       pipeline.getPipelineLayout(),
@@ -107,7 +107,7 @@ void pandora::core::TransferCommandBuffer::copyBuffer(
 void pandora::core::TransferCommandBuffer::copyBufferToImage(
     const gpu::Buffer& buffer,
     const gpu::Image& image,
-    const ImageLayout image_layout,
+    ImageLayout image_layout,
     const ImageViewInfo& image_view_info) const {
   const auto& graphical_size = image.getGraphicalSize();
 
@@ -139,7 +139,7 @@ void pandora::core::TransferCommandBuffer::copyBufferToImage(
 void pandora::core::TransferCommandBuffer::copyImageToBuffer(
     const gpu::Image& image,
     const gpu::Buffer& buffer,
-    const ImageLayout image_layout,
+    ImageLayout image_layout,
     const ImageViewInfo& image_view_info) const {
   const auto& graphical_size = image.getGraphicalSize();
 
@@ -169,7 +169,7 @@ void pandora::core::TransferCommandBuffer::copyImageToBuffer(
 }
 
 void pandora::core::TransferCommandBuffer::setMipmaps(
-    const gpu::Image& image, const PipelineStage dst_stage) const {
+    const gpu::Image& image, PipelineStage dst_stage) const {
   const auto image_view_info =
       ImageViewInfo{}
           .setAspect(pandora::core::ImageAspect::Color)
@@ -366,8 +366,8 @@ void pandora::core::GraphicCommandBuffer::setScissor(
 
 void pandora::core::GraphicCommandBuffer::setViewport(
     const gpu_ui::GraphicalSize<float_t>& size,
-    const float_t min_depth,
-    const float_t max_depth) const {
+    float_t min_depth,
+    float_t max_depth) const {
   m_commandBuffer.setViewport(0u,
                               vk::Viewport{}
                                   .setX(0.0f)
@@ -389,21 +389,20 @@ void pandora::core::GraphicCommandBuffer::bindIndexBuffer(
       buffer.getBuffer(), offset, vk::IndexType::eUint32);
 }
 
-void pandora::core::GraphicCommandBuffer::draw(
-    const uint32_t vertex_count,
-    const uint32_t instance_count,
-    const uint32_t first_vertex,
-    const uint32_t first_instance) const {
+void pandora::core::GraphicCommandBuffer::draw(uint32_t vertex_count,
+                                               uint32_t instance_count,
+                                               uint32_t first_vertex,
+                                               uint32_t first_instance) const {
   m_commandBuffer.draw(
       vertex_count, instance_count, first_vertex, first_instance);
 }
 
 void pandora::core::GraphicCommandBuffer::drawIndexed(
-    const uint32_t index_count,
-    const uint32_t instance_count,
-    const uint32_t first_index,
-    const int32_t vertex_offset,
-    const uint32_t first_instance) const {
+    uint32_t index_count,
+    uint32_t instance_count,
+    uint32_t first_index,
+    int32_t vertex_offset,
+    uint32_t first_instance) const {
   m_commandBuffer.drawIndexed(
       index_count, instance_count, first_index, vertex_offset, first_instance);
 }

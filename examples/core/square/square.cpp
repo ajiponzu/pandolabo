@@ -119,7 +119,7 @@ void samples::core::Square::constructShaderResources() {
                                         plc::PipelineBind::Graphics));
 }
 
-void samples::core::Square::constructRenderpass(const bool is_resized) {
+void samples::core::Square::constructRenderpass(bool is_resized) {
   plc::AttachmentList attachment_list;
 
   const auto backbuffer_attach_index = [&] {

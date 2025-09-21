@@ -49,10 +49,10 @@ vk::BufferUsageFlagBits get_buffer_usage(
 
 pandora::core::gpu::Buffer::Buffer(
     const std::unique_ptr<Context>& ptr_context,
-    const MemoryUsage memory_usage,
-    const TransferType transfer_type,
+    MemoryUsage memory_usage,
+    TransferType transfer_type,
     const std::vector<BufferUsage>& buffer_usages,
-    const size_t size)
+    size_t size)
     : m_size(size) {
   const auto& ptr_vk_device =
       ptr_context->getPtrDevice()->getPtrLogicalDevice();

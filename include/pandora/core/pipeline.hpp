@@ -55,8 +55,8 @@ class VertexInput {
   /// @param binding Binding index for this vertex buffer
   /// @param stride Size in bytes between consecutive vertex elements
   /// @param input_rate Whether data is per-vertex or per-instance
-  void appendBinding(const uint32_t binding,
-                     const uint32_t stride,
+  void appendBinding(uint32_t binding,
+                     uint32_t stride,
                      const VertexInputRate input_rate);
 
   /// @brief Add a vertex attribute description
@@ -64,23 +64,23 @@ class VertexInput {
   /// @param binding Vertex buffer binding this attribute comes from
   /// @param format Data format of the attribute
   /// @param offset Byte offset of this attribute within the vertex
-  void appendAttribute(const uint32_t location,
-                       const uint32_t binding,
-                       const DataFormat format,
-                       const uint32_t offset);
+  void appendAttribute(uint32_t location,
+                       uint32_t binding,
+                       DataFormat format,
+                       uint32_t offset);
 
   // Fluent interface methods
-  VertexInput& addBinding(const uint32_t binding,
-                          const uint32_t stride,
-                          const VertexInputRate input_rate) {
+  VertexInput& addBinding(uint32_t binding,
+                          uint32_t stride,
+                          VertexInputRate input_rate) {
     appendBinding(binding, stride, input_rate);
     return *this;
   }
 
-  VertexInput& addAttribute(const uint32_t location,
-                            const uint32_t binding,
-                            const DataFormat format,
-                            const uint32_t offset) {
+  VertexInput& addAttribute(uint32_t location,
+                            uint32_t binding,
+                            DataFormat format,
+                            uint32_t offset) {
     appendAttribute(location, binding, format, offset);
     return *this;
   }
@@ -101,20 +101,20 @@ class InputAssembly {
   /// @brief Set primitive topology type
   /// @param topology How vertices are assembled (triangles, lines, points,
   /// etc.)
-  void setTopology(const PrimitiveTopology topology);
+  void setTopology(PrimitiveTopology topology);
 
   /// @brief Enable or disable primitive restart
   /// @param is_enabled Whether to enable primitive restart with special index
   /// values
-  void setRestart(const bool is_enabled);
+  void setRestart(bool is_enabled);
 
   // Fluent interface methods
-  InputAssembly& withTopology(const PrimitiveTopology topology) {
+  InputAssembly& withTopology(PrimitiveTopology topology) {
     setTopology(topology);
     return *this;
   }
 
-  InputAssembly& withRestart(const bool is_enabled) {
+  InputAssembly& withRestart(bool is_enabled) {
     setRestart(is_enabled);
     return *this;
   }
@@ -134,10 +134,10 @@ class Tessellation {
 
   /// @brief Set number of control points per patch
   /// @param count Number of vertices that define each tessellation patch
-  void setPatchControlPoints(const uint32_t count);
+  void setPatchControlPoints(uint32_t count);
 
   // Fluent interface methods
-  Tessellation& withPatchControlPoints(const uint32_t count) {
+  Tessellation& withPatchControlPoints(uint32_t count) {
     setPatchControlPoints(count);
     return *this;
   }
@@ -161,8 +161,8 @@ class ViewportState {
   /// @param min_depth Minimum depth value (typically 0.0)
   /// @param max_depth Maximum depth value (typically 1.0)
   void setViewport(const gpu_ui::GraphicalSize<float_t>& size,
-                   const float_t min_depth,
-                   const float_t max_depth);
+                   float_t min_depth,
+                   float_t max_depth);
 
   /// @brief Set scissor test rectangle
   /// @param size Width and height of the scissor rectangle
@@ -170,8 +170,8 @@ class ViewportState {
 
   // Fluent interface methods
   ViewportState& withViewport(const gpu_ui::GraphicalSize<float_t>& size,
-                              const float_t min_depth,
-                              const float_t max_depth) {
+                              float_t min_depth,
+                              float_t max_depth) {
     setViewport(size, min_depth, max_depth);
     return *this;
   }
@@ -196,70 +196,70 @@ class Rasterization {
 
   /// @brief Enable or disable depth bias
   /// @param is_enabled Whether to apply depth bias to fragments
-  void setDepthBiasEnabled(const bool is_enabled);
+  void setDepthBiasEnabled(bool is_enabled);
 
   /// @brief Configure depth bias parameters
   /// @param constant_factor Constant depth bias factor
   /// @param clamp Maximum depth bias clamp value
   /// @param slope_factor Slope-dependent depth bias factor
-  void setDepthBias(const float_t constant_factor,
-                    const float_t clamp,
-                    const float_t slope_factor);
+  void setDepthBias(float_t constant_factor,
+                    float_t clamp,
+                    float_t slope_factor);
 
   /// @brief Enable or disable rasterizer discard
   /// @param is_enabled Whether to discard primitives before rasterization
-  void setRasterizerDiscard(const bool is_enabled);
+  void setRasterizerDiscard(bool is_enabled);
 
   /// @brief Set polygon rendering mode
   /// @param polygon_mode How to render polygons (fill, line, point)
-  void setPolygonMode(const PolygonMode polygon_mode);
+  void setPolygonMode(PolygonMode polygon_mode);
 
   /// @brief Set face culling mode
   /// @param cull_mode Which faces to cull (none, front, back, front+back)
-  void setCullMode(const CullMode cull_mode);
+  void setCullMode(CullMode cull_mode);
 
   /// @brief Set front face winding order
   /// @param front_face Whether front faces are clockwise or counter-clockwise
-  void setFrontFace(const FrontFace front_face);
+  void setFrontFace(FrontFace front_face);
 
   /// @brief Set line width for line primitives
   /// @param line_width Width of rasterized lines in pixels
-  void setLineWidth(const float_t line_width);
+  void setLineWidth(float_t line_width);
 
   // Fluent interface methods
-  Rasterization& withDepthBiasEnabled(const bool is_enabled) {
+  Rasterization& withDepthBiasEnabled(bool is_enabled) {
     setDepthBiasEnabled(is_enabled);
     return *this;
   }
 
-  Rasterization& withDepthBias(const float_t constant_factor,
-                               const float_t clamp,
-                               const float_t slope_factor) {
+  Rasterization& withDepthBias(float_t constant_factor,
+                               float_t clamp,
+                               float_t slope_factor) {
     setDepthBias(constant_factor, clamp, slope_factor);
     return *this;
   }
 
-  Rasterization& withRasterizerDiscard(const bool is_enabled) {
+  Rasterization& withRasterizerDiscard(bool is_enabled) {
     setRasterizerDiscard(is_enabled);
     return *this;
   }
 
-  Rasterization& withPolygonMode(const PolygonMode polygon_mode) {
+  Rasterization& withPolygonMode(PolygonMode polygon_mode) {
     setPolygonMode(polygon_mode);
     return *this;
   }
 
-  Rasterization& withCullMode(const CullMode cull_mode) {
+  Rasterization& withCullMode(CullMode cull_mode) {
     setCullMode(cull_mode);
     return *this;
   }
 
-  Rasterization& withFrontFace(const FrontFace front_face) {
+  Rasterization& withFrontFace(FrontFace front_face) {
     setFrontFace(front_face);
     return *this;
   }
 
-  Rasterization& withLineWidth(const float_t line_width) {
+  Rasterization& withLineWidth(float_t line_width) {
     setLineWidth(line_width);
     return *this;
   }
@@ -277,8 +277,8 @@ class Multisample {
   ~Multisample() = default;
 
   void setSampleCount(const std::unique_ptr<gpu::Context>& ptr_context);
-  void setSampleShading(const bool is_enabled);
-  void setMinSampleShading(const float_t min_sample_shading);
+  void setSampleShading(bool is_enabled);
+  void setMinSampleShading(float_t min_sample_shading);
 
   // Fluent interface methods
   Multisample& withSampleCount(
@@ -287,12 +287,12 @@ class Multisample {
     return *this;
   }
 
-  Multisample& withSampleShading(const bool is_enabled) {
+  Multisample& withSampleShading(bool is_enabled) {
     setSampleShading(is_enabled);
     return *this;
   }
 
-  Multisample& withMinSampleShading(const float_t min_sample_shading) {
+  Multisample& withMinSampleShading(float_t min_sample_shading) {
     setMinSampleShading(min_sample_shading);
     return *this;
   }
@@ -309,36 +309,36 @@ class DepthStencil {
   DepthStencil() = default;
   ~DepthStencil() = default;
 
-  void setDepthTest(const bool is_enabled);
-  void setDepthWrite(const bool is_enabled);
-  void setDepthCompareOp(const CompareOp compare_op);
-  void setDepthBoundsTest(const bool is_enabled);
-  void setStencilTest(const bool is_enabled);
+  void setDepthTest(bool is_enabled);
+  void setDepthWrite(bool is_enabled);
+  void setDepthCompareOp(CompareOp compare_op);
+  void setDepthBoundsTest(bool is_enabled);
+  void setStencilTest(bool is_enabled);
   void setFrontStencilOp(const StencilOpState& state);
   void setBackStencilOp(const StencilOpState& state);
 
   // Fluent interface methods
-  DepthStencil& withDepthTest(const bool is_enabled) {
+  DepthStencil& withDepthTest(bool is_enabled) {
     setDepthTest(is_enabled);
     return *this;
   }
 
-  DepthStencil& withDepthWrite(const bool is_enabled) {
+  DepthStencil& withDepthWrite(bool is_enabled) {
     setDepthWrite(is_enabled);
     return *this;
   }
 
-  DepthStencil& withDepthCompareOp(const CompareOp compare_op) {
+  DepthStencil& withDepthCompareOp(CompareOp compare_op) {
     setDepthCompareOp(compare_op);
     return *this;
   }
 
-  DepthStencil& withDepthBoundsTest(const bool is_enabled) {
+  DepthStencil& withDepthBoundsTest(bool is_enabled) {
     setDepthBoundsTest(is_enabled);
     return *this;
   }
 
-  DepthStencil& withStencilTest(const bool is_enabled) {
+  DepthStencil& withStencilTest(bool is_enabled) {
     setStencilTest(is_enabled);
     return *this;
   }
@@ -366,11 +366,11 @@ class ColorBlend {
   ColorBlend() = default;
   ~ColorBlend() = default;
 
-  void setLogicOp(const bool is_enabled, const LogicOp logic_op);
+  void setLogicOp(bool is_enabled, LogicOp logic_op);
   void appendAttachment(const ColorBlendAttachment& attachment);
 
   // Fluent interface methods
-  ColorBlend& withLogicOp(const bool is_enabled, const LogicOp logic_op) {
+  ColorBlend& withLogicOp(bool is_enabled, LogicOp logic_op) {
     setLogicOp(is_enabled, logic_op);
     return *this;
   }
@@ -393,10 +393,10 @@ class DynamicState {
   DynamicState() = default;
   ~DynamicState() = default;
 
-  void appendState(const DynamicOption option);
+  void appendState(DynamicOption option);
 
   // Fluent interface methods
-  DynamicState& addState(const DynamicOption option) {
+  DynamicState& addState(DynamicOption option) {
     appendState(option);
     return *this;
   }
@@ -549,7 +549,7 @@ class Pipeline {
   Pipeline(const std::unique_ptr<gpu::Context>& ptr_context,
            const gpu::DescriptionUnit& description_unit,
            const gpu::DescriptorSetLayout& descriptor_set_layout,
-           const PipelineBind bind_point);
+           PipelineBind bind_point);
 
   // Rule of Five
   ~Pipeline();
@@ -564,10 +564,10 @@ class Pipeline {
   const auto& getPipelineLayout() const {
     return m_ptrPipelineLayout.get();
   }
-  const auto getQueueFamilyType() const {
+  auto getQueueFamilyType() const {
     return m_queueFamilyType;
   }
-  const auto getBindPoint() const {
+  auto getBindPoint() const {
     return m_bindPoint;
   }
 
@@ -592,7 +592,7 @@ class Pipeline {
       const std::vector<std::string>& module_keys,
       const std::unique_ptr<pipeline::GraphicInfo>& ptr_graphic_info,
       const Renderpass& render_pass,
-      const uint32_t subpass_index);
+      uint32_t subpass_index);
 };
 
 }  // namespace pandora::core

@@ -5,7 +5,7 @@ pandora::core::RenderKit::RenderKit(
     AttachmentList& attachment_list,
     const SubpassGraph& subpass_graph,
     const gpu_ui::GraphicalSize<uint32_t>& size,
-    const bool is_presented) {
+    bool is_presented) {
   m_ptrRenderpass =
       std::make_unique<Renderpass>(ptr_context, attachment_list, subpass_graph);
 
@@ -16,7 +16,7 @@ void pandora::core::RenderKit::resetFramebuffer(
     const std::unique_ptr<gpu::Context>& ptr_context,
     AttachmentList& attachment_list,
     const gpu_ui::GraphicalSize<uint32_t>& size,
-    const bool is_presented) {
+    bool is_presented) {
   m_framebuffers.clear();
 
   if (is_presented) {

@@ -1,9 +1,7 @@
-#include <array>
-#include <print>
+#include "pandora/core/gpu/device.hpp"
+
 #include <set>
 #include <string>
-
-#include "pandora/core/gpu.hpp"
 
 namespace {
 
@@ -209,8 +207,8 @@ void pandora::core::gpu::Device::constructLogicalDevice(
   m_ptrLogicalDevice = m_physicalDevice.createDeviceUnique(create_info);
 }
 
-const uint32_t pandora::core::gpu::Device::getQueueFamilyIndex(
-    const QueueFamilyType family_type) const {
+uint32_t pandora::core::gpu::Device::getQueueFamilyIndex(
+    QueueFamilyType family_type) const {
   switch (family_type) {
     using enum QueueFamilyType;
 
@@ -225,8 +223,7 @@ const uint32_t pandora::core::gpu::Device::getQueueFamilyIndex(
   }
 }
 
-vk::Queue pandora::core::gpu::Device::getQueue(
-    const uint32_t queue_family_index) {
+vk::Queue pandora::core::gpu::Device::getQueue(uint32_t queue_family_index) {
   return m_ptrLogicalDevice->getQueue(queue_family_index, 0u);
 }
 

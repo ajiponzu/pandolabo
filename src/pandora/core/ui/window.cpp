@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "pandora/core/ui.hpp"
 
 std::unordered_map<uint64_t, std::unordered_set<int32_t>>
@@ -48,8 +46,8 @@ void callback_resized(GLFWwindow* window, int /*width*/, int /*height*/) {
 }  // namespace
 
 pandora::core::ui::Window::Window(const std::string& title,
-                                  const int32_t width,
-                                  const int32_t height) {
+                                  int32_t width,
+                                  int32_t height) {
   if (!glfwInit()) {
     throw std::runtime_error("Failed to initialize GLFW.");
   }

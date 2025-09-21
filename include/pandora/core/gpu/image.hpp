@@ -46,8 +46,8 @@ class Image {
   /// @param image_usages Image usage types
   /// @param image_sub_info Image sub-resource information
   Image(const std::unique_ptr<Context>& ptr_context,
-        const MemoryUsage memory_usage,
-        const TransferType transfer_type,
+        MemoryUsage memory_usage,
+        TransferType transfer_type,
         const std::vector<ImageUsage>& image_usages,
         const ImageSubInfo& image_sub_info);
   ~Image();

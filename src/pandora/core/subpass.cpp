@@ -2,7 +2,7 @@
 #include "pandora/core/renderpass.hpp"
 
 pandora::core::SubpassNode::SubpassNode(const PipelineBind bind_point,
-                                        const uint32_t view_mask) {
+                                        uint32_t view_mask) {
   m_bindPoint = vk_helper::getPipelineBindPoint(bind_point);
   m_viewMask = view_mask;
 }

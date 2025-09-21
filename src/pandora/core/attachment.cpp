@@ -36,7 +36,7 @@ uint32_t pandora::core::AttachmentList::append(
 }
 
 void pandora::core::AttachmentList::setBackbufferAttachment(
-    const std::unique_ptr<gpu::Context>& ptr_context, const size_t index) {
+    const std::unique_ptr<gpu::Context>& ptr_context, size_t index) {
   m_attachments[m_backbufferIndex] =
       ptr_context->getPtrSwapchain()->getImageViews().at(index).get();
 }
@@ -51,7 +51,7 @@ uint32_t pandora::core::AttachmentList::append(
   return static_cast<uint32_t>(m_attachments.size()) - 1u;
 }
 
-const void pandora::core::AttachmentList::appendDescription(
+void pandora::core::AttachmentList::appendDescription(
     const AttachmentDescription& description) {
   using namespace vk_helper;
 

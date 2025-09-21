@@ -1,7 +1,7 @@
 #include "pandora/core/gpu/vk_helper.hpp"
 
 vk::MemoryPropertyFlags vk_helper::getMemoryPropertyFlags(
-    const pandora::core::MemoryUsage memory_usage) {
+    pandora::core::MemoryUsage memory_usage) {
   switch (memory_usage) {
     using enum pandora::core::MemoryUsage;
     using enum vk::MemoryPropertyFlagBits;
@@ -20,7 +20,7 @@ vk::MemoryPropertyFlags vk_helper::getMemoryPropertyFlags(
 }
 
 vk::AccessFlagBits vk_helper::getAccessFlagBits(
-    const pandora::core::AccessFlag access_flag) {
+    pandora::core::AccessFlag access_flag) {
   switch (access_flag) {
     using enum pandora::core::AccessFlag;
     using enum vk::AccessFlagBits;
@@ -65,7 +65,7 @@ vk::AccessFlagBits vk_helper::getAccessFlagBits(
 }
 
 vk::PipelineStageFlagBits vk_helper::getPipelineStageFlagBits(
-    const pandora::core::PipelineStage stage) {
+    pandora::core::PipelineStage stage) {
   switch (stage) {
     using enum pandora::core::PipelineStage;
     using enum vk::PipelineStageFlagBits;
@@ -110,7 +110,7 @@ vk::PipelineStageFlagBits vk_helper::getPipelineStageFlagBits(
 }
 
 vk::PipelineBindPoint vk_helper::getPipelineBindPoint(
-    const pandora::core::PipelineBind bind_point) {
+    pandora::core::PipelineBind bind_point) {
   switch (bind_point) {
     using enum pandora::core::PipelineBind;
     using enum vk::PipelineBindPoint;
@@ -127,7 +127,7 @@ vk::PipelineBindPoint vk_helper::getPipelineBindPoint(
 }
 
 vk::ImageUsageFlagBits vk_helper::getImageUsage(
-    const pandora::core::ImageUsage image_usage) {
+    pandora::core::ImageUsage image_usage) {
   switch (image_usage) {
     using enum pandora::core::ImageUsage;
     using enum vk::ImageUsageFlagBits;
@@ -150,7 +150,7 @@ vk::ImageUsageFlagBits vk_helper::getImageUsage(
 }
 
 vk::ImageLayout vk_helper::getImageLayout(
-    const pandora::core::ImageLayout image_layout) {
+    pandora::core::ImageLayout image_layout) {
   switch (image_layout) {
     using enum pandora::core::ImageLayout;
     using enum vk::ImageLayout;
@@ -186,7 +186,7 @@ vk::ImageLayout vk_helper::getImageLayout(
   }
 }
 
-vk::Format vk_helper::getFormat(const pandora::core::DataFormat format) {
+vk::Format vk_helper::getFormat(pandora::core::DataFormat format) {
   switch (format) {
     using enum pandora::core::DataFormat;
     using enum vk::Format;
@@ -267,7 +267,7 @@ vk::Format vk_helper::getFormat(const pandora::core::DataFormat format) {
 }
 
 vk::SampleCountFlagBits vk_helper::getSampleCount(
-    const pandora::core::ImageSampleCount sample_count) {
+    pandora::core::ImageSampleCount sample_count) {
   switch (sample_count) {
     using enum pandora::core::ImageSampleCount;
     using enum vk::SampleCountFlagBits;
@@ -292,7 +292,7 @@ vk::SampleCountFlagBits vk_helper::getSampleCount(
 }
 
 vk::ImageAspectFlags vk_helper::getImageAspectFlags(
-    const pandora::core::ImageAspect image_aspect) {
+    pandora::core::ImageAspect image_aspect) {
   vk::ImageSubresourceRange subresource_range;
   switch (image_aspect) {
     using enum pandora::core::ImageAspect;
@@ -312,7 +312,7 @@ vk::ImageAspectFlags vk_helper::getImageAspectFlags(
 }
 
 vk::ShaderStageFlags vk_helper::getShaderStageFlagBits(
-    const pandora::core::ShaderStage shader_stage) {
+    pandora::core::ShaderStage shader_stage) {
   switch (shader_stage) {
     using enum pandora::core::ShaderStage;
     using enum vk::ShaderStageFlagBits;
@@ -340,7 +340,7 @@ vk::Extent3D vk_helper::getExtent3D(
 }
 
 vk::AttachmentLoadOp vk_helper::getAttachmentLoadOp(
-    const pandora::core::AttachmentLoadOp attachment_load_op) {
+    pandora::core::AttachmentLoadOp attachment_load_op) {
   using enum pandora::core::AttachmentLoadOp;
   using enum vk::AttachmentLoadOp;
 
@@ -357,7 +357,7 @@ vk::AttachmentLoadOp vk_helper::getAttachmentLoadOp(
 }
 
 vk::AttachmentStoreOp vk_helper::getAttachmentStoreOp(
-    const pandora::core::AttachmentStoreOp attachment_store_op) {
+    pandora::core::AttachmentStoreOp attachment_store_op) {
   switch (attachment_store_op) {
     using enum pandora::core::AttachmentStoreOp;
     using enum vk::AttachmentStoreOp;
@@ -372,8 +372,7 @@ vk::AttachmentStoreOp vk_helper::getAttachmentStoreOp(
 }
 
 // Pipeline-related conversions
-vk::CompareOp vk_helper::getCompareOp(
-    const pandora::core::CompareOp compare_op) {
+vk::CompareOp vk_helper::getCompareOp(pandora::core::CompareOp compare_op) {
   switch (compare_op) {
     using enum pandora::core::CompareOp;
     using enum vk::CompareOp;
@@ -399,8 +398,7 @@ vk::CompareOp vk_helper::getCompareOp(
   }
 }
 
-vk::StencilOp vk_helper::getStencilOp(
-    const pandora::core::StencilOp stencil_op) {
+vk::StencilOp vk_helper::getStencilOp(pandora::core::StencilOp stencil_op) {
   switch (stencil_op) {
     using enum pandora::core::StencilOp;
     using enum vk::StencilOp;
@@ -441,7 +439,7 @@ vk::StencilOpState vk_helper::getStencilOpState(
 }
 
 vk::BlendFactor vk_helper::getBlendFactor(
-    const pandora::core::BlendFactor blend_factor) {
+    pandora::core::BlendFactor blend_factor) {
   switch (blend_factor) {
     using enum pandora::core::BlendFactor;
     using enum vk::BlendFactor;
@@ -489,7 +487,7 @@ vk::BlendFactor vk_helper::getBlendFactor(
   }
 }
 
-vk::BlendOp vk_helper::getBlendOp(const pandora::core::BlendOp blend_op) {
+vk::BlendOp vk_helper::getBlendOp(pandora::core::BlendOp blend_op) {
   switch (blend_op) {
     using enum pandora::core::BlendOp;
     using enum vk::BlendOp;
@@ -539,7 +537,7 @@ vk::ColorComponentFlags vk_helper::getColorComponent(
 
 // Command buffer related conversions
 vk::CommandBufferUsageFlagBits vk_helper::getCommandBufferUsageFlagBits(
-    const pandora::core::CommandBufferUsage usage_flags) {
+    pandora::core::CommandBufferUsage usage_flags) {
   switch (usage_flags) {
     using enum pandora::core::CommandBufferUsage;
     using enum vk::CommandBufferUsageFlagBits;
@@ -556,7 +554,7 @@ vk::CommandBufferUsageFlagBits vk_helper::getCommandBufferUsageFlagBits(
 }
 
 vk::SubpassContents vk_helper::getSubpassContents(
-    const pandora::core::SubpassContents subpass_contents) {
+    pandora::core::SubpassContents subpass_contents) {
   switch (subpass_contents) {
     using enum pandora::core::SubpassContents;
     using enum vk::SubpassContents;
@@ -572,7 +570,7 @@ vk::SubpassContents vk_helper::getSubpassContents(
 
 // Subpass related conversions
 vk::DependencyFlagBits vk_helper::getDependencyFlag(
-    const pandora::core::DependencyFlag dependency_flag) {
+    pandora::core::DependencyFlag dependency_flag) {
   switch (dependency_flag) {
     using enum pandora::core::DependencyFlag;
     using enum vk::DependencyFlagBits;
@@ -592,7 +590,7 @@ vk::DependencyFlagBits vk_helper::getDependencyFlag(
 
 // Pipeline state conversions
 vk::PrimitiveTopology vk_helper::getPrimitiveTopology(
-    const pandora::core::PrimitiveTopology topology) {
+    pandora::core::PrimitiveTopology topology) {
   switch (topology) {
     using enum pandora::core::PrimitiveTopology;
     using enum vk::PrimitiveTopology;
@@ -625,7 +623,7 @@ vk::PrimitiveTopology vk_helper::getPrimitiveTopology(
 }
 
 vk::PolygonMode vk_helper::getPolygonMode(
-    const pandora::core::PolygonMode polygon_mode) {
+    pandora::core::PolygonMode polygon_mode) {
   switch (polygon_mode) {
     using enum pandora::core::PolygonMode;
     using enum vk::PolygonMode;
@@ -641,8 +639,7 @@ vk::PolygonMode vk_helper::getPolygonMode(
   }
 }
 
-vk::CullModeFlags vk_helper::getCullMode(
-    const pandora::core::CullMode cull_mode) {
+vk::CullModeFlags vk_helper::getCullMode(pandora::core::CullMode cull_mode) {
   switch (cull_mode) {
     using enum pandora::core::CullMode;
     using enum vk::CullModeFlagBits;
@@ -660,8 +657,7 @@ vk::CullModeFlags vk_helper::getCullMode(
   }
 }
 
-vk::FrontFace vk_helper::getFrontFace(
-    const pandora::core::FrontFace front_face) {
+vk::FrontFace vk_helper::getFrontFace(pandora::core::FrontFace front_face) {
   switch (front_face) {
     using enum pandora::core::FrontFace;
     using enum vk::FrontFace;
@@ -675,7 +671,7 @@ vk::FrontFace vk_helper::getFrontFace(
   }
 }
 
-vk::LogicOp vk_helper::getLogicOp(const pandora::core::LogicOp logic_op) {
+vk::LogicOp vk_helper::getLogicOp(pandora::core::LogicOp logic_op) {
   switch (logic_op) {
     using enum pandora::core::LogicOp;
     using enum vk::LogicOp;
@@ -718,7 +714,7 @@ vk::LogicOp vk_helper::getLogicOp(const pandora::core::LogicOp logic_op) {
 }
 
 vk::DynamicState vk_helper::getDynamicState(
-    const pandora::core::DynamicOption option) {
+    pandora::core::DynamicOption option) {
   switch (option) {
     using enum pandora::core::DynamicOption;
     using enum vk::DynamicState;
@@ -747,7 +743,7 @@ vk::DynamicState vk_helper::getDynamicState(
 }
 
 vk::VertexInputRate vk_helper::getVertexInputRate(
-    const pandora::core::VertexInputRate input_rate) {
+    pandora::core::VertexInputRate input_rate) {
   switch (input_rate) {
     using enum pandora::core::VertexInputRate;
     using enum vk::VertexInputRate;
@@ -762,8 +758,7 @@ vk::VertexInputRate vk_helper::getVertexInputRate(
 }
 
 // Sampler related conversions
-vk::Filter vk_helper::getSamplerFilter(
-    const pandora::core::SamplerFilter filter) {
+vk::Filter vk_helper::getSamplerFilter(pandora::core::SamplerFilter filter) {
   switch (filter) {
     using enum pandora::core::SamplerFilter;
     using enum vk::Filter;
@@ -780,7 +775,7 @@ vk::Filter vk_helper::getSamplerFilter(
 }
 
 vk::SamplerMipmapMode vk_helper::getSamplerMipmapMode(
-    const pandora::core::SamplerMipmapMode mipmap_mode) {
+    pandora::core::SamplerMipmapMode mipmap_mode) {
   switch (mipmap_mode) {
     using enum pandora::core::SamplerMipmapMode;
     using enum vk::SamplerMipmapMode;
@@ -795,7 +790,7 @@ vk::SamplerMipmapMode vk_helper::getSamplerMipmapMode(
 }
 
 vk::SamplerAddressMode vk_helper::getSamplerAddressMode(
-    const pandora::core::SamplerAddressMode address_mode) {
+    pandora::core::SamplerAddressMode address_mode) {
   switch (address_mode) {
     using enum pandora::core::SamplerAddressMode;
     using enum vk::SamplerAddressMode;
@@ -816,7 +811,7 @@ vk::SamplerAddressMode vk_helper::getSamplerAddressMode(
 }
 
 vk::CompareOp vk_helper::getSamplerCompareOp(
-    const pandora::core::SamplerCompareOp compare_op) {
+    pandora::core::SamplerCompareOp compare_op) {
   switch (compare_op) {
     using enum pandora::core::SamplerCompareOp;
     using enum vk::CompareOp;
@@ -843,7 +838,7 @@ vk::CompareOp vk_helper::getSamplerCompareOp(
 }
 
 vk::BorderColor vk_helper::getSamplerBorderColor(
-    const pandora::core::SamplerBorderColor border_color) {
+    pandora::core::SamplerBorderColor border_color) {
   switch (border_color) {
     using enum pandora::core::SamplerBorderColor;
     using enum vk::BorderColor;
