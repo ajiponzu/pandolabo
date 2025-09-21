@@ -1,7 +1,5 @@
 # Pandolabo - Modern C++ Graphic
 
-[![CI](https://github.com/ajiponzu/pandolabo/actions/workflows/ci.yml/badge.svg)](https://github.com/ajiponzu/pandolabo/actions/workflows/ci.yml)
-
 ## 注意
 
 - このプロジェクトは開発者本人の自己満足のためのものです．ドキュメントは自分向けの備忘録となっておりますのでご了承ください．
