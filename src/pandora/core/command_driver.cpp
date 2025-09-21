@@ -137,8 +137,8 @@ pandora::core::GraphicCommandBuffer pandora::core::CommandDriver::getGraphic(
 pandora::core::ComputeCommandBuffer pandora::core::CommandDriver::getCompute(
     const std::optional<size_t> secondary_index) const {
   if (secondary_index.has_value()) {
-    return ComputeCommandBuffer(m_secondaryCommandBuffers.at(*secondary_index),
-                                true);
+    return ComputeCommandBuffer(
+        m_secondaryCommandBuffers.at(secondary_index.value()), true);
   }
 
   return ComputeCommandBuffer(m_ptrPrimaryCommandBuffer);
@@ -147,8 +147,8 @@ pandora::core::ComputeCommandBuffer pandora::core::CommandDriver::getCompute(
 pandora::core::TransferCommandBuffer pandora::core::CommandDriver::getTransfer(
     const std::optional<size_t> secondary_index) const {
   if (secondary_index.has_value()) {
-    return TransferCommandBuffer(m_secondaryCommandBuffers.at(*secondary_index),
-                                 true);
+    return TransferCommandBuffer(
+        m_secondaryCommandBuffers.at(secondary_index.value()), true);
   }
 
   return TransferCommandBuffer(m_ptrPrimaryCommandBuffer);
