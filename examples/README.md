@@ -6,39 +6,15 @@ Pandolaboライブラリの機能を学習するためのサンプルプログ�
 
 ## Example一覧
 
+各exampleの詳細については、個別のREADMEファイルを参照してください：
+
 ### 🟢 初心者向け
-
-#### 1. Square Example
-**📁 `core/square/`**
-- **内容**: 最もシンプルな2D四角形の描画
-- **学習内容**: Vulkanの基本的なグラフィックスパイプライン
-- **実行時間**: 数秒
-- **推奨順序**: 1番目
-
-#### 2. Basic Cube Example
-**📁 `core/basic_cube/`**
-- **内容**: 3Dキューブの回転表示
-- **学習内容**: 3D変換、MVP行列、深度テスト
-- **実行時間**: 継続的な描画
-- **推奨順序**: 2番目
+- **[Square Example](core/square/README.md)** - 最もシンプルな2D四角形の描画
+- **[Basic Cube Example](core/basic_cube/README.md)** - 3Dキューブの回転表示
 
 ### 🟡 中級者向け
-
-#### 3. Basic Compute Example
-**📁 `core/basic_compute/`**
-- **内容**: コンピュートシェーダーによる並列計算
-- **学習内容**: GPU汎用計算、バッファ操作
-- **実行時間**: 数秒
-- **推奨順序**: 3番目
-
-#### 4. Computing Image Example
-**📁 `core/computing_image/`**
-- **内容**: GPU上での画像処理フィルタ
-- **学習内容**: テクスチャ処理、画像I/O、実用的GPU活用
-- **実行時間**: 数秒
-- **推奨順序**: 4番目
-
-## 共通の前提条件
+- **[Basic Compute Example](core/basic_compute/README.md)** - コンピュートシェーダーによる並列計算
+- **[Computing Image Example](core/computing_image/README.md)** - GPU上での画像処理フィルタ## 共通の前提条件
 
 ### システム要件
 - **OS**: Windows 10/11
