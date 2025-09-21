@@ -14,7 +14,13 @@ Pandolaboライブラリの機能を学習するためのサンプルプログ�
 
 ### 🟡 中級者向け
 - **[Basic Compute Example](core/basic_compute/README.md)** - コンピュートシェーダーによる並列計算
-- **[Computing Image Example](core/computing_image/README.md)** - GPU上での画像処理フィルタ## 共通の前提条件
+- **[Computing Image Example](core/computing_image/README.md)** - GPU上での画像処理フィルタ
+
+### 🔴 上級者向け
+
+- **[Streaming Resources Example](core/streaming_resources/README.md)** - Timeline Semaphoreを使った高度なリソースストリーミング
+
+## 共通の前提条件
 
 ### システム要件
 - **OS**: Windows 10/11

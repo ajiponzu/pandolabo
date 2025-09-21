@@ -62,3 +62,10 @@ pdl_add_example(example_square
         ${CMAKE_CURRENT_SOURCE_DIR}/core/square/square.cpp
 )
 add_dependencies(examples_all example_square)
+
+pdl_add_example(example_streaming_resources
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/streaming_resources/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/core/streaming_resources/streaming_resources.cpp
+)
+add_dependencies(examples_all example_streaming_resources)

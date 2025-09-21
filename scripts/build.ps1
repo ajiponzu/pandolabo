@@ -108,7 +108,8 @@ function Select-Example {
         "example_basic_compute",
         "example_basic_cube",
         "example_simple_image",
-        "example_square"
+        "example_square",
+        "example_streaming_resources"
     )
 
     Write-Host ""; Write-Host "🎯 実行するExampleを選択してください:" -ForegroundColor Yellow
