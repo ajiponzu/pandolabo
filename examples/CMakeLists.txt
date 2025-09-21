@@ -16,24 +16,16 @@ function(pdl_add_example name)
     cmake_parse_arguments(PDL "" "" "SOURCES;INCLUDES" ${ARGN})
     add_executable(${name} ${PDL_SOURCES})
 
-    if(WIN32 AND DEFINED PANDOLABO_CXX_STANDARD AND PANDOLABO_CXX_STANDARD STREQUAL "23")
+    if(DEFINED PANDOLABO_CXX_STANDARD AND PANDOLABO_CXX_STANDARD STREQUAL "23")
         target_compile_options(${name} PRIVATE /std:c++23preview)
     else()
         target_compile_features(${name} PRIVATE cxx_std_20)
     endif()
 
-    if(WIN32)
-        target_compile_options(${name} PRIVATE
-            $<$\<CONFIG:Release\>:/O2>
-            $<$\<CONFIG:Debug\>:/Od>
-        )
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(${name} PRIVATE
-            $<$\<CONFIG:Release\>:-O3>
-            $<$\<CONFIG:Debug\>:-O0>
-            -Wall -Wextra
-        )
-    endif()
+    target_compile_options(${name} PRIVATE
+        $<$<CONFIG:Release>:/O2>
+        $<$<CONFIG:Debug>:/Od>
+    )
 
     target_link_libraries(${name} PRIVATE ${LIB_TARGET} glm::glm)
     target_include_directories(${name} PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR} ${PDL_INCLUDES})

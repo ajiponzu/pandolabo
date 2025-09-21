@@ -413,6 +413,7 @@ try {
                 continue
             }
 
+
             if ($selectedCommand -eq "test") {
                 Write-Host ""
                 Write-Host "🧪 テストをビルドして実行します ($Configuration)" -ForegroundColor Green
@@ -533,7 +534,7 @@ try {
                 Write-Host "❌ VSCode設定スクリプトが見つかりません" -ForegroundColor Red
                 exit 1
             }
-        } elseif ($Command -eq "format") {
+    } elseif ($Command -eq "format") {
             Write-Host "🎨 C++ファイルを一括フォーマット中..." -ForegroundColor Green
 
             # clang-formatが利用可能かチェック

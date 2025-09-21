@@ -10,7 +10,7 @@ file(GLOB_RECURSE TEST_SOURCES "*.cpp")
 add_executable(tests ${TEST_SOURCES})
 
 # WindowsでC++23を使用する場合、特別な設定
-if(WIN32 AND DEFINED PANDOLABO_CXX_STANDARD AND PANDOLABO_CXX_STANDARD STREQUAL "23")
+if(DEFINED PANDOLABO_CXX_STANDARD AND PANDOLABO_CXX_STANDARD STREQUAL "23")
     # 明示的にコンパイラフラグのみ使用（CXX_STANDARDプロパティは設定しない）
     target_compile_options(tests PRIVATE /std:c++23preview)
     message(STATUS "Applied C++23 preview settings to tests target")
@@ -19,24 +19,13 @@ else()
     target_compile_features(tests PRIVATE cxx_std_20)
 endif()
 
-# プラットフォーム別最適化設定
-if(WIN32)
-    # Windows: MSVC最適化設定
-    if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_CONFIGURATION_TYPES)
-        target_compile_options(tests PRIVATE
-            $<$<CONFIG:Release>:/O2>
-            $<$<CONFIG:Debug>:/Od>
-        )
-        message(STATUS "Building tests with MSVC optimization on Windows")
-    endif()
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    # Linux/macOS: Clang最適化設定
+# 最適化設定（MSVC）
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_CONFIGURATION_TYPES)
     target_compile_options(tests PRIVATE
-        $<$<CONFIG:Release>:-O3>
-        $<$<CONFIG:Debug>:-O0>
-        -Wall -Wextra
+        $<$<CONFIG:Release>:/O2>
+        $<$<CONFIG:Debug>:/Od>
     )
-    message(STATUS "Building tests with Clang optimization on ${CMAKE_SYSTEM_NAME}")
+    message(STATUS "Building tests with MSVC optimization")
 endif()
 
 # Catch2ライブラリをリンク

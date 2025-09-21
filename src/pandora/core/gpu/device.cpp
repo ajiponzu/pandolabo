@@ -3,6 +3,10 @@
 #include <set>
 #include <string>
 
+#ifdef GPU_DEBUG
+  #include <print>
+#endif
+
 namespace {
 
 std::vector<const char*> getDeviceExtensions(bool has_window_surface) {

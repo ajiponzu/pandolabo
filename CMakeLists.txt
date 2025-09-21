@@ -1,102 +1,41 @@
 cmake_minimum_required(VERSION 3.16)
 
-# プラットフォーム別コンパイラー設定
-if(WIN32)
-    # Windows: MSVCを強制的に使用
-    message(STATUS "Windows detected - forcing MSVC compiler")
-    # Clang設定をスキップしてMSVCを使用
-else()
-    # Linux/macOS: Clangコンパイラを優先設定
-    find_program(CLANG_CXX_COMPILER NAMES clang++ clang++-18 clang++-17 clang++-16 clang++-15)
-    if(CLANG_CXX_COMPILER)
-        set(CMAKE_CXX_COMPILER ${CLANG_CXX_COMPILER})
-        message(STATUS "Using Clang C++ compiler: ${CLANG_CXX_COMPILER}")
-    else()
-        message(WARNING "Clang not found on non-Windows platform, falling back to default compiler")
-    endif()
-
-    find_program(CLANG_C_COMPILER NAMES clang clang-18 clang-17 clang-16 clang-15)
-    if(CLANG_C_COMPILER)
-        set(CMAKE_C_COMPILER ${CLANG_C_COMPILER})
-        message(STATUS "Using Clang C compiler: ${CLANG_C_COMPILER}")
-    else()
-        message(STATUS "Clang not found, falling back to default C compiler")
-    endif()
+if(NOT WIN32)
+    message(FATAL_ERROR "This project is Windows-only. Please build on Windows with MSVC.")
 endif()
 
 project(pandolabo VERSION 1.0.0 LANGUAGES CXX)
 
-# プラットフォーム別C++標準設定
-if(WIN32)
-    # Windows: MSVC + C++標準バージョン
-    if(NOT MSVC)
-        message(FATAL_ERROR "Windows builds require MSVC compiler. Please use Visual Studio or MSVC tools.")
-    endif()
-
-    # C++標準をユーザーが指定可能にする（デフォルトは23）
-    set(PANDOLABO_CXX_STANDARD "23" CACHE STRING "C++ standard version (20, 23)")
-    set_property(CACHE PANDOLABO_CXX_STANDARD PROPERTY STRINGS "20" "23")
-
-    # C++23プレビューサポート
-    if(PANDOLABO_CXX_STANDARD STREQUAL "23")
-        # C++23の場合はCMAKE_CXX_STANDARDを設定せず、直接コンパイラフラグを使用
-        # これにより、CMakeがstdcpplatest(/std:c++latest)を設定するのを防ぐ
-        add_compile_options(/std:c++23preview)
-        message(STATUS "Using MSVC with C++23 preview on Windows")
-    else()
-        # C++20の場合は通常のCMAKE_CXX_STANDARD設定を使用
-        set(CMAKE_CXX_STANDARD ${PANDOLABO_CXX_STANDARD})
-        set(CMAKE_CXX_STANDARD_REQUIRED ON)
-        set(CMAKE_CXX_EXTENSIONS OFF)
-        message(STATUS "Using MSVC with C++${PANDOLABO_CXX_STANDARD} on Windows")
-    endif()
-else()
-    # Linux/macOS: Clang + 最新C++バージョン
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        # C++標準をユーザーが指定可能にする（デフォルトは26）
-        set(PANDOLABO_CXX_STANDARD "26" CACHE STRING "C++ standard version (20, 23, 26)")
-        set_property(CACHE PANDOLABO_CXX_STANDARD PROPERTY STRINGS "20" "23" "26")
-
-        # C++標準の設定（最低C++20、それ以上も可能）
-        set(CMAKE_CXX_STANDARD ${PANDOLABO_CXX_STANDARD})
-        set(CMAKE_CXX_STANDARD_REQUIRED ON)
-        set(CMAKE_CXX_EXTENSIONS OFF)
-        message(STATUS "Using Clang with C++${PANDOLABO_CXX_STANDARD} on ${CMAKE_SYSTEM_NAME}")
-    else()
-        message(WARNING "Non-Windows platforms should preferably use Clang")
-        set(CMAKE_CXX_STANDARD 20)
-        set(CMAKE_CXX_STANDARD_REQUIRED ON)
-        set(CMAKE_CXX_EXTENSIONS OFF)
-    endif()
+# Windows: MSVC + C++標準バージョン
+if(NOT MSVC)
+    message(FATAL_ERROR "Windows builds require MSVC compiler. Please use Visual Studio or MSVC tools.")
 endif()
 
-# コンパイラ設定
-if(MSVC)
-    add_compile_options(/W4)
-    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+# C++標準をユーザーが指定可能にする（デフォルトは23）
+set(PANDOLABO_CXX_STANDARD "23" CACHE STRING "C++ standard version (20, 23)")
+set_property(CACHE PANDOLABO_CXX_STANDARD PROPERTY STRINGS "20" "23")
 
-    # リリースビルド最適化設定
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
-
-    # デバッグビルド設定
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Od /Zi /RTC1")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Od /Zi /RTC1")
-
-    message(STATUS "MSVC optimization flags configured - Release: /O2 /Ob2, Debug: /Od")
+# C++23プレビューサポート
+if(PANDOLABO_CXX_STANDARD STREQUAL "23")
+    add_compile_options(/std:c++23preview)
+    message(STATUS "Using MSVC with C++23 preview on Windows")
 else()
-    add_compile_options(-Wall -Wextra -Wpedantic)
-
-    # リリースビルド最適化設定
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -DNDEBUG")
-
-    # デバッグビルド設定
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
-
-    message(STATUS "Clang/GCC optimization flags configured - Release: -O3, Debug: -O0 -g")
+    set(CMAKE_CXX_STANDARD ${PANDOLABO_CXX_STANDARD})
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    message(STATUS "Using MSVC with C++${PANDOLABO_CXX_STANDARD} on Windows")
 endif()
+
+# コンパイラ設定（MSVC）
+add_compile_options(/W4)
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+
+# リリース/デバッグ最適化設定
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Od /Zi /RTC1")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Od /Zi /RTC1")
+message(STATUS "MSVC optimization flags configured - Release: /O2 /Ob2, Debug: /Od")
 
 # デバッグビルドでのシンボル情報
 set(CMAKE_DEBUG_POSTFIX "d")
@@ -108,13 +47,8 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "Setting default build type to Release")
 endif()
 
-# VSCode IntelliSense用のコンパイルコマンドを生成（Clangの場合のみ）
-if(NOT WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-    message(STATUS "Enabling compile_commands.json generation for Clang on non-Windows platform")
-else()
-    message(STATUS "Skipping compile_commands.json generation (MSVC on Windows uses different IntelliSense method)")
-endif()
+# compile_commands.json はWindowsでは生成しない
+message(STATUS "Windows/MSVC build: skipping compile_commands.json generation")
 
 # Conan統合の設定 - toolchainで指定された場合は自動インクルードをスキップ
 if(NOT CMAKE_TOOLCHAIN_FILE OR NOT CMAKE_TOOLCHAIN_FILE MATCHES "conan_toolchain")

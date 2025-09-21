@@ -12,8 +12,9 @@
 
 > すごいシステムです，みたいな書き方をしているドキュメントはAIが生成しました．あくまで備忘録です
 
-プラットフォーム適応型C++開発環境 with Vulkan.hpp
-- **Windows**: MSVC + C++23 (安定版)
+Windows専用C++開発環境 with Vulkan.hpp
+
+- 対応プラットフォーム: Windows 10/11（MSVC + C++23）
 
 ## 🚀 自動セットアップ
 
@@ -30,9 +31,10 @@
 .\scripts\build.ps1 setup      # 環境セットアップ (.venv + Conan)
 .\scripts\build.ps1 build      # プロジェクト全体ビルド
 .\scripts\build.ps1 lib        # ライブラリのみビルド
-.\scripts\build.ps1 examples   # サンプルのみビルド
-.\scripts\build.ps1 tests      # テストビルド
-.\scripts\build.ps1 run        # サンプル実行
+.\scripts\build.ps1 examples   # サンプルをビルドして実行（対話選択あり/`-Example`指定可）
+.\scripts\build.ps1 tests      # テストをビルド
+.\scripts\build.ps1 test       # テストをビルドして実行（JUnit出力付き）
+.\scripts\build.ps1 run        # サンプル実行のみ（対話選択あり/`-Example`指定可）
 .\scripts\build.ps1 vscode     # VS Code設定生成
 .\scripts\build.ps1 format     # C++コード一括フォーマット
 .\scripts\build.ps1 clean      # ビルドディレクトリ削除
@@ -44,23 +46,14 @@
 
 ## 📋 前提条件
 
-### 🖥️ すべてのプラットフォーム共通
+### 🖥️ 前提条件（Windows）
 
-- **Python 3.6+** (Conan パッケージマネージャー用)
-- **CMake 3.16+**
-- **Git** (依存関係の取得用)
-- **Vulkan SDK** (グラフィックスAPI)
-  - 公式からSDKをインストール
-
-### 🖥️ Windows
-
-- **Visual Studio 2022** または **Build Tools for Visual Studio 2022**
-- **PowerShell 5.1+** (Windows標準搭載)
-
-### 🐧 Linux/macOS
-
-- 現時点では動作未保証です（CMake/Conan定義は用意済み）
-- 必要に応じて将来対応予定です
+- Python 3.8+（Conan 2.x 用）
+- CMake 3.20+
+- Git
+- Vulkan SDK（公式インストーラーで導入）
+- Visual Studio 2022 または Build Tools for Visual Studio 2022（MSVC）
+- PowerShell 5.1 以上（Windows標準）
 
 ## 🎯 プロジェクト概要
 
@@ -70,7 +63,7 @@
 ### 🌟 主な機能
 
 - **Vulkan.hpp** による現代的なVulkanAPI活用
-- **クロスプラットフォーム対応** (Windows/Linux/macOS)
+- **Windows専用設計**（MSVC前提）
 - **自動化されたビルドシステム** (Conan + CMake)
 - **完全なデバッグサポート** (VS Code統合)
 - **包括的なサンプルとテスト**
@@ -79,7 +72,7 @@
 ### 📦 技術スタック
 
 - **グラフィックスAPI**: Vulkan 1.4+
-- **C++標準**: C++23 (Windows)
+- **C++標準**: C++23（Windows）
 - **パッケージマネージャー**: Conan 2.x（CMakeDeps/Toolchainに一本化）
 - **ビルドシステム**: CMake 3.16+（CMakePresets準備中）
 - **開発環境**: VS Code (推奨)
@@ -90,8 +83,9 @@
 ### 🎯 自動セットアップ（推奨）
 
 ```powershell
-# VS Code設定を自動生成
+# VS Code設定を自動生成（Debug/Releaseを選択）
 .\scripts\build.ps1 vscode -Configuration Debug
+.\scripts\build.ps1 vscode -Configuration Release
 ```
 
 
@@ -99,7 +93,7 @@
 
 1. **プロジェクトを開く：**
 
-   ```bash
+   ```powershell
    code .
    ```
 
@@ -108,7 +102,7 @@
    - `F5` → デバッグ実行
    - `Ctrl+Shift+P` → `Tasks: Run Task` → 各種タスク選択
 
-## 🐛 デバッグ実行
+### 🐛 デバッグ実行
 
 VS Codeでブレークポイントを使ったデバッグが可能：
 
@@ -136,14 +130,11 @@ pandolabo/
 ├── CMakeLists.txt          # メインCMakeファイル
 ├── README.md               # このファイル
 ├── conanfile.txt          # Conan依存関係定義
-├── .clang-format          # コードフォーマット設定
+├── .clang-format          # コードフォーマット設定（自動生成）
 ├── LICENSE                # MITライセンス
 ├── Doxyfile              # Doxygen設定
-├── config/               # 設定ファイル
-│   └── conan/           # Conanプロファイル
 ├── scripts/             # ビルド自動化スクリプト
 │   ├── build.ps1       # Windows用ビルドスクリプト
-│   ├── build.sh        # Linux/macOS用ビルドスクリプト
 │   └── generate_vscode_config.py  # VS Code設定自動生成
 ├── include/             # パブリックヘッダー
 │   ├── pandolabo.hpp   # メインヘッダー
@@ -154,7 +145,7 @@ pandolabo/
 │   └── pandora/
 │       └── core/       # Vulkan.hpp実装
 ├── examples/           # 使用例・サンプル
-│   ├── (removed) basic_usage.cpp
+│   ├── basic_usage.cpp（またはサブディレクトリ）
 │   └── core/          # コア機能サンプル
 ├── tests/             # テストファイル
 │   ├── CMakeLists.txt
@@ -205,8 +196,10 @@ pandolabo/
 3. **ビルド & テスト**
 
    ```powershell
-   .\scripts\build.ps1 build    # ビルド
-   .\scripts\build.ps1 tests    # テスト実行
+   .\scripts\build.ps1 build           # ビルド
+   .\scripts\build.ps1 test            # テスト実行（JUnit生成）
+   .\scripts\build.ps1 examples        # サンプルをビルドして実行
+   .\scripts\build.ps1 run -Example …  # サンプル実行のみ
    ```
 
 4. **デバッグ**
@@ -233,9 +226,11 @@ pandolabo/
 
 ### 🏗️ ライブラリ出力
 
-- **静的ライブラリ**: `build/src/{Debug|Release}/pandolabo.lib` (Windows) / `libpandolabo.a` (Linux/macOS)
-- **実行ファイル**: `build/examples/{Debug|Release}/example_basic_cube.exe`
-- **テスト実行ファイル**: `build/tests/{Debug|Release}/tests.exe`
+- 静的ライブラリ: `build/src/{Debug|Release}/pandolabo.lib`
+- 実行ファイル: `build/examples/{Debug|Release}/<example>.exe`
+- テスト実行ファイル: `build/tests/{Debug|Release}/tests.exe`
+
+GPUテストはデフォルト無効です。`setx PANDOLABO_ENABLE_GPU_TESTS 1` を実行し新しいシェルを開くと有効化されます（CIでは無効）。
 
 ## 📚 開発環境備忘録
 

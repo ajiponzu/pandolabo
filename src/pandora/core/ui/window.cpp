@@ -1,5 +1,9 @@
 #include "pandora/core/ui.hpp"
 
+#ifdef _DEBUG
+  #include <print>
+#endif
+
 std::unordered_map<uint64_t, std::unordered_set<int32_t>>
     pandora::core::ui::Window::s_inputKeySetMap;
 std::unordered_map<uint64_t, pandora::core::Mouse>
@@ -10,7 +14,7 @@ namespace {
 
 #ifdef _DEBUG
 void error_callback(int error, const char* description) {
-  std::cerr << "GLFW Error " << error << ": " << description << std::endl;
+  std::println(stderr, "GLFW Error {}: {}", error, description);
 }
 #endif
 

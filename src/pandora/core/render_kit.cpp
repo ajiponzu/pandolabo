@@ -1,3 +1,4 @@
+#include "pandora/core/gpu.hpp"
 #include "pandora/core/renderpass.hpp"
 
 pandora::core::RenderKit::RenderKit(

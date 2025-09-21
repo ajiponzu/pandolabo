@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """
-VSCode用の設定ファイル一式を自動生成するスクリプト
-プラットフォーム別に最適化された設定を生成します
+VSCode用の設定ファイル一式を自動生成するスクリプト（Windows/MSVC専用）
 """
 
 import os
 import json
 import glob
 import subprocess
-import platform
 import argparse
 from pathlib import Path
 
@@ -78,9 +76,7 @@ def get_conan_include_paths():
 
 
 def generate_settings_json():
-    """settings.jsonを生成"""
-    is_windows = platform.system() == "Windows"
-
+    """settings.jsonを生成（Windows/MSVC 固定）"""
     common = {
         "files.associations": {
             "*.hpp": "cpp",
@@ -108,9 +104,9 @@ def generate_settings_json():
         "editor.renderWhitespace": "boundary",
         "editor.bracketPairColorization.enabled": True,
         "editor.guides.bracketPairs": "active",
-        "C_Cpp.formatting": "clangFormat",
-        "C_Cpp.clang_format_style": "file",
-        "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 80 }",
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.clang_format_style": "file",
+    "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 80 }",
         "cmake.configureOnOpen": False,
         "cmake.showOptionsMovedNotification": False,
         "[cpp]": {
@@ -139,41 +135,22 @@ def generate_settings_json():
             "editor.wordWrap": "on",
         },
     }
-
-    if is_windows:
-        common.update(
-            {
-                "C_Cpp.default.cppStandard": "c++20",
-                "C_Cpp.default.cStandard": "c17",
-                "C_Cpp.default.compilerPath": "cl.exe",
-                "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
-            }
-        )
-    else:
-        common.update(
-            {
-                "C_Cpp.default.cppStandard": "c++20",
-                "C_Cpp.default.cStandard": "c23",
-                "C_Cpp.default.compilerPath": "clang++",
-                "C_Cpp.default.intelliSenseMode": "clang-x64",
-                "C_Cpp.codeAnalysis.clangTidy.enabled": True,
-                "C_Cpp.codeAnalysis.clangTidy.args": [
-                    "--checks=-*,clang-analyzer-*,bugprone-*,performance-*,readability-*,modernize-*"
-                ],
-                "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
-                    "modernize-concat-nested-namespaces"
-                ],
-            }
-        )
+    common.update(
+        {
+            "C_Cpp.default.cppStandard": "c++20",
+            "C_Cpp.default.cStandard": "c17",
+            "C_Cpp.default.compilerPath": "cl.exe",
+            "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+            "C_Cpp.intelliSenseEngine": "Disabled",
+        }
+    )
 
     return common
 
 
 def generate_tasks_json():
-    """tasks.jsonを生成 (Windowsは build.ps1 を使用)"""
-    is_windows = platform.system() == "Windows"
-    if is_windows:
-        tasks = {
+    """tasks.jsonを生成（Windowsは build.ps1 を使用）"""
+    tasks = {
             "version": "2.0.0",
             "tasks": [
                 {
@@ -516,35 +493,12 @@ def generate_tasks_json():
                 },
             ],
         }
-    else:
-        tasks = {
-            "version": "2.0.0",
-            "tasks": [
-                {
-                    "label": "🔨 Build (Shell)",
-                    "type": "shell",
-                    "command": "${workspaceFolder}/scripts/build.sh",
-                    "args": [],
-                    "group": {"kind": "build", "isDefault": True},
-                    "problemMatcher": "$gcc",
-                    "presentation": {
-                        "echo": True,
-                        "reveal": "always",
-                        "focus": False,
-                        "panel": "shared",
-                    },
-                    "options": {"cwd": "${workspaceFolder}"},
-                }
-            ],
-        }
     return tasks
 
 
 def generate_launch_json():
-    """launch.jsonを生成 - Debug/Release両対応"""
-    is_windows = platform.system() == "Windows"
-    if is_windows:
-        return {
+    """launch.jsonを生成 - Debug/Release両対応（Windows専用）"""
+    return {
             "version": "0.2.0",
             "configurations": [
                 {
@@ -641,162 +595,9 @@ def generate_launch_json():
                 },
             ],
         }
-    else:
-        return {
-            "version": "0.2.0",
-            "configurations": [
-                {
-                    "name": "🐛 Debug Tests (Debug)",
-                    "type": "cppdbg",
-                    "request": "launch",
-                    "program": "${workspaceFolder}/build/tests/Debug/tests",
-                    "args": ["${input:catchFilterLaunch}"],
-                    "stopAtEntry": False,
-                    "cwd": "${workspaceFolder}",
-                    "environment": [],
-                    "externalConsole": False,
-                    "MIMode": "gdb",
-                    "setupCommands": [
-                        {
-                            "description": "Enable pretty-printing for gdb",
-                            "text": "-enable-pretty-printing",
-                            "ignoreFailures": True,
-                        }
-                    ],
-                    "preLaunchTask": "🐛 Build (Debug)",
-                    "miDebuggerPath": "/usr/bin/gdb",
-                },
-                {
-                    "name": "🐛 Debug Example (Debug)",
-                    "type": "cppdbg",
-                    "request": "launch",
-                    "program": "${workspaceFolder}/build/examples/Debug/example_basic_cube",
-                    "args": [],
-                    "stopAtEntry": False,
-                    "cwd": "${workspaceFolder}",
-                    "environment": [],
-                    "externalConsole": False,
-                    "MIMode": "gdb",
-                    "setupCommands": [
-                        {
-                            "description": "Enable pretty-printing for gdb",
-                            "text": "-enable-pretty-printing",
-                            "ignoreFailures": True,
-                        }
-                    ],
-                    "preLaunchTask": "🐛 Build (Debug)",
-                    "miDebuggerPath": "/usr/bin/gdb",
-                },
-                {
-                    "name": "🚀 Debug Tests (Release)",
-                    "type": "cppdbg",
-                    "request": "launch",
-                    "program": "${workspaceFolder}/build/tests/Release/tests",
-                    "args": ["${input:catchFilterLaunch}"],
-                    "stopAtEntry": False,
-                    "cwd": "${workspaceFolder}",
-                    "environment": [],
-                    "externalConsole": False,
-                    "MIMode": "gdb",
-                    "setupCommands": [
-                        {
-                            "description": "Enable pretty-printing for gdb",
-                            "text": "-enable-pretty-printing",
-                            "ignoreFailures": True,
-                        }
-                    ],
-                    "preLaunchTask": "🔨 Build (Release)",
-                    "miDebuggerPath": "/usr/bin/gdb",
-                },
-                {
-                    "name": "🚀 Debug Example (Release)",
-                    "type": "cppdbg",
-                    "request": "launch",
-                    "program": "${workspaceFolder}/build/examples/Release/example_basic_cube",
-                    "args": [],
-                    "stopAtEntry": False,
-                    "cwd": "${workspaceFolder}",
-                    "environment": [],
-                    "externalConsole": False,
-                    "MIMode": "gdb",
-                    "setupCommands": [
-                        {
-                            "description": "Enable pretty-printing for gdb",
-                            "text": "-enable-pretty-printing",
-                            "ignoreFailures": True,
-                        }
-                    ],
-                    "preLaunchTask": "🔨 Build (Release)",
-                    "miDebuggerPath": "/usr/bin/gdb",
-                },
-                {
-                    "name": "🐛 Debug Example (Pick - Debug)",
-                    "type": "cppdbg",
-                    "request": "launch",
-                    "program": "${workspaceFolder}/build/examples/Debug/${input:examplePickerLaunch}",
-                    "args": [],
-                    "stopAtEntry": False,
-                    "cwd": "${workspaceFolder}",
-                    "environment": [],
-                    "externalConsole": False,
-                    "MIMode": "gdb",
-                    "setupCommands": [
-                        {
-                            "description": "Enable pretty-printing for gdb",
-                            "text": "-enable-pretty-printing",
-                            "ignoreFailures": True,
-                        }
-                    ],
-                    "preLaunchTask": "🐛 Build (Debug)",
-                    "miDebuggerPath": "/usr/bin/gdb",
-                },
-                {
-                    "name": "🚀 Debug Example (Pick - Release)",
-                    "type": "cppdbg",
-                    "request": "launch",
-                    "program": "${workspaceFolder}/build/examples/Release/${input:examplePickerLaunch}",
-                    "args": [],
-                    "stopAtEntry": False,
-                    "cwd": "${workspaceFolder}",
-                    "environment": [],
-                    "externalConsole": False,
-                    "MIMode": "gdb",
-                    "setupCommands": [
-                        {
-                            "description": "Enable pretty-printing for gdb",
-                            "text": "-enable-pretty-printing",
-                            "ignoreFailures": True,
-                        }
-                    ],
-                    "preLaunchTask": "🔨 Build (Release)",
-                    "miDebuggerPath": "/usr/bin/gdb",
-                },
-            ],
-            "inputs": [
-                {
-                    "id": "examplePickerLaunch",
-                    "type": "pickString",
-                    "description": "Choose example target to debug",
-                    "options": [
-                        "example_basic_compute",
-                        "example_basic_cube",
-                        "example_simple_image",
-                        "example_square",
-                    ],
-                    "default": "example_basic_cube",
-                },
-                {
-                    "id": "catchFilterLaunch",
-                    "type": "promptString",
-                    "description": "Catch2 filter (leave empty for all)",
-                    "default": "",
-                },
-            ],
-        }
-
 
 def generate_extensions_json():
-    """extensions.jsonを生成 (フォーマット拡張機能含む)"""
+    """extensions.jsonを生成 (フォーマット拡張機能含む、Windows用)"""
     extensions = {
         "recommendations": [
             "ms-vscode.cpptools",
@@ -821,16 +622,7 @@ def generate_extensions_json():
             "davidanson.vscode-markdownlint",
         ]
     }
-    if platform.system() != "Windows":
-        extensions["recommendations"].extend(
-            [
-                "llvm-vs-code-extensions.vscode-clangd",
-                "vadimcn.vscode-lldb",
-                "webfreak.debug",
-            ]
-        )
-    else:
-        extensions["recommendations"].append("ms-vscode.powershell")
+    extensions["recommendations"].append("ms-vscode.powershell")
     return extensions
 
 
@@ -894,26 +686,24 @@ FixNamespaceComments: true
 
 
 def generate_cpp_properties(debug_mode=True):
-    """c_cpp_properties.jsonを生成"""
+    """c_cpp_properties.jsonを生成（Windows/MSVC 固定）"""
     workspace_folder = Path.cwd()
+    # Prefer MSVC build compile_commands if present (typically off)
     compile_commands_path = workspace_folder / "build" / "compile_commands.json"
     compile_commands_exists = compile_commands_path.exists()
-    is_windows = platform.system() == "Windows"
 
     include_paths = ["${workspaceFolder}/include", "${workspaceFolder}/src"]
     include_paths.extend(get_conan_include_paths())
 
     base_defines = ["VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"]
-    platform_defines = (
-        ["_WIN32", "_UNICODE", "UNICODE"] if is_windows else ["__linux__"]
-    )
+    platform_defines = ["_WIN32", "_UNICODE", "UNICODE"]
     debug_defines = ["_DEBUG"] if debug_mode else []
     all_defines = platform_defines + base_defines + debug_defines
 
     config = {
         "configurations": [
             {
-                "name": "Win32" if is_windows else "Linux",
+                "name": "Win32",
                 "includePath": include_paths,
                 "defines": all_defines,
                 "cStandard": "c17",
@@ -922,14 +712,9 @@ def generate_cpp_properties(debug_mode=True):
         ],
         "version": 4,
     }
-    if is_windows:
-        config["configurations"][0].update(
-            {"compilerPath": "cl.exe", "intelliSenseMode": "windows-msvc-x64"}
-        )
-    else:
-        config["configurations"][0].update(
-            {"compilerPath": "/usr/bin/clang++", "intelliSenseMode": "linux-clang-x64"}
-        )
+    config["configurations"][0].update(
+        {"compilerPath": "cl.exe", "intelliSenseMode": "windows-msvc-x64"}
+    )
 
     if compile_commands_exists:
         config["configurations"][0][
@@ -950,8 +735,7 @@ def generate_all_vscode_configs(debug_mode=True):
     vscode_dir = workspace_folder / ".vscode"
     vscode_dir.mkdir(exist_ok=True)
 
-    is_windows = platform.system() == "Windows"
-    platform_name = "Windows/MSVC" if is_windows else f"{platform.system()}/Clang"
+    platform_name = "Windows/MSVC"
     print(f"🎯 Generating VSCode configuration for {platform_name}...")
 
     configs = {
