@@ -9,7 +9,9 @@
 // Namespace alias for cleaner code in examples
 namespace plc = pandora::core;
 
-samples::core::SimpleImageComputing::SimpleImageComputing() {
+namespace samples::core {
+
+SimpleImageComputing::SimpleImageComputing() {
   m_ptrContext = std::make_unique<plc::gpu::Context>(nullptr);
 
   m_ptrComputeCommandDriver = std::make_unique<plc::CommandDriver>(
@@ -29,12 +31,12 @@ samples::core::SimpleImageComputing::SimpleImageComputing() {
   constructShaderResources();
 }
 
-samples::core::SimpleImageComputing::~SimpleImageComputing() {
+SimpleImageComputing::~SimpleImageComputing() {
   m_ptrContext->getPtrDevice()->waitIdle();
   stbi_image_free(m_image.data);
 }
 
-void samples::core::SimpleImageComputing::run() {
+void SimpleImageComputing::run() {
   plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
 
   const auto result_buffer = plc::createStagingBufferFromGPU(
@@ -47,12 +49,12 @@ void samples::core::SimpleImageComputing::run() {
 
     m_ptrTransferCommandDriver->submit(
         {plc::PipelineStage::BottomOfPipe},
-        plc::gpu::SubmitSemaphoreGroup{}
+        plc::SubmitSemaphoreGroup{}
             .setWaitSemaphores(semaphore.forWait(0u))
             .setSignalSemaphores(semaphore.forSignal(1u)));
     m_ptrComputeCommandDriver->submit(
         {plc::PipelineStage::ComputeShader},
-        plc::gpu::SubmitSemaphoreGroup{}
+        plc::SubmitSemaphoreGroup{}
             .setWaitSemaphores(semaphore.forWait(1u))
             .setSignalSemaphores(semaphore.forSignal(2u)));
 
@@ -80,7 +82,7 @@ void samples::core::SimpleImageComputing::run() {
                  image_size.width * 4);
 }
 
-void samples::core::SimpleImageComputing::initializeImageResources() {
+void SimpleImageComputing::initializeImageResources() {
   m_image.data = stbi_load("examples/core/computing_image/lenna.png",
                            &(m_image.width),
                            &(m_image.height),
@@ -141,7 +143,7 @@ void samples::core::SimpleImageComputing::initializeImageResources() {
   }
 }
 
-void samples::core::SimpleImageComputing::constructShaderResources() {
+void SimpleImageComputing::constructShaderResources() {
   const auto spirv_binary =
       plc::io::shader::read("examples/core/computing_image/simple_image.comp");
 
@@ -184,7 +186,7 @@ void samples::core::SimpleImageComputing::constructShaderResources() {
       m_ptrContext, m_shaderModuleMap.at("compute"));
 }
 
-void samples::core::SimpleImageComputing::setTransferCommands(
+void SimpleImageComputing::setTransferCommands(
     std::vector<plc::gpu::Buffer>& staging_buffers) {
   const auto command_buffer = m_ptrTransferCommandDriver->getTransfer();
 
@@ -244,7 +246,7 @@ void samples::core::SimpleImageComputing::setTransferCommands(
   command_buffer.end();
 }
 
-void samples::core::SimpleImageComputing::setComputeCommands(
+void SimpleImageComputing::setComputeCommands(
     const plc::gpu::Buffer& staging_buffer) {
   static float_t push_timer = 0.0f;
   push_timer += 0.001f;
@@ -342,3 +344,5 @@ void samples::core::SimpleImageComputing::setComputeCommands(
 
   command_buffer.end();
 }
+
+}  // namespace samples::core

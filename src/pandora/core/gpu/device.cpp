@@ -82,14 +82,15 @@ T get_optional_value(const std::optional<T>& option) {
 
 }  // namespace
 
-pandora::core::gpu::Device::Device(
-    const vk::UniqueInstance& ptr_instance,
-    const vk::UniqueSurfaceKHR& ptr_window_surface
+namespace pandora::core::gpu {
+
+Device::Device(const vk::UniqueInstance& ptr_instance,
+               const vk::UniqueSurfaceKHR& ptr_window_surface
 #ifdef GPU_DEBUG
-    ,
-    const std::unique_ptr<debug::Messenger>& ptr_messenger
+               ,
+               const std::unique_ptr<debug::Messenger>& ptr_messenger
 #endif
-    )
+               )
     : m_hasWindowSurface(ptr_window_surface.get() != nullptr) {
   const auto physical_devices = ptr_instance->enumeratePhysicalDevices();
   if (physical_devices.empty()) {
@@ -166,9 +167,9 @@ pandora::core::gpu::Device::Device(
 #endif
 }
 
-pandora::core::gpu::Device::~Device() {}
+Device::~Device() {}
 
-void pandora::core::gpu::Device::constructLogicalDevice(
+void Device::constructLogicalDevice(
 #ifdef GPU_DEBUG
     const std::unique_ptr<debug::Messenger>& ptr_messenger
 #endif
@@ -223,8 +224,7 @@ void pandora::core::gpu::Device::constructLogicalDevice(
   m_ptrLogicalDevice = m_physicalDevice.createDeviceUnique(create_info);
 }
 
-uint32_t pandora::core::gpu::Device::getQueueFamilyIndex(
-    QueueFamilyType family_type) const {
+uint32_t Device::getQueueFamilyIndex(QueueFamilyType family_type) const {
   switch (family_type) {
     using enum QueueFamilyType;
 
@@ -239,12 +239,11 @@ uint32_t pandora::core::gpu::Device::getQueueFamilyIndex(
   }
 }
 
-vk::Queue pandora::core::gpu::Device::getQueue(uint32_t queue_family_index) {
+vk::Queue Device::getQueue(uint32_t queue_family_index) {
   return m_ptrLogicalDevice->getQueue(queue_family_index, 0u);
 }
 
-vk::SampleCountFlagBits pandora::core::gpu::Device::getMaxUsableSampleCount()
-    const {
+vk::SampleCountFlagBits Device::getMaxUsableSampleCount() const {
   const auto physical_device_props = m_physicalDevice.getProperties();
   const auto sample_count =
       physical_device_props.limits.framebufferColorSampleCounts
@@ -267,3 +266,5 @@ vk::SampleCountFlagBits pandora::core::gpu::Device::getMaxUsableSampleCount()
 
   return vk::SampleCountFlagBits::e1;
 }
+
+}  // namespace pandora::core::gpu

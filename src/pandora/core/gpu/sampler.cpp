@@ -1,9 +1,10 @@
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
 
-pandora::core::gpu::Sampler::Sampler(
-    const std::unique_ptr<Context>& ptr_context,
-    const SamplerInfo& sampler_info) {
+namespace pandora::core::gpu {
+
+Sampler::Sampler(const std::unique_ptr<Context>& ptr_context,
+                 const SamplerInfo& sampler_info) {
   using namespace vk_helper;
 
   const auto sampler_create_info =
@@ -29,4 +30,6 @@ pandora::core::gpu::Sampler::Sampler(
           sampler_create_info);
 }
 
-pandora::core::gpu::Sampler::~Sampler() {}
+Sampler::~Sampler() {}
+
+}  // namespace pandora::core::gpu

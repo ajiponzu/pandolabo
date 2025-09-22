@@ -1,7 +1,9 @@
 
 #include "pandora/core/gpu.hpp"
 
-pandora::core::gpu::DescriptionUnit::DescriptionUnit(
+namespace pandora::core::gpu {
+
+DescriptionUnit::DescriptionUnit(
     const std::unordered_map<std::string, ShaderModule>& shader_module_map,
     const std::vector<std::string>& module_keys) {
   for (const auto& module_key : module_keys) {
@@ -35,4 +37,6 @@ pandora::core::gpu::DescriptionUnit::DescriptionUnit(
   }
 }
 
-pandora::core::gpu::DescriptionUnit::~DescriptionUnit() {}
+DescriptionUnit::~DescriptionUnit() {}
+
+}  // namespace pandora::core::gpu

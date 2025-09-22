@@ -2,7 +2,9 @@
 
 #include "pandora/core/gpu.hpp"
 
-pandora::core::gpu::DescriptorSetLayout::DescriptorSetLayout(
+namespace pandora::core::gpu {
+
+DescriptorSetLayout::DescriptorSetLayout(
     const std::unique_ptr<Context>& ptr_context,
     const DescriptionUnit& description_unit) {
   using D = std::ranges::range_value_t<
@@ -32,12 +34,14 @@ pandora::core::gpu::DescriptorSetLayout::DescriptorSetLayout(
           ->createDescriptorSetLayoutUnique(descriptor_set_layout_info);
 }
 
-pandora::core::gpu::DescriptorSetLayout::~DescriptorSetLayout() {}
+DescriptorSetLayout::~DescriptorSetLayout() {}
 
-vk::DescriptorPoolCreateInfo
-pandora::core::gpu::DescriptorSetLayout::getDescriptorPoolInfo() const {
+vk::DescriptorPoolCreateInfo DescriptorSetLayout::getDescriptorPoolInfo()
+    const {
   return vk::DescriptorPoolCreateInfo()
       .setMaxSets(1u)
       .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
       .setPoolSizes(m_descriptorPoolSizes);
 }
+
+}  // namespace pandora::core::gpu

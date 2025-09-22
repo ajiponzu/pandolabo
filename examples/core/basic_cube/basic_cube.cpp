@@ -2,7 +2,9 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-samples::core::BasicCube::BasicCube() {
+namespace samples::core {
+
+BasicCube::BasicCube() {
   m_ptrWindow = std::make_unique<plc::ui::Window>("Basic Cube", 800, 600);
   m_ptrContext =
       std::make_unique<plc::gpu::Context>(m_ptrWindow->getWindowSurface());
@@ -41,11 +43,11 @@ samples::core::BasicCube::BasicCube() {
   constructGraphicPipeline();
 }
 
-samples::core::BasicCube::~BasicCube() {
+BasicCube::~BasicCube() {
   m_ptrContext->getPtrDevice()->waitIdle();
 }
 
-void samples::core::BasicCube::run() {
+void BasicCube::run() {
   {
     std::vector<plc::gpu::Buffer> staging_buffers;
 
@@ -54,12 +56,12 @@ void samples::core::BasicCube::run() {
     plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
     m_ptrTransferCommandDriver->submit(
         {plc::PipelineStage::BottomOfPipe},
-        plc::gpu::SubmitSemaphoreGroup{}
+        plc::SubmitSemaphoreGroup{}
             .setWaitSemaphores(semaphore.forWait(0u))
             .setSignalSemaphores(semaphore.forSignal(1u)));
     m_ptrGraphicCommandDriver.at(0u)->submit(
         {plc::PipelineStage::VertexShader},
-        plc::gpu::SubmitSemaphoreGroup{}
+        plc::SubmitSemaphoreGroup{}
             .setWaitSemaphores(semaphore.forWait(1u))
             .setSignalSemaphores(semaphore.forSignal(2u)));
 
@@ -101,7 +103,7 @@ void samples::core::BasicCube::run() {
 
     m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
         ->submit({plc::PipelineStage::ColorAttachmentOutput},
-                 plc::gpu::SubmitSemaphoreGroup{}
+                 plc::SubmitSemaphoreGroup{}
                      .setWaitSemaphores(image_semaphore)
                      .setSignalSemaphores(finished_semaphore),
                  finished_fence);
@@ -115,7 +117,7 @@ void samples::core::BasicCube::run() {
   m_ptrUniformBuffer->unmapMemory(m_ptrContext);
 }
 
-void samples::core::BasicCube::constructShaderResources() {
+void BasicCube::constructShaderResources() {
   {
     const auto spirv_binary =
         plc::io::shader::read("examples/core/basic_cube/cube.vert");
@@ -152,7 +154,7 @@ void samples::core::BasicCube::constructShaderResources() {
                                         plc::PipelineBind::Graphics));
 }
 
-void samples::core::BasicCube::constructRenderpass(const bool is_resized) {
+void BasicCube::constructRenderpass(const bool is_resized) {
   {
     const auto& window_size = m_ptrWindow->getWindowSurface()->getWindowSize();
 
@@ -259,7 +261,7 @@ void samples::core::BasicCube::constructRenderpass(const bool is_resized) {
   }
 }
 
-void samples::core::BasicCube::constructGraphicPipeline() {
+void BasicCube::constructGraphicPipeline() {
   // Create GraphicInfo using builder pattern
   const auto ptr_graphic_info =
       plc::pipeline::GraphicInfoBuilder::create()
@@ -307,7 +309,7 @@ void samples::core::BasicCube::constructGraphicPipeline() {
                                            m_supassIndexMap.at("draw"));
 }
 
-void samples::core::BasicCube::setTransferCommands(
+void BasicCube::setTransferCommands(
     std::vector<plc::gpu::Buffer>& staging_buffers) {
   const auto queue_family_indices =
       std::make_pair(m_ptrTransferCommandDriver->getQueueFamilyIndex(),
@@ -458,7 +460,7 @@ void samples::core::BasicCube::setTransferCommands(
   }
 }
 
-void samples::core::BasicCube::setGraphicCommands() {
+void BasicCube::setGraphicCommands() {
   const auto command_buffer =
       m_ptrGraphicCommandDriver
           .at(m_ptrContext->getPtrSwapchain()->getFrameSyncIndex())
@@ -491,3 +493,5 @@ void samples::core::BasicCube::setGraphicCommands() {
 
   command_buffer.end();
 }
+
+}  // namespace samples::core

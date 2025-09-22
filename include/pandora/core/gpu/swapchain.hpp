@@ -14,8 +14,13 @@
 
 #include "../module_connection/gpu_ui.hpp"
 #include "../types.hpp"
-#include "device.hpp"
-#include "synchronization.hpp"
+#include "fence.hpp"
+#include "semaphore.hpp"
+
+// Forward declarations
+namespace pandora::core::gpu {
+class Device;
+}  // namespace pandora::core::gpu
 
 namespace pandora::core::gpu {
 

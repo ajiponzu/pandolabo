@@ -5,8 +5,9 @@
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
-pandora::core::gpu::Context::Context(
-    std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
+namespace pandora::core::gpu {
+
+Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
   // Helpers to manage instance extensions
   auto get_available_instance_extensions = []() {
     std::unordered_set<std::string> names;
@@ -111,7 +112,7 @@ pandora::core::gpu::Context::Context(
   m_isInitialized = true;
 }
 
-pandora::core::gpu::Context::~Context() {
+Context::~Context() {
   m_ptrDevice.release();
   m_ptrInstance.release();
 #ifdef GPU_DEBUG
@@ -119,8 +120,10 @@ pandora::core::gpu::Context::~Context() {
 #endif
 }
 
-void pandora::core::gpu::Context::resetSwapchain() {
+void Context::resetSwapchain() {
   m_ptrDevice->waitIdle();
   m_ptrWindowSurface->setWindowSize();
   m_ptrSwapchain->resetSwapchain(m_ptrDevice, m_ptrWindowSurface);
 }
+
+}  // namespace pandora::core::gpu

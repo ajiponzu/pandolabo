@@ -1,31 +1,31 @@
 #include "pandora/core/gpu/vk_helper.hpp"
 #include "pandora/core/renderpass.hpp"
 
-pandora::core::AttachmentList::AttachmentList() {}
+namespace pandora::core {
 
-pandora::core::AttachmentList::~AttachmentList() {}
+AttachmentList::AttachmentList() {}
 
-uint32_t pandora::core::AttachmentList::append(
-    const AttachmentDescription& description,
-    const gpu::ImageView& image_view,
-    const ClearColor& clear_value) {
+AttachmentList::~AttachmentList() {}
+
+uint32_t AttachmentList::append(const AttachmentDescription& description,
+                                const gpu::ImageView& image_view,
+                                const ClearColor& clear_value) {
   m_clearValues.emplace_back(vk::ClearColorValue(clear_value.color));
 
   return append(description, image_view);
 }
 
-uint32_t pandora::core::AttachmentList::append(
-    const AttachmentDescription& description,
-    const gpu::ImageView& image_view,
-    const ClearDepthStencil& clear_value) {
+uint32_t AttachmentList::append(const AttachmentDescription& description,
+                                const gpu::ImageView& image_view,
+                                const ClearDepthStencil& clear_value) {
   m_clearValues.emplace_back(
       vk::ClearDepthStencilValue(clear_value.depth, clear_value.stencil));
 
   return append(description, image_view);
 }
 
-uint32_t pandora::core::AttachmentList::append(
-    const AttachmentDescription& description, const ClearColor& clear_value) {
+uint32_t AttachmentList::append(const AttachmentDescription& description,
+                                const ClearColor& clear_value) {
   m_clearValues.push_back(vk::ClearColorValue(clear_value.color));
 
   appendDescription(description);
@@ -35,15 +35,14 @@ uint32_t pandora::core::AttachmentList::append(
   return static_cast<uint32_t>(m_attachments.size()) - 1u;
 }
 
-void pandora::core::AttachmentList::setBackbufferAttachment(
+void AttachmentList::setBackbufferAttachment(
     const std::unique_ptr<gpu::Context>& ptr_context, size_t index) {
   m_attachments[m_backbufferIndex] =
       ptr_context->getPtrSwapchain()->getImageViews().at(index).get();
 }
 
-uint32_t pandora::core::AttachmentList::append(
-    const AttachmentDescription& description,
-    const gpu::ImageView& image_view) {
+uint32_t AttachmentList::append(const AttachmentDescription& description,
+                                const gpu::ImageView& image_view) {
   appendDescription(description);
 
   m_attachments.push_back(image_view.getImageView());
@@ -51,7 +50,7 @@ uint32_t pandora::core::AttachmentList::append(
   return static_cast<uint32_t>(m_attachments.size()) - 1u;
 }
 
-void pandora::core::AttachmentList::appendDescription(
+void AttachmentList::appendDescription(
     const AttachmentDescription& description) {
   using namespace vk_helper;
 
@@ -68,3 +67,5 @@ void pandora::core::AttachmentList::appendDescription(
 
   m_descriptions.push_back(vk_description);
 }
+
+}  // namespace pandora::core

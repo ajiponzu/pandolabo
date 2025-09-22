@@ -1,19 +1,20 @@
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/renderpass.hpp"
 
-pandora::core::RenderKit::RenderKit(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    AttachmentList& attachment_list,
-    const SubpassGraph& subpass_graph,
-    const gpu_ui::GraphicalSize<uint32_t>& size,
-    bool is_presented) {
+namespace pandora::core {
+
+RenderKit::RenderKit(const std::unique_ptr<gpu::Context>& ptr_context,
+                     AttachmentList& attachment_list,
+                     const SubpassGraph& subpass_graph,
+                     const gpu_ui::GraphicalSize<uint32_t>& size,
+                     bool is_presented) {
   m_ptrRenderpass =
       std::make_unique<Renderpass>(ptr_context, attachment_list, subpass_graph);
 
   resetFramebuffer(ptr_context, attachment_list, size, is_presented);
 }
 
-void pandora::core::RenderKit::resetFramebuffer(
+void RenderKit::resetFramebuffer(
     const std::unique_ptr<gpu::Context>& ptr_context,
     AttachmentList& attachment_list,
     const gpu_ui::GraphicalSize<uint32_t>& size,
@@ -36,3 +37,5 @@ void pandora::core::RenderKit::resetFramebuffer(
 
   m_clearValues = attachment_list.getClearValues();
 }
+
+}  // namespace pandora::core

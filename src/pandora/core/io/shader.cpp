@@ -175,8 +175,9 @@ std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage,
 
 }  // namespace
 
-std::vector<uint32_t> pandora::core::io::shader::readText(
-    const std::string& file_path) {
+namespace pandora::core::io::shader {
+
+std::vector<uint32_t> readText(const std::string& file_path) {
   const auto& [shader_type, stage] = translate_shader_stage(file_path);
 
   std::stringstream shader_code{};
@@ -187,8 +188,7 @@ std::vector<uint32_t> pandora::core::io::shader::readText(
   return compile_shader(stage, shader_code.str());
 }
 
-std::vector<uint32_t> pandora::core::io::shader::readBinary(
-    const std::string& file_path) {
+std::vector<uint32_t> readBinary(const std::string& file_path) {
   std::ifstream file(file_path, std::ios::ate | std::ios::binary);
   if (!file.is_open()) {
     std::println("Failed to open file: {}", file_path);
@@ -205,8 +205,7 @@ std::vector<uint32_t> pandora::core::io::shader::readBinary(
   return shader_binary;
 }
 
-std::vector<uint32_t> pandora::core::io::shader::read(
-    const std::string& file_path) {
+std::vector<uint32_t> read(const std::string& file_path) {
   if (file_path.ends_with(".spv")) {
     return readBinary(file_path);
   } else {
@@ -214,10 +213,12 @@ std::vector<uint32_t> pandora::core::io::shader::read(
   }
 }
 
-void pandora::core::io::shader::write(
-    const std::string& file_path, const std::vector<uint32_t>& shader_binary) {
+void write(const std::string& file_path,
+           const std::vector<uint32_t>& shader_binary) {
   std::ofstream output_file(file_path, std::ios::binary);
 
   output_file.write(reinterpret_cast<const char*>(shader_binary.data()),
                     shader_binary.size() * sizeof(uint32_t));
 }
+
+}  // namespace pandora::core::io::shader

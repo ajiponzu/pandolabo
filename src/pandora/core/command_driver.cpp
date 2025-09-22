@@ -1,13 +1,14 @@
 #include <ranges>
 
 #include "pandora/core/command_buffer.hpp"
-#include "pandora/core/gpu/synchronization.hpp"
 #include "pandora/core/pipeline.hpp"
 #include "pandora/core/renderpass.hpp"
+#include "pandora/core/synchronization.hpp"
 
-pandora::core::CommandDriver::CommandDriver(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const pandora::core::QueueFamilyType queue_family) {
+namespace pandora::core {
+
+CommandDriver::CommandDriver(const std::unique_ptr<gpu::Context>& ptr_context,
+                             const QueueFamilyType queue_family) {
   const auto& ptr_device = ptr_context->getPtrDevice();
 
   m_queueFamilyType = queue_family;
@@ -32,9 +33,9 @@ pandora::core::CommandDriver::CommandDriver(
                     .front());
 }
 
-pandora::core::CommandDriver::~CommandDriver() {}
+CommandDriver::~CommandDriver() {}
 
-void pandora::core::CommandDriver::constructSecondary(
+void CommandDriver::constructSecondary(
     const std::unique_ptr<gpu::Context>& ptr_context,
     uint32_t required_secondary_num) {
   const auto& ptr_vk_device =
@@ -56,7 +57,7 @@ void pandora::core::CommandDriver::constructSecondary(
   }
 }
 
-void pandora::core::CommandDriver::resetAllCommands() const {
+void CommandDriver::resetAllCommands() const {
   for (const auto& command_buffer : m_secondaryCommandBuffers) {
     command_buffer->reset(vk::CommandBufferResetFlags{});
   }
@@ -64,7 +65,7 @@ void pandora::core::CommandDriver::resetAllCommands() const {
   m_ptrPrimaryCommandBuffer->reset(vk::CommandBufferResetFlags{});
 }
 
-void pandora::core::CommandDriver::resetAllCommandPools(
+void CommandDriver::resetAllCommandPools(
     const std::unique_ptr<gpu::Context>& ptr_context) const {
   const auto& ptr_vk_device =
       ptr_context->getPtrDevice()->getPtrLogicalDevice();
@@ -77,7 +78,7 @@ void pandora::core::CommandDriver::resetAllCommandPools(
                                   vk::CommandPoolResetFlags{});
 }
 
-void pandora::core::CommandDriver::mergeSecondaryCommands() const {
+void CommandDriver::mergeSecondaryCommands() const {
   using C = std::ranges::range_value_t<decltype(m_secondaryCommandBuffers)>;
 
   m_ptrPrimaryCommandBuffer->executeCommands(
@@ -86,10 +87,9 @@ void pandora::core::CommandDriver::mergeSecondaryCommands() const {
       | std::ranges::to<std::vector<vk::CommandBuffer>>());
 }
 
-void pandora::core::CommandDriver::submit(
-    const std::vector<PipelineStage>& dst_stages,
-    const gpu::SubmitSemaphoreGroup& semaphore_group,
-    const gpu::Fence& fence) const {
+void CommandDriver::submit(const std::vector<PipelineStage>& dst_stages,
+                           const SubmitSemaphoreGroup& semaphore_group,
+                           const gpu::Fence& fence) const {
   auto submit_info =
       vk::SubmitInfo()
           .setPNext(semaphore_group.getPtrTimelineSubmitInfo())
@@ -103,10 +103,9 @@ void pandora::core::CommandDriver::submit(
   m_queue.submit(submit_info, fence.getFence());
 }
 
-void pandora::core::CommandDriver::present(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const gpu::BinarySemaphore& wait_semaphore) const {
-  if (m_queueFamilyType != pandora::core::QueueFamilyType::Graphics) {
+void CommandDriver::present(const std::unique_ptr<gpu::Context>& ptr_context,
+                            const gpu::BinarySemaphore& wait_semaphore) const {
+  if (m_queueFamilyType != QueueFamilyType::Graphics) {
     throw std::runtime_error("Queue family type is not present.");
   }
 
@@ -124,7 +123,7 @@ void pandora::core::CommandDriver::present(
   }
 }
 
-pandora::core::GraphicCommandBuffer pandora::core::CommandDriver::getGraphic(
+GraphicCommandBuffer CommandDriver::getGraphic(
     const std::optional<size_t> secondary_index) const {
   if (secondary_index.has_value()) {
     return GraphicCommandBuffer(
@@ -134,7 +133,7 @@ pandora::core::GraphicCommandBuffer pandora::core::CommandDriver::getGraphic(
   return GraphicCommandBuffer(m_ptrPrimaryCommandBuffer);
 }
 
-pandora::core::ComputeCommandBuffer pandora::core::CommandDriver::getCompute(
+ComputeCommandBuffer CommandDriver::getCompute(
     const std::optional<size_t> secondary_index) const {
   if (secondary_index.has_value()) {
     return ComputeCommandBuffer(
@@ -144,7 +143,7 @@ pandora::core::ComputeCommandBuffer pandora::core::CommandDriver::getCompute(
   return ComputeCommandBuffer(m_ptrPrimaryCommandBuffer);
 }
 
-pandora::core::TransferCommandBuffer pandora::core::CommandDriver::getTransfer(
+TransferCommandBuffer CommandDriver::getTransfer(
     const std::optional<size_t> secondary_index) const {
   if (secondary_index.has_value()) {
     return TransferCommandBuffer(
@@ -153,3 +152,5 @@ pandora::core::TransferCommandBuffer pandora::core::CommandDriver::getTransfer(
 
   return TransferCommandBuffer(m_ptrPrimaryCommandBuffer);
 }
+
+}  // namespace pandora::core

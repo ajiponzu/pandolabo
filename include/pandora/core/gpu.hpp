@@ -12,13 +12,15 @@
 #include "types.hpp"
 
 // GPU modules
+#include "gpu/barrier.hpp"
 #include "gpu/buffer.hpp"
 #include "gpu/config.hpp"
 #include "gpu/context.hpp"
 #include "gpu/debug.hpp"
 #include "gpu/descriptor.hpp"
 #include "gpu/device.hpp"
+#include "gpu/fence.hpp"
 #include "gpu/image.hpp"
+#include "gpu/semaphore.hpp"
 #include "gpu/shader.hpp"
 #include "gpu/swapchain.hpp"
-#include "gpu/synchronization.hpp"

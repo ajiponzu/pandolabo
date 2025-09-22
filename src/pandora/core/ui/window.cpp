@@ -49,9 +49,9 @@ void callback_resized(GLFWwindow* window, int /*width*/, int /*height*/) {
 
 }  // namespace
 
-pandora::core::ui::Window::Window(const std::string& title,
-                                  int32_t width,
-                                  int32_t height) {
+namespace pandora::core::ui {
+
+Window::Window(const std::string& title, int32_t width, int32_t height) {
   if (!glfwInit()) {
     throw std::runtime_error("Failed to initialize GLFW.");
   }
@@ -79,7 +79,7 @@ pandora::core::ui::Window::Window(const std::string& title,
   m_ptrWindowSurface = std::make_shared<gpu_ui::WindowSurface>(m_ptrWindow);
 }
 
-pandora::core::ui::Window::~Window() {
+Window::~Window() {
   glfwDestroyWindow(m_ptrWindow);
   glfwTerminate();
 
@@ -88,7 +88,7 @@ pandora::core::ui::Window::~Window() {
 #endif
 }
 
-bool pandora::core::ui::Window::update() {
+bool Window::update() {
   setResizedBool(m_ptrWindow, false);
 
   glfwPollEvents();
@@ -99,3 +99,5 @@ bool pandora::core::ui::Window::update() {
 
   return !glfwWindowShouldClose(m_ptrWindow);
 }
+
+}  // namespace pandora::core::ui

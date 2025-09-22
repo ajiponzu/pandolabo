@@ -21,7 +21,7 @@
 #include "rendering_types.hpp"
 #include "renderpass.hpp"
 #include "structures.hpp"
-#include "synchronization_helpers.hpp"
+#include "synchronization.hpp"
 #include "types.hpp"
 
 // Forward declarations
@@ -418,7 +418,7 @@ class CommandDriver {
   /// @param semaphore_group Semaphore group containing wait/signal semaphores
   /// @param fence Fence to wait on before execution
   void submit(const std::vector<PipelineStage>& dst_stages,
-              const gpu::SubmitSemaphoreGroup& semaphore_group,
+              const SubmitSemaphoreGroup& semaphore_group,
               const gpu::Fence& fence = {}) const;
 
   /// @brief Present rendered image to display

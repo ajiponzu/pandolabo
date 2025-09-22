@@ -38,7 +38,9 @@ void set_transfer_secondary_command(
 
 }  // namespace
 
-samples::core::BasicComputing::BasicComputing() {
+namespace samples::core {
+
+BasicComputing::BasicComputing() {
   m_ptrContext = std::make_unique<plc::gpu::Context>(nullptr);
 
   m_ptrComputeCommandDriver = std::make_unique<plc::CommandDriver>(
@@ -65,11 +67,11 @@ samples::core::BasicComputing::BasicComputing() {
                                      sizeof(uint32_t) * 1024u);
 }
 
-samples::core::BasicComputing::~BasicComputing() {
+BasicComputing::~BasicComputing() {
   m_ptrContext->getPtrDevice()->waitIdle();
 }
 
-void samples::core::BasicComputing::run() {
+void BasicComputing::run() {
   try {
     auto result_buffer = plc::createStagingBufferFromGPU(
         m_ptrContext, m_ptrOutputStorageBuffer->getSize());
@@ -84,12 +86,12 @@ void samples::core::BasicComputing::run() {
       plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
       m_ptrTransferCommandDriver->submit(
           {plc::PipelineStage::BottomOfPipe},
-          plc::gpu::SubmitSemaphoreGroup{}
+          plc::SubmitSemaphoreGroup{}
               .setWaitSemaphores(semaphore.forWait(0u))
               .setSignalSemaphores(semaphore.forSignal(1u)));
       m_ptrComputeCommandDriver->submit(
           {plc::PipelineStage::Transfer},
-          plc::gpu::SubmitSemaphoreGroup{}
+          plc::SubmitSemaphoreGroup{}
               .setWaitSemaphores(semaphore.forWait(1u))
               .setSignalSemaphores(semaphore.forSignal(2u)));
 
@@ -125,7 +127,7 @@ void samples::core::BasicComputing::run() {
   }
 }
 
-void samples::core::BasicComputing::setTransferCommands(
+void BasicComputing::setTransferCommands(
     std::vector<plc::gpu::Buffer>& staging_buffers) {
   std::shared_mutex mutex;
 
@@ -214,7 +216,7 @@ void samples::core::BasicComputing::setTransferCommands(
   primary_command_buffer.end();
 }
 
-void samples::core::BasicComputing::constructShaderResources() {
+void BasicComputing::constructShaderResources() {
   const auto spirv_binary =
       plc::io::shader::read("examples/core/basic_compute/basic.comp");
 
@@ -253,8 +255,7 @@ void samples::core::BasicComputing::constructShaderResources() {
       m_ptrContext, m_shaderModuleMap.at("compute"));
 }
 
-void samples::core::BasicComputing::setComputeCommands(
-    plc::gpu::Buffer& staging_buffer) {
+void BasicComputing::setComputeCommands(plc::gpu::Buffer& staging_buffer) {
   const auto command_buffer = m_ptrComputeCommandDriver->getCompute();
 
   command_buffer.begin();
@@ -337,3 +338,5 @@ void samples::core::BasicComputing::setComputeCommands(
 
   command_buffer.end();
 }
+
+}  // namespace samples::core

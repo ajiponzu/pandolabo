@@ -1,6 +1,8 @@
 #include "square.hpp"
 
-samples::core::Square::Square() {
+namespace samples::core {
+
+Square::Square() {
   m_ptrWindow = std::make_unique<plc::ui::Window>("Square", 800u, 600u);
   m_ptrContext =
       std::make_unique<plc::gpu::Context>(m_ptrWindow->getWindowSurface());
@@ -27,11 +29,11 @@ samples::core::Square::Square() {
   constructGraphicPipeline();
 }
 
-samples::core::Square::~Square() {
+Square::~Square() {
   m_ptrContext->getPtrDevice()->waitIdle();
 }
 
-void samples::core::Square::run() {
+void Square::run() {
   {
     std::vector<plc::gpu::Buffer> staging_buffers;
 
@@ -40,12 +42,12 @@ void samples::core::Square::run() {
     plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
     m_ptrTransferCommandDriver->submit(
         {plc::PipelineStage::BottomOfPipe},
-        plc::gpu::SubmitSemaphoreGroup{}
+        plc::SubmitSemaphoreGroup{}
             .setWaitSemaphores(semaphore.forWait(0u))
             .setSignalSemaphores(semaphore.forSignal(1u)));
     m_ptrGraphicCommandDriver.at(0u)->submit(
         {plc::PipelineStage::VertexShader},
-        plc::gpu::SubmitSemaphoreGroup{}
+        plc::SubmitSemaphoreGroup{}
             .setWaitSemaphores(semaphore.forWait(1u))
             .setSignalSemaphores(semaphore.forSignal(2u)));
 
@@ -76,7 +78,7 @@ void samples::core::Square::run() {
 
     m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
         ->submit({plc::PipelineStage::ColorAttachmentOutput},
-                 plc::gpu::SubmitSemaphoreGroup{}
+                 plc::SubmitSemaphoreGroup{}
                      .setWaitSemaphores(image_semaphore)
                      .setSignalSemaphores(finished_semaphore),
                  finished_fence);
@@ -87,7 +89,7 @@ void samples::core::Square::run() {
   }
 }
 
-void samples::core::Square::constructShaderResources() {
+void Square::constructShaderResources() {
   {
     const auto spirv_binary =
         plc::io::shader::read("examples/core/square/square.vert");
@@ -119,7 +121,7 @@ void samples::core::Square::constructShaderResources() {
                                         plc::PipelineBind::Graphics));
 }
 
-void samples::core::Square::constructRenderpass(bool is_resized) {
+void Square::constructRenderpass(bool is_resized) {
   plc::AttachmentList attachment_list;
 
   const auto backbuffer_attach_index = [&] {
@@ -174,7 +176,7 @@ void samples::core::Square::constructRenderpass(bool is_resized) {
   }
 }
 
-void samples::core::Square::constructGraphicPipeline() {
+void Square::constructGraphicPipeline() {
   // Create GraphicInfo using builder pattern
   const auto ptr_graphic_info =
       plc::pipeline::GraphicInfoBuilder::create()
@@ -222,7 +224,7 @@ void samples::core::Square::constructGraphicPipeline() {
                                            m_supassIndexMap.at("draw"));
 }
 
-void samples::core::Square::setTransferCommands(
+void Square::setTransferCommands(
     std::vector<plc::gpu::Buffer>& staging_buffers) {
   const auto queue_family_indices =
       std::make_pair(m_ptrTransferCommandDriver->getQueueFamilyIndex(),
@@ -344,7 +346,7 @@ void samples::core::Square::setTransferCommands(
   }
 }
 
-void samples::core::Square::setGraphicCommands() {
+void Square::setGraphicCommands() {
   const auto command_buffer =
       m_ptrGraphicCommandDriver
           .at(m_ptrContext->getPtrSwapchain()->getFrameSyncIndex())
@@ -382,3 +384,5 @@ void samples::core::Square::setGraphicCommands() {
 
   command_buffer.end();
 }
+
+}  // namespace samples::core

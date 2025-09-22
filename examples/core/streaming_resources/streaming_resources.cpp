@@ -6,7 +6,7 @@
 #include <thread>
 #include <vector>
 
-using namespace samples::core;
+namespace samples::core {
 
 StreamingResources::StreamingResources()
     : m_startTime(std::chrono::high_resolution_clock::now()),
@@ -332,7 +332,7 @@ void StreamingResources::updateVertexData() {
   // Submit transfer command with Timeline Semaphore synchronization
   transfer_driver->submit(
       {plc::PipelineStage::VertexInput},  // Wait stage for Timeline Semaphore
-      plc::gpu::SubmitSemaphoreGroup{}
+      plc::SubmitSemaphoreGroup{}
           .setWaitSemaphores(m_currentTimelineSemaphore->forWait(
               0))  // Wait for initial value 0
           .setSignalSemaphores(
@@ -505,7 +505,7 @@ void StreamingResources::setGraphicCommands() {
         ->submit(
             {plc::PipelineStage::ColorAttachmentOutput,  // for image_semaphore
              plc::PipelineStage::VertexShader},  // for timeline semaphore
-            plc::gpu::SubmitSemaphoreGroup{}
+            plc::SubmitSemaphoreGroup{}
                 .setWaitSemaphores(image_semaphore,
                                    m_currentTimelineSemaphore->forWait(
                                        m_currentSemaphoreValue))
@@ -521,7 +521,7 @@ void StreamingResources::setGraphicCommands() {
     // No Timeline Semaphore available, just use image semaphore
     m_ptrGraphicCommandDriver.at(frame_index)
         ->submit({plc::PipelineStage::ColorAttachmentOutput},
-                 plc::gpu::SubmitSemaphoreGroup{}
+                 plc::SubmitSemaphoreGroup{}
                      .setWaitSemaphores(image_semaphore)
                      .setSignalSemaphores(finished_semaphore),
                  finished_fence);
@@ -533,3 +533,5 @@ void StreamingResources::setGraphicCommands() {
 
   ptr_swapchain->updateFrameSyncIndex();
 }
+
+}  // namespace samples::core

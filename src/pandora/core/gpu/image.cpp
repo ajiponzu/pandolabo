@@ -42,11 +42,13 @@ vk::ImageType get_image_type(pandora::core::ImageDimension dimension) {
 
 }  // namespace
 
-pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
-                                 MemoryUsage memory_usage,
-                                 TransferType transfer_type,
-                                 const std::vector<ImageUsage>& image_usages,
-                                 const ImageSubInfo& image_sub_info) {
+namespace pandora::core::gpu {
+
+Image::Image(const std::unique_ptr<Context>& ptr_context,
+             MemoryUsage memory_usage,
+             TransferType transfer_type,
+             const std::vector<ImageUsage>& image_usages,
+             const ImageSubInfo& image_sub_info) {
   const auto& ptr_vk_device =
       ptr_context->getPtrDevice()->getPtrLogicalDevice();
 
@@ -116,4 +118,6 @@ pandora::core::gpu::Image::Image(const std::unique_ptr<Context>& ptr_context,
   ptr_vk_device->bindImageMemory(m_ptrImage.get(), m_ptrMemory.get(), 0u);
 }
 
-pandora::core::gpu::Image::~Image() {}
+Image::~Image() {}
+
+}  // namespace pandora::core::gpu

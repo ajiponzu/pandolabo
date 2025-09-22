@@ -1,11 +1,12 @@
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/renderpass.hpp"
 
-pandora::core::Framebuffer::Framebuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const Renderpass& render_pass,
-    const gpu_ui::GraphicalSize<uint32_t>& size,
-    const AttachmentList& attachments) {
+namespace pandora::core {
+
+Framebuffer::Framebuffer(const std::unique_ptr<gpu::Context>& ptr_context,
+                         const Renderpass& render_pass,
+                         const gpu_ui::GraphicalSize<uint32_t>& size,
+                         const AttachmentList& attachments) {
   m_ptrFramebuffer = ptr_context->getPtrDevice()
                          ->getPtrLogicalDevice()
                          ->createFramebufferUnique(
@@ -17,4 +18,6 @@ pandora::core::Framebuffer::Framebuffer(
                                  .setAttachments(attachments.getAttachments()));
 }
 
-pandora::core::Framebuffer::~Framebuffer() {}
+Framebuffer::~Framebuffer() {}
+
+}  // namespace pandora::core

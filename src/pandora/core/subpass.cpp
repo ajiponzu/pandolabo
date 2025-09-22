@@ -1,26 +1,27 @@
 #include "pandora/core/gpu/vk_helper.hpp"
 #include "pandora/core/renderpass.hpp"
 
-pandora::core::SubpassNode::SubpassNode(const PipelineBind bind_point,
-                                        uint32_t view_mask) {
+namespace pandora::core {
+
+SubpassNode::SubpassNode(const PipelineBind bind_point, uint32_t view_mask) {
   m_bindPoint = vk_helper::getPipelineBindPoint(bind_point);
   m_viewMask = view_mask;
 }
 
-pandora::core::SubpassNode::~SubpassNode() {}
+SubpassNode::~SubpassNode() {}
 
-vk::AttachmentReference pandora::core::SubpassNode::convert(
+vk::AttachmentReference SubpassNode::convert(
     const AttachmentReference& attachment_ref) {
   return vk::AttachmentReference{}
       .setAttachment(attachment_ref.index)
       .setLayout(vk_helper::getImageLayout(attachment_ref.layout));
 }
 
-pandora::core::SubpassGraph::SubpassGraph() {}
+SubpassGraph::SubpassGraph() {}
 
-pandora::core::SubpassGraph::~SubpassGraph() {}
+SubpassGraph::~SubpassGraph() {}
 
-uint32_t pandora::core::SubpassGraph::appendNode(const SubpassNode& node) {
+uint32_t SubpassGraph::appendNode(const SubpassNode& node) {
   m_nodes.push_back(node);
 
   {
@@ -48,7 +49,7 @@ uint32_t pandora::core::SubpassGraph::appendNode(const SubpassNode& node) {
   return static_cast<uint32_t>(m_descriptions.size()) - 1u;
 }
 
-void pandora::core::SubpassGraph::appendEdge(const SubpassEdge& edge) {
+void SubpassGraph::appendEdge(const SubpassEdge& edge) {
   using namespace vk_helper;
 
   vk::SubpassDependency dependency{};
@@ -72,3 +73,5 @@ void pandora::core::SubpassGraph::appendEdge(const SubpassEdge& edge) {
 
   m_dependencies.push_back(dependency);
 }
+
+}  // namespace pandora::core

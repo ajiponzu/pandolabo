@@ -5,8 +5,12 @@
 #include "pandora/core/gpu/vk_helper.hpp"
 #include "pandora/core/renderpass.hpp"
 
-void pandora::core::pipeline::VertexInput::appendBinding(
-    uint32_t binding, uint32_t stride, VertexInputRate input_rate) {
+namespace pandora::core {
+
+namespace pipeline {
+void VertexInput::appendBinding(uint32_t binding,
+                                uint32_t stride,
+                                VertexInputRate input_rate) {
   m_bindings.push_back(
       vk::VertexInputBindingDescription{}
           .setBinding(binding)
@@ -16,10 +20,10 @@ void pandora::core::pipeline::VertexInput::appendBinding(
   m_info.setVertexBindingDescriptions(m_bindings);
 }
 
-void pandora::core::pipeline::VertexInput::appendAttribute(uint32_t location,
-                                                           uint32_t binding,
-                                                           DataFormat format,
-                                                           uint32_t offset) {
+void VertexInput::appendAttribute(uint32_t location,
+                                  uint32_t binding,
+                                  DataFormat format,
+                                  uint32_t offset) {
   m_attributes.push_back(vk::VertexInputAttributeDescription{}
                              .setLocation(location)
                              .setBinding(binding)
@@ -29,24 +33,21 @@ void pandora::core::pipeline::VertexInput::appendAttribute(uint32_t location,
   m_info.setVertexAttributeDescriptions(m_attributes);
 }
 
-void pandora::core::pipeline::InputAssembly::setTopology(
-    PrimitiveTopology topology) {
+void InputAssembly::setTopology(PrimitiveTopology topology) {
   m_info.setTopology(vk_helper::getPrimitiveTopology(topology));
 }
 
-void pandora::core::pipeline::InputAssembly::setRestart(bool is_enabled) {
+void InputAssembly::setRestart(bool is_enabled) {
   m_info.setPrimitiveRestartEnable(is_enabled);
 }
 
-void pandora::core::pipeline::Tessellation::setPatchControlPoints(
-    uint32_t count) {
+void Tessellation::setPatchControlPoints(uint32_t count) {
   m_info.setPatchControlPoints(count);
 }
 
-void pandora::core::pipeline::ViewportState::setViewport(
-    const gpu_ui::GraphicalSize<float_t>& size,
-    float_t min_depth,
-    float_t max_depth) {
+void ViewportState::setViewport(const gpu_ui::GraphicalSize<float_t>& size,
+                                float_t min_depth,
+                                float_t max_depth) {
   m_viewport.setX(0.0f)
       .setY(0.0f)
       .setWidth(size.width)
@@ -57,103 +58,92 @@ void pandora::core::pipeline::ViewportState::setViewport(
   m_info.setViewports(m_viewport);
 }
 
-void pandora::core::pipeline::ViewportState::setScissor(
-    const gpu_ui::GraphicalSize<uint32_t>& size) {
+void ViewportState::setScissor(const gpu_ui::GraphicalSize<uint32_t>& size) {
   m_scissor.setOffset({0, 0}).setExtent(vk_helper::getExtent2D(size));
 
   m_info.setScissors(m_scissor);
 }
 
-void pandora::core::pipeline::Rasterization::setDepthBiasEnabled(
-    bool is_enabled) {
+void Rasterization::setDepthBiasEnabled(bool is_enabled) {
   m_info.setDepthBiasEnable(is_enabled);
 }
 
-void pandora::core::pipeline::Rasterization::setDepthBias(
-    float_t constant_factor, float_t clamp, float_t slope_factor) {
+void Rasterization::setDepthBias(float_t constant_factor,
+                                 float_t clamp,
+                                 float_t slope_factor) {
   m_info.setDepthBiasConstantFactor(constant_factor)
       .setDepthBiasClamp(clamp)
       .setDepthBiasSlopeFactor(slope_factor);
 }
 
-void pandora::core::pipeline::Rasterization::setRasterizerDiscard(
-    bool is_enabled) {
+void Rasterization::setRasterizerDiscard(bool is_enabled) {
   m_info.setRasterizerDiscardEnable(is_enabled);
 }
 
-void pandora::core::pipeline::Rasterization::setPolygonMode(
-    PolygonMode polygon_mode) {
+void Rasterization::setPolygonMode(PolygonMode polygon_mode) {
   m_info.setPolygonMode(vk_helper::getPolygonMode(polygon_mode));
 }
 
-void pandora::core::pipeline::Rasterization::setCullMode(CullMode cull_mode) {
+void Rasterization::setCullMode(CullMode cull_mode) {
   m_info.setCullMode(vk_helper::getCullMode(cull_mode));
 }
 
-void pandora::core::pipeline::Rasterization::setFrontFace(
-    FrontFace front_face) {
+void Rasterization::setFrontFace(FrontFace front_face) {
   m_info.setFrontFace(vk_helper::getFrontFace(front_face));
 }
 
-void pandora::core::pipeline::Rasterization::setLineWidth(float_t line_width) {
+void Rasterization::setLineWidth(float_t line_width) {
   m_info.setLineWidth(line_width);
 }
 
-void pandora::core::pipeline::Multisample::setSampleCount(
+void Multisample::setSampleCount(
     const std::unique_ptr<gpu::Context>& ptr_context) {
   m_info.setRasterizationSamples(
       ptr_context->getPtrDevice()->getMaxUsableSampleCount());
 }
 
-void pandora::core::pipeline::Multisample::setSampleShading(bool is_enabled) {
+void Multisample::setSampleShading(bool is_enabled) {
   m_info.setSampleShadingEnable(is_enabled);
 }
 
-void pandora::core::pipeline::Multisample::setMinSampleShading(
-    float_t min_sample_shading) {
+void Multisample::setMinSampleShading(float_t min_sample_shading) {
   m_info.setMinSampleShading(min_sample_shading);
 }
 
-void pandora::core::pipeline::DepthStencil::setDepthTest(bool is_enabled) {
+void DepthStencil::setDepthTest(bool is_enabled) {
   m_info.setDepthTestEnable(is_enabled);
 }
 
-void pandora::core::pipeline::DepthStencil::setDepthWrite(bool is_enabled) {
+void DepthStencil::setDepthWrite(bool is_enabled) {
   m_info.setDepthWriteEnable(is_enabled);
 }
 
-void pandora::core::pipeline::DepthStencil::setDepthCompareOp(
-    CompareOp compare_op) {
+void DepthStencil::setDepthCompareOp(CompareOp compare_op) {
   m_info.setDepthCompareOp(vk_helper::getCompareOp(compare_op));
 }
 
-void pandora::core::pipeline::DepthStencil::setDepthBoundsTest(
-    bool is_enabled) {
+void DepthStencil::setDepthBoundsTest(bool is_enabled) {
   m_info.setDepthBoundsTestEnable(is_enabled);
 }
 
-void pandora::core::pipeline::DepthStencil::setStencilTest(bool is_enabled) {
+void DepthStencil::setStencilTest(bool is_enabled) {
   m_info.setStencilTestEnable(is_enabled);
 }
 
-void pandora::core::pipeline::DepthStencil::setFrontStencilOp(
-    const StencilOpState& state) {
+void DepthStencil::setFrontStencilOp(const StencilOpState& state) {
   m_info.setFront(vk_helper::getStencilOpState(state));
 }
 
-void pandora::core::pipeline::DepthStencil::setBackStencilOp(
-    const StencilOpState& state) {
+void DepthStencil::setBackStencilOp(const StencilOpState& state) {
   m_info.setBack(vk_helper::getStencilOpState(state));
 }
 
-void pandora::core::pipeline::ColorBlend::setLogicOp(bool is_enabled,
-                                                     LogicOp logic_op) {
+void ColorBlend::setLogicOp(bool is_enabled, LogicOp logic_op) {
   m_info.setLogicOpEnable(is_enabled);
   m_info.setLogicOp(vk_helper::getLogicOp(logic_op));
 }
 
-void pandora::core::pipeline::ColorBlend::appendAttachment(
-    const ColorBlendAttachment& attachment) {
+void ColorBlend::appendAttachment(const ColorBlendAttachment& attachment) {
   using namespace vk_helper;
 
   m_attachments.push_back(
@@ -168,16 +158,17 @@ void pandora::core::pipeline::ColorBlend::appendAttachment(
           .setColorWriteMask(getColorComponent(attachment.color_components)));
 }
 
-void pandora::core::pipeline::DynamicState::appendState(DynamicOption option) {
+void DynamicState::appendState(DynamicOption option) {
   m_states.push_back(vk_helper::getDynamicState(option));
   m_info.setDynamicStates(m_states);
 }
 
-pandora::core::Pipeline::Pipeline(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const gpu::DescriptionUnit& description_unit,
-    const gpu::DescriptorSetLayout& descriptor_set_layout,
-    PipelineBind bind_point) {
+}  // namespace pipeline
+
+Pipeline::Pipeline(const std::unique_ptr<gpu::Context>& ptr_context,
+                   const gpu::DescriptionUnit& description_unit,
+                   const gpu::DescriptorSetLayout& descriptor_set_layout,
+                   PipelineBind bind_point) {
   using P = std::ranges::range_value_t<
       decltype(description_unit.getPushConstantRangeMap()
                | std::views::values)>;
@@ -202,9 +193,9 @@ pandora::core::Pipeline::Pipeline(
   m_bindPoint = vk_helper::getPipelineBindPoint(bind_point);
 }
 
-pandora::core::Pipeline::~Pipeline() {}
+Pipeline::~Pipeline() {}
 
-void pandora::core::Pipeline::constructComputePipeline(
+void Pipeline::constructComputePipeline(
     const std::unique_ptr<gpu::Context>& ptr_context,
     const gpu::ShaderModule& shader_module) {
   m_queueFamilyType = QueueFamilyType::Compute;
@@ -224,7 +215,7 @@ void pandora::core::Pipeline::constructComputePipeline(
           .value;
 }
 
-void pandora::core::Pipeline::constructGraphicsPipeline(
+void Pipeline::constructGraphicsPipeline(
     const std::unique_ptr<gpu::Context>& ptr_context,
     const std::unordered_map<std::string, gpu::ShaderModule>& shader_module_map,
     const std::vector<std::string>& module_keys,
@@ -284,3 +275,5 @@ void pandora::core::Pipeline::constructGraphicsPipeline(
                       ->createGraphicsPipelineUnique(nullptr, pipeline_info)
                       .value;
 }
+
+}  // namespace pandora::core

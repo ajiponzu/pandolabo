@@ -1,11 +1,21 @@
+#include "pandora/core/synchronization.hpp"
+
 #include <ranges>
 
-#include "pandora/core/synchronization_helpers.hpp"
+#include "pandora/core/gpu/vk_helper.hpp"
 
-bool pandora::core::WaitedFences::wait(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    uint64_t timeout,
-    bool is_reset) {
+namespace pandora::core {
+
+WaitedFences::WaitedFences(const std::vector<gpu::Fence>& fences) {
+  m_fences =
+      fences
+      | std::views::transform([](const gpu::Fence& f) { return f.getFence(); })
+      | std::ranges::to<std::vector>();
+}
+
+bool WaitedFences::wait(const std::unique_ptr<gpu::Context>& ptr_context,
+                        uint64_t timeout,
+                        bool is_reset) {
   const auto& ptr_vk_device =
       ptr_context->getPtrDevice()->getPtrLogicalDevice();
 
@@ -22,8 +32,7 @@ bool pandora::core::WaitedFences::wait(
   return true;
 }
 
-pandora::core::TimelineSemaphoreDriver&
-pandora::core::TimelineSemaphoreDriver::setSemaphores(
+TimelineSemaphoreDriver& TimelineSemaphoreDriver::setSemaphores(
     const std::vector<std::reference_wrapper<gpu::TimelineSemaphore>>&
         semaphores) {
   m_semaphores = semaphores
@@ -35,15 +44,14 @@ pandora::core::TimelineSemaphoreDriver::setSemaphores(
   return *this;
 }
 
-pandora::core::TimelineSemaphoreDriver&
-pandora::core::TimelineSemaphoreDriver::setValues(
+TimelineSemaphoreDriver& TimelineSemaphoreDriver::setValues(
     const std::vector<uint64_t>& values) {
   m_values = values;
 
   return *this;
 }
 
-bool pandora::core::TimelineSemaphoreDriver::wait(
+bool TimelineSemaphoreDriver::wait(
     const std::unique_ptr<gpu::Context>& ptr_context, uint64_t timeout) {
   const auto& ptr_vk_device =
       ptr_context->getPtrDevice()->getPtrLogicalDevice();
@@ -59,7 +67,7 @@ bool pandora::core::TimelineSemaphoreDriver::wait(
   return true;
 }
 
-void pandora::core::TimelineSemaphoreDriver::signal(
+void TimelineSemaphoreDriver::signal(
     const std::unique_ptr<gpu::Context>& ptr_context) {
   const auto& ptr_vk_device =
       ptr_context->getPtrDevice()->getPtrLogicalDevice();
@@ -71,3 +79,14 @@ void pandora::core::TimelineSemaphoreDriver::signal(
     ptr_vk_device->signalSemaphore(semaphore_signal_info);
   }
 }
+
+void SubmitSemaphoreGroup::setWaitStages(
+    const std::vector<PipelineStage>& stages) const {
+  m_waitStages = stages | std::views::transform([](const PipelineStage& stage) {
+                   return static_cast<vk::PipelineStageFlags>(
+                       vk_helper::getPipelineStageFlagBits(stage));
+                 })
+                 | std::ranges::to<std::vector>();
+}
+
+}  // namespace pandora::core

@@ -8,8 +8,9 @@
 #include "pandora/core/pipeline.hpp"
 #include "pandora/core/renderpass.hpp"
 
-void pandora::core::CommandBuffer::begin(
-    const CommandBeginInfo& command_begin_info) const {
+namespace pandora::core {
+
+void CommandBuffer::begin(const CommandBeginInfo& command_begin_info) const {
   using vk_helper::getCommandBufferUsageFlagBits;
 
   vk::CommandBufferBeginInfo begin_info{};
@@ -32,14 +33,13 @@ void pandora::core::CommandBuffer::begin(
   m_commandBuffer.begin(begin_info);
 }
 
-void pandora::core::CommandBuffer::end() const {
+void CommandBuffer::end() const {
   m_commandBuffer.end();
 }
 
-void pandora::core::CommandBuffer::setPipelineBarrier(
-    const gpu::BufferBarrier& barrier,
-    PipelineStage src_stage,
-    PipelineStage dst_stage) const {
+void CommandBuffer::setPipelineBarrier(const gpu::BufferBarrier& barrier,
+                                       PipelineStage src_stage,
+                                       PipelineStage dst_stage) const {
   m_commandBuffer.pipelineBarrier(
       vk_helper::getPipelineStageFlagBits(src_stage),
       vk_helper::getPipelineStageFlagBits(dst_stage),
@@ -49,10 +49,9 @@ void pandora::core::CommandBuffer::setPipelineBarrier(
       nullptr);
 }
 
-void pandora::core::CommandBuffer::setPipelineBarrier(
-    const gpu::ImageBarrier& barrier,
-    PipelineStage src_stage,
-    PipelineStage dst_stage) const {
+void CommandBuffer::setPipelineBarrier(const gpu::ImageBarrier& barrier,
+                                       PipelineStage src_stage,
+                                       PipelineStage dst_stage) const {
   m_commandBuffer.pipelineBarrier(
       vk_helper::getPipelineStageFlagBits(src_stage),
       vk_helper::getPipelineStageFlagBits(dst_stage),
@@ -62,12 +61,11 @@ void pandora::core::CommandBuffer::setPipelineBarrier(
       barrier.getBarrier());
 }
 
-void pandora::core::CommandBuffer::bindPipeline(
-    const Pipeline& pipeline) const {
+void CommandBuffer::bindPipeline(const Pipeline& pipeline) const {
   m_commandBuffer.bindPipeline(pipeline.getBindPoint(), pipeline.getPipeline());
 }
 
-void pandora::core::CommandBuffer::bindDescriptorSet(
+void CommandBuffer::bindDescriptorSet(
     const Pipeline& pipeline, const gpu::DescriptorSet& descriptor_set) const {
   m_commandBuffer.bindDescriptorSets(pipeline.getBindPoint(),
                                      pipeline.getPipelineLayout(),
@@ -76,11 +74,10 @@ void pandora::core::CommandBuffer::bindDescriptorSet(
                                      {});
 }
 
-void pandora::core::CommandBuffer::pushConstants(
-    const Pipeline& pipeline,
-    const std::vector<ShaderStage>& dst_stages,
-    uint32_t offset,
-    const std::vector<float_t>& data) const {
+void CommandBuffer::pushConstants(const Pipeline& pipeline,
+                                  const std::vector<ShaderStage>& dst_stages,
+                                  uint32_t offset,
+                                  const std::vector<float_t>& data) const {
   m_commandBuffer.pushConstants(
       pipeline.getPipelineLayout(),
       std::ranges::fold_left(
@@ -92,19 +89,19 @@ void pandora::core::CommandBuffer::pushConstants(
       data.data());
 }
 
-void pandora::core::CommandBuffer::resetCommands() const {
+void CommandBuffer::resetCommands() const {
   m_commandBuffer.reset(vk::CommandBufferResetFlags{});
 }
 
-void pandora::core::TransferCommandBuffer::copyBuffer(
-    const gpu::Buffer& staging_buffer, const gpu::Buffer& dst_buffer) const {
+void TransferCommandBuffer::copyBuffer(const gpu::Buffer& staging_buffer,
+                                       const gpu::Buffer& dst_buffer) const {
   m_commandBuffer.copyBuffer(
       staging_buffer.getBuffer(),
       dst_buffer.getBuffer(),
       vk::BufferCopy{}.setSize(staging_buffer.getSize()));
 }
 
-void pandora::core::TransferCommandBuffer::copyBufferToImage(
+void TransferCommandBuffer::copyBufferToImage(
     const gpu::Buffer& buffer,
     const gpu::Image& image,
     ImageLayout image_layout,
@@ -136,7 +133,7 @@ void pandora::core::TransferCommandBuffer::copyBufferToImage(
       buffer.getBuffer(), image.getImage(), vk_image_layout, copy_region);
 }
 
-void pandora::core::TransferCommandBuffer::copyImageToBuffer(
+void TransferCommandBuffer::copyImageToBuffer(
     const gpu::Image& image,
     const gpu::Buffer& buffer,
     ImageLayout image_layout,
@@ -168,8 +165,8 @@ void pandora::core::TransferCommandBuffer::copyImageToBuffer(
       image.getImage(), vk_image_layout, buffer.getBuffer(), copy_region);
 }
 
-void pandora::core::TransferCommandBuffer::setMipmaps(
-    const gpu::Image& image, PipelineStage dst_stage) const {
+void TransferCommandBuffer::setMipmaps(const gpu::Image& image,
+                                       PipelineStage dst_stage) const {
   const auto image_view_info =
       ImageViewInfo{}
           .setAspect(pandora::core::ImageAspect::Color)
@@ -273,7 +270,7 @@ void pandora::core::TransferCommandBuffer::setMipmaps(
       dst_barrier);
 }
 
-void pandora::core::TransferCommandBuffer::transferMipmapImages(
+void TransferCommandBuffer::transferMipmapImages(
     const gpu::Image& image,
     const PipelineStage src_stage,
     const PipelineStage dst_stage,
@@ -311,7 +308,7 @@ void pandora::core::TransferCommandBuffer::transferMipmapImages(
   }
 }
 
-void pandora::core::TransferCommandBuffer::acquireMipmapImages(
+void TransferCommandBuffer::acquireMipmapImages(
     const gpu::Image& image,
     const PipelineStage src_stage,
     const PipelineStage dst_stage,
@@ -351,20 +348,20 @@ void pandora::core::TransferCommandBuffer::acquireMipmapImages(
   }
 }
 
-void pandora::core::ComputeCommandBuffer::compute(
+void ComputeCommandBuffer::compute(
     const ComputeWorkGroupSize& work_group_size) const {
   m_commandBuffer.dispatch(
       work_group_size.x, work_group_size.y, work_group_size.z);
 }
 
-void pandora::core::GraphicCommandBuffer::setScissor(
+void GraphicCommandBuffer::setScissor(
     const gpu_ui::GraphicalSize<uint32_t>& size) const {
   m_commandBuffer.setScissor(
       0u,
       vk::Rect2D().setOffset({0u, 0u}).setExtent(vk_helper::getExtent2D(size)));
 }
 
-void pandora::core::GraphicCommandBuffer::setViewport(
+void GraphicCommandBuffer::setViewport(
     const gpu_ui::GraphicalSize<float_t>& size,
     float_t min_depth,
     float_t max_depth) const {
@@ -378,36 +375,35 @@ void pandora::core::GraphicCommandBuffer::setViewport(
                                   .setMaxDepth(max_depth));
 }
 
-void pandora::core::GraphicCommandBuffer::bindVertexBuffer(
-    const gpu::Buffer& buffer, const uint32_t& offset) const {
+void GraphicCommandBuffer::bindVertexBuffer(const gpu::Buffer& buffer,
+                                            const uint32_t& offset) const {
   m_commandBuffer.bindVertexBuffers(0u, buffer.getBuffer(), offset);
 }
 
-void pandora::core::GraphicCommandBuffer::bindIndexBuffer(
-    const gpu::Buffer& buffer, const uint32_t& offset) const {
+void GraphicCommandBuffer::bindIndexBuffer(const gpu::Buffer& buffer,
+                                           const uint32_t& offset) const {
   m_commandBuffer.bindIndexBuffer(
       buffer.getBuffer(), offset, vk::IndexType::eUint32);
 }
 
-void pandora::core::GraphicCommandBuffer::draw(uint32_t vertex_count,
-                                               uint32_t instance_count,
-                                               uint32_t first_vertex,
-                                               uint32_t first_instance) const {
+void GraphicCommandBuffer::draw(uint32_t vertex_count,
+                                uint32_t instance_count,
+                                uint32_t first_vertex,
+                                uint32_t first_instance) const {
   m_commandBuffer.draw(
       vertex_count, instance_count, first_vertex, first_instance);
 }
 
-void pandora::core::GraphicCommandBuffer::drawIndexed(
-    uint32_t index_count,
-    uint32_t instance_count,
-    uint32_t first_index,
-    int32_t vertex_offset,
-    uint32_t first_instance) const {
+void GraphicCommandBuffer::drawIndexed(uint32_t index_count,
+                                       uint32_t instance_count,
+                                       uint32_t first_index,
+                                       int32_t vertex_offset,
+                                       uint32_t first_instance) const {
   m_commandBuffer.drawIndexed(
       index_count, instance_count, first_index, vertex_offset, first_instance);
 }
 
-void pandora::core::GraphicCommandBuffer::beginRenderpass(
+void GraphicCommandBuffer::beginRenderpass(
     const RenderKit& render_kit,
     const gpu_ui::GraphicalSize<uint32_t>& render_area,
     const SubpassContents subpass_contents) const {
@@ -428,11 +424,13 @@ void pandora::core::GraphicCommandBuffer::beginRenderpass(
       render_pass_info, vk_helper::getSubpassContents(subpass_contents));
 }
 
-void pandora::core::GraphicCommandBuffer::endRenderpass() const {
+void GraphicCommandBuffer::endRenderpass() const {
   m_commandBuffer.endRenderPass();
 }
 
-void pandora::core::GraphicCommandBuffer::nextSubpass(
+void GraphicCommandBuffer::nextSubpass(
     const SubpassContents subpass_contents) const {
   m_commandBuffer.nextSubpass(vk_helper::getSubpassContents(subpass_contents));
 }
+
+}  // namespace pandora::core

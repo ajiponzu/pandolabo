@@ -1,25 +1,27 @@
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/gpu/vk_helper.hpp"
 
-pandora::core::gpu::Swapchain::Swapchain(
+namespace pandora::core::gpu {
+
+Swapchain::Swapchain(
     const std::unique_ptr<Device>& ptr_device,
     const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface) {
   constructSwapchain(ptr_device, ptr_surface);
 }
 
-pandora::core::gpu::Swapchain::~Swapchain() {
+Swapchain::~Swapchain() {
   clear();
 }
 
-void pandora::core::gpu::Swapchain::resetSwapchain(
+void Swapchain::resetSwapchain(
     const std::unique_ptr<Device>& ptr_device,
     const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface) {
   clear();
   constructSwapchain(ptr_device, ptr_surface);
 }
 
-void pandora::core::gpu::Swapchain::updateImageIndex(
-    const std::unique_ptr<Device>& ptr_device, uint64_t timeout) {
+void Swapchain::updateImageIndex(const std::unique_ptr<Device>& ptr_device,
+                                 uint64_t timeout) {
   const auto& ptr_vk_device = ptr_device->getPtrLogicalDevice();
 
   const auto vk_result = ptr_vk_device->waitForFences(
@@ -43,12 +45,12 @@ void pandora::core::gpu::Swapchain::updateImageIndex(
   ptr_vk_device->resetFences(m_fences.at(m_frameSyncIndex).get());
 }
 
-void pandora::core::gpu::Swapchain::updateFrameSyncIndex() {
+void Swapchain::updateFrameSyncIndex() {
   m_frameSyncIndex =
       (m_frameSyncIndex + 1u) % static_cast<uint32_t>(m_fences.size());
 }
 
-void pandora::core::gpu::Swapchain::constructSwapchain(
+void Swapchain::constructSwapchain(
     const std::unique_ptr<Device>& ptr_device,
     const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface) {
   m_imageFormat = DataFormat::R8G8B8A8Srgb;
@@ -123,7 +125,7 @@ void pandora::core::gpu::Swapchain::constructSwapchain(
   }
 }
 
-void pandora::core::gpu::Swapchain::clear() {
+void Swapchain::clear() {
   /* Notion: this function must not delete swapchain */
 
   m_imageViews.clear();
@@ -135,3 +137,5 @@ void pandora::core::gpu::Swapchain::clear() {
   m_frameSyncIndex = 0u;
   m_imageIndex = 0u;
 }
+
+}  // namespace pandora::core::gpu

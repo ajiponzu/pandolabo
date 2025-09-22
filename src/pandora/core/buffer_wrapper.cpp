@@ -1,6 +1,8 @@
 #include "pandora/core/buffer_helpers.hpp"
 
-pandora::core::gpu::Buffer pandora::core::createStagingBufferToGPU(
+namespace pandora::core {
+
+gpu::Buffer createStagingBufferToGPU(
     const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::CpuToGpu,
@@ -9,8 +11,7 @@ pandora::core::gpu::Buffer pandora::core::createStagingBufferToGPU(
                      size);
 }
 
-std::unique_ptr<pandora::core::gpu::Buffer>
-pandora::core::createUniqueStagingBufferToGPU(
+std::unique_ptr<gpu::Buffer> createUniqueStagingBufferToGPU(
     const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
@@ -20,7 +21,7 @@ pandora::core::createUniqueStagingBufferToGPU(
       size);
 }
 
-pandora::core::gpu::Buffer pandora::core::createStagingBufferFromGPU(
+gpu::Buffer createStagingBufferFromGPU(
     const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::GpuToCpu,
@@ -29,8 +30,7 @@ pandora::core::gpu::Buffer pandora::core::createStagingBufferFromGPU(
                      size);
 }
 
-std::unique_ptr<pandora::core::gpu::Buffer>
-pandora::core::createUniqueStagingBufferFromGPU(
+std::unique_ptr<gpu::Buffer> createUniqueStagingBufferFromGPU(
     const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
@@ -40,7 +40,7 @@ pandora::core::createUniqueStagingBufferFromGPU(
       size);
 }
 
-pandora::core::gpu::Buffer pandora::core::createStorageBuffer(
+gpu::Buffer createStorageBuffer(
     const std::unique_ptr<gpu::Context>& ptr_context,
     TransferType transfer_type,
     size_t size) {
@@ -51,8 +51,7 @@ pandora::core::gpu::Buffer pandora::core::createStorageBuffer(
                      size);
 }
 
-std::unique_ptr<pandora::core::gpu::Buffer>
-pandora::core::createUniqueStorageBuffer(
+std::unique_ptr<gpu::Buffer> createUniqueStorageBuffer(
     const std::unique_ptr<gpu::Context>& ptr_context,
     TransferType transfer_type,
     size_t size) {
@@ -64,7 +63,7 @@ pandora::core::createUniqueStorageBuffer(
       size);
 }
 
-pandora::core::gpu::Buffer pandora::core::createUniformBuffer(
+gpu::Buffer createUniformBuffer(
     const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::CpuToGpu,
@@ -73,8 +72,7 @@ pandora::core::gpu::Buffer pandora::core::createUniformBuffer(
                      size);
 }
 
-std::unique_ptr<pandora::core::gpu::Buffer>
-pandora::core::createUniqueUniformBuffer(
+std::unique_ptr<gpu::Buffer> createUniqueUniformBuffer(
     const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
@@ -84,8 +82,8 @@ pandora::core::createUniqueUniformBuffer(
       size);
 }
 
-pandora::core::gpu::Buffer pandora::core::createVertexBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
+gpu::Buffer createVertexBuffer(const std::unique_ptr<gpu::Context>& ptr_context,
+                               size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::GpuOnly,
                      TransferType::TransferDst,
@@ -93,8 +91,7 @@ pandora::core::gpu::Buffer pandora::core::createVertexBuffer(
                      size);
 }
 
-std::unique_ptr<pandora::core::gpu::Buffer>
-pandora::core::createUniqueVertexBuffer(
+std::unique_ptr<gpu::Buffer> createUniqueVertexBuffer(
     const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
@@ -104,8 +101,8 @@ pandora::core::createUniqueVertexBuffer(
       size);
 }
 
-pandora::core::gpu::Buffer pandora::core::createIndexBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
+gpu::Buffer createIndexBuffer(const std::unique_ptr<gpu::Context>& ptr_context,
+                              size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::GpuOnly,
                      TransferType::TransferDst,
@@ -113,8 +110,7 @@ pandora::core::gpu::Buffer pandora::core::createIndexBuffer(
                      size);
 }
 
-std::unique_ptr<pandora::core::gpu::Buffer>
-pandora::core::createUniqueIndexBuffer(
+std::unique_ptr<gpu::Buffer> createUniqueIndexBuffer(
     const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
@@ -123,3 +119,5 @@ pandora::core::createUniqueIndexBuffer(
       std::vector<BufferUsage>{BufferUsage::IndexBuffer},
       size);
 }
+
+}  // namespace pandora::core

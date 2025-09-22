@@ -51,11 +51,13 @@ bool check_validation_layer_support(
 
 }  // namespace
 
-pandora::core::gpu::debug::Messenger::~Messenger() {
+namespace pandora::core::gpu {
+
+debug::Messenger::~Messenger() {
   m_ptrMessenger.release();
 }
 
-vk::UniqueInstance pandora::core::gpu::debug::Messenger::createDebugInstance(
+vk::UniqueInstance debug::Messenger::createDebugInstance(
     const vk::ApplicationInfo& app_info,
     const std::vector<const char*>& extensions) {
   if (!check_validation_layer_support(s_validationLayers)) {
@@ -121,3 +123,5 @@ vk::UniqueInstance pandora::core::gpu::debug::Messenger::createDebugInstance(
   return std::move(ptr_vk_instance);
 }
 #endif
+
+}  // namespace pandora::core::gpu

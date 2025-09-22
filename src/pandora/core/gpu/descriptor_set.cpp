@@ -2,7 +2,9 @@
 
 #include "pandora/core/gpu.hpp"
 
-pandora::core::gpu::DescriptorSet::DescriptorSet(
+namespace pandora::core::gpu {
+
+DescriptorSet::DescriptorSet(
     const std::unique_ptr<Context>& ptr_context,
     const DescriptorSetLayout& description_set_layout) {
   const auto& ptr_vk_device =
@@ -20,9 +22,9 @@ pandora::core::gpu::DescriptorSet::DescriptorSet(
           .front());
 }
 
-pandora::core::gpu::DescriptorSet::~DescriptorSet() {}
+DescriptorSet::~DescriptorSet() {}
 
-void pandora::core::gpu::DescriptorSet::updateDescriptorSet(
+void DescriptorSet::updateDescriptorSet(
     const std::unique_ptr<Context>& ptr_context,
     const std::vector<BufferDescription>& buffer_descriptions,
     const std::vector<ImageDescription>& image_descriptions) {
@@ -57,8 +59,10 @@ void pandora::core::gpu::DescriptorSet::updateDescriptorSet(
       write_descriptor_sets, nullptr);
 }
 
-void pandora::core::gpu::DescriptorSet::freeDescriptorSet(
+void DescriptorSet::freeDescriptorSet(
     const std::unique_ptr<Context>& ptr_context) {
   ptr_context->getPtrDevice()->getPtrLogicalDevice()->freeDescriptorSets(
       m_ptrDescriptorPool.get(), m_ptrDescriptorSet.get());
 }
+
+}  // namespace pandora::core::gpu

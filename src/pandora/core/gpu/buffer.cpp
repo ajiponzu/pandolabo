@@ -47,12 +47,13 @@ vk::BufferUsageFlagBits get_buffer_usage(
 
 }  // namespace
 
-pandora::core::gpu::Buffer::Buffer(
-    const std::unique_ptr<Context>& ptr_context,
-    MemoryUsage memory_usage,
-    TransferType transfer_type,
-    const std::vector<BufferUsage>& buffer_usages,
-    size_t size)
+namespace pandora::core::gpu {
+
+Buffer::Buffer(const std::unique_ptr<Context>& ptr_context,
+               MemoryUsage memory_usage,
+               TransferType transfer_type,
+               const std::vector<BufferUsage>& buffer_usages,
+               size_t size)
     : m_size(size) {
   const auto& ptr_vk_device =
       ptr_context->getPtrDevice()->getPtrLogicalDevice();
@@ -99,16 +100,16 @@ pandora::core::gpu::Buffer::Buffer(
   ptr_vk_device->bindBufferMemory(m_ptrBuffer.get(), m_ptrMemory.get(), 0u);
 }
 
-pandora::core::gpu::Buffer::~Buffer() = default;
+Buffer::~Buffer() = default;
 
-void* pandora::core::gpu::Buffer::mapMemory(
-    const std::unique_ptr<Context>& ptr_context) const {
+void* Buffer::mapMemory(const std::unique_ptr<Context>& ptr_context) const {
   return ptr_context->getPtrDevice()->getPtrLogicalDevice()->mapMemory(
       m_ptrMemory.get(), 0u, m_size, {});
 }
 
-void pandora::core::gpu::Buffer::unmapMemory(
-    const std::unique_ptr<Context>& ptr_context) const {
+void Buffer::unmapMemory(const std::unique_ptr<Context>& ptr_context) const {
   ptr_context->getPtrDevice()->getPtrLogicalDevice()->unmapMemory(
       m_ptrMemory.get());
 }
+
+}  // namespace pandora::core::gpu

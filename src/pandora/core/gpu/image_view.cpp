@@ -22,10 +22,11 @@ vk::ImageViewType get_image_view_type(
 
 }  // namespace
 
-pandora::core::gpu::ImageView::ImageView(
-    const std::unique_ptr<Context>& ptr_context,
-    const Image& image,
-    const ImageViewInfo& image_view_info) {
+namespace pandora::core::gpu {
+
+ImageView::ImageView(const std::unique_ptr<Context>& ptr_context,
+                     const Image& image,
+                     const ImageViewInfo& image_view_info) {
   const auto create_info =
       vk::ImageViewCreateInfo()
           .setSubresourceRange(
@@ -51,4 +52,6 @@ pandora::core::gpu::ImageView::ImageView(
   m_ptrImageViewInfo = std::make_unique<ImageViewInfo>(image_view_info);
 }
 
-pandora::core::gpu::ImageView::~ImageView() {}
+ImageView::~ImageView() {}
+
+}  // namespace pandora::core::gpu

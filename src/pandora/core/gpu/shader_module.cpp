@@ -166,9 +166,10 @@ ShaderCompiler::getPushConstantRanges() const {
   return push_constant_range_map;
 }
 
-pandora::core::gpu::ShaderModule::ShaderModule(
-    const std::unique_ptr<Context>& ptr_context,
-    const std::vector<uint32_t>& spirv_binary) {
+namespace pandora::core::gpu {
+
+ShaderModule::ShaderModule(const std::unique_ptr<Context>& ptr_context,
+                           const std::vector<uint32_t>& spirv_binary) {
   {
     ShaderCompiler compiler(spirv_binary);
 
@@ -189,4 +190,6 @@ pandora::core::gpu::ShaderModule::ShaderModule(
   }
 }
 
-pandora::core::gpu::ShaderModule::~ShaderModule() {}
+ShaderModule::~ShaderModule() {}
+
+}  // namespace pandora::core::gpu
