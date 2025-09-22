@@ -72,27 +72,51 @@ vk::UniqueInstance pandora::core::gpu::debug::Messenger::createDebugInstance(
       | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
       | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
 
-  vk::ValidationFeaturesEXT validation_features;
-  std::vector<vk::ValidationFeatureEnableEXT> enabled_features = {
-      vk::ValidationFeatureEnableEXT::eDebugPrintf};
-  validation_features.setEnabledValidationFeatures(enabled_features);
+  // 拡張有無を判定
+  const auto ext_contains = [&](const char* name) {
+    for (auto* e : extensions) {
+      if (std::strcmp(e, name) == 0)
+        return true;
+    }
+    return false;
+  };
 
-  const vk::StructureChain<vk::InstanceCreateInfo,
-                           vk::ValidationFeaturesEXT,
-                           vk::DebugUtilsMessengerCreateInfoEXT>
-      create_info_chain({{}, &app_info, s_validationLayers, extensions},
-                        validation_features,
-                        {{},
-                         severity_flags,
-                         type_flags,
-                         reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT>(
-                             &debug_utils_messenger_callback)});
+  const bool has_debug_utils = ext_contains(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+  const bool has_validation_features =
+      ext_contains(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME);
 
-  auto ptr_vk_instance =
-      vk::createInstanceUnique(create_info_chain.get<vk::InstanceCreateInfo>());
+  // Create pNext chain conditionally
+  vk::InstanceCreateInfo instance_info{};
+  instance_info.setPApplicationInfo(&app_info);
+  instance_info.setPEnabledLayerNames(s_validationLayers);
+  instance_info.setPEnabledExtensionNames(extensions);
+
+  vk::ValidationFeaturesEXT validation_features{};
+  if (has_validation_features) {
+    std::vector<vk::ValidationFeatureEnableEXT> enabled_features = {
+        vk::ValidationFeatureEnableEXT::eDebugPrintf};
+    validation_features.setEnabledValidationFeatures(enabled_features);
+    validation_features.setPNext(instance_info.pNext);
+    instance_info.setPNext(&validation_features);
+  }
+
+  vk::DebugUtilsMessengerCreateInfoEXT messenger_info{};
+  messenger_info.setMessageSeverity(severity_flags);
+  messenger_info.setMessageType(type_flags);
+  messenger_info.setPfnUserCallback(
+      reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT>(
+          &debug_utils_messenger_callback));
+  if (has_debug_utils) {
+    messenger_info.setPNext(instance_info.pNext);
+    instance_info.setPNext(&messenger_info);
+  }
+
+  auto ptr_vk_instance = vk::createInstanceUnique(instance_info);
   VULKAN_HPP_DEFAULT_DISPATCHER.init(*ptr_vk_instance);
-  m_ptrMessenger = ptr_vk_instance->createDebugUtilsMessengerEXTUnique(
-      create_info_chain.get<vk::DebugUtilsMessengerCreateInfoEXT>());
+  if (has_debug_utils) {
+    m_ptrMessenger =
+        ptr_vk_instance->createDebugUtilsMessengerEXTUnique(messenger_info);
+  }
 
   return std::move(ptr_vk_instance);
 }

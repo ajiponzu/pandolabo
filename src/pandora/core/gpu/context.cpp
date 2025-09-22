@@ -1,9 +1,36 @@
+#include <string>
+#include <unordered_set>
+
 #include "pandora/core/gpu.hpp"
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 pandora::core::gpu::Context::Context(
     std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
+  // Helpers to manage instance extensions
+  auto get_available_instance_extensions = []() {
+    std::unordered_set<std::string> names;
+    for (const auto& prop : vk::enumerateInstanceExtensionProperties()) {
+      names.emplace(prop.extensionName.data());
+    }
+    return names;
+  };
+
+  auto contains_ext = [](const std::vector<const char*>& exts,
+                         const char* name) {
+    return std::any_of(exts.begin(), exts.end(), [&](const char* e) {
+      return std::strcmp(e, name) == 0;
+    });
+  };
+
+  auto try_add_ext = [&](std::vector<const char*>& exts,
+                         const char* name,
+                         const std::unordered_set<std::string>& available) {
+    if (available.contains(name) && !contains_ext(exts, name)) {
+      exts.emplace_back(name);
+    }
+  };
+
   // Initialize Vulkan.hpp
   {
     static vk::detail::DynamicLoader dl{};
@@ -21,6 +48,7 @@ pandora::core::gpu::Context::Context(
                                  PANDOLABO_VK_VERSION};
 
     std::vector<const char*> extensions;
+    const auto available_exts = get_available_instance_extensions();
 
     if (ptr_window_surface) {
       // Window mode: add GLFW extensions
@@ -29,13 +57,15 @@ pandora::core::gpu::Context::Context(
           glfwGetRequiredInstanceExtensions(&extension_count);
       extensions = std::vector<const char*>(glfw_extensions,
                                             glfw_extensions + extension_count);
-      extensions.emplace_back(VK_KHR_SURFACE_EXTENSION_NAME);
+      // VK_KHR_surface は通常 GLFW が返すため明示追加しない
     }
     // Headless mode: no GLFW or surface extensions needed
 
 #ifdef GPU_DEBUG
-    extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-    extensions.emplace_back(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME);
+    // ある場合のみ追加（重複も抑止）
+    try_add_ext(extensions, VK_EXT_DEBUG_UTILS_EXTENSION_NAME, available_exts);
+    try_add_ext(
+        extensions, VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME, available_exts);
 
     m_ptrMessenger = std::make_unique<debug::Messenger>();
     m_ptrInstance = m_ptrMessenger->createDebugInstance(app_info, extensions);

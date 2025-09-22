@@ -10,11 +10,9 @@
 namespace {
 
 std::vector<const char*> getDeviceExtensions(bool has_window_surface) {
-  std::vector<const char*> extensions = {
-      VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
-      VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME,
-      VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
-  };
+  // With Vulkan 1.3+ core (we target 1.4), most sync/renderpass
+  // extensions are core features and do not need enabling.
+  std::vector<const char*> extensions = {};
 
   if (has_window_surface) {
     extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
@@ -193,12 +191,26 @@ void pandora::core::gpu::Device::constructLogicalDevice(
     }
   }
 
-  // Create timeline semaphore features
-  vk::PhysicalDeviceTimelineSemaphoreFeatures timeline_semaphore_features;
-  timeline_semaphore_features.setTimelineSemaphore(VK_TRUE);
+  // Query supported Vulkan 1.3/1.2 feature sets and enable required ones
+  vk::PhysicalDeviceVulkan12Features supported_v12_features;
+  vk::PhysicalDeviceVulkan13Features supported_v13_features;
+  vk::PhysicalDeviceFeatures2 supported_features;
+  supported_features.setPNext(&supported_v13_features);
+  supported_v13_features.setPNext(&supported_v12_features);
+  m_physicalDevice.getFeatures2(&supported_features);
+
+  // Enable features we need if supported
+  vk::PhysicalDeviceVulkan12Features enabled_v12_features;
+  enabled_v12_features.setTimelineSemaphore(
+      supported_v12_features.timelineSemaphore);
+
+  vk::PhysicalDeviceVulkan13Features enabled_v13_features;
+  enabled_v13_features.setSynchronization2(
+      supported_v13_features.synchronization2);
 
   vk::PhysicalDeviceFeatures2 features2;
-  features2.setPNext(&timeline_semaphore_features);
+  features2.setPNext(&enabled_v13_features);
+  enabled_v13_features.setPNext(&enabled_v12_features);
 
   const auto required_extensions = getDeviceExtensions(m_hasWindowSurface);
   vk::DeviceCreateInfo create_info(
