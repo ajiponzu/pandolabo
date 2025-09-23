@@ -26,6 +26,8 @@ vk::AccessFlagBits2 getAccessFlagBits(pandora::core::AccessFlag access_flag) {
     using enum pandora::core::AccessFlag;
     using enum vk::AccessFlagBits2;
 
+    case None:
+      return eNone;
     case IndirectCommandRead:
       return eIndirectCommandRead;
     case IndexRead:
@@ -40,14 +42,26 @@ vk::AccessFlagBits2 getAccessFlagBits(pandora::core::AccessFlag access_flag) {
       return eShaderRead;
     case ShaderWrite:
       return eShaderWrite;
+    case ShaderSampledRead:
+      return eShaderSampledRead;
+    case ShaderStorageRead:
+      return eShaderStorageRead;
+    case ShaderStorageWrite:
+      return eShaderStorageWrite;
     case ColorAttachmentRead:
       return eColorAttachmentRead;
     case ColorAttachmentWrite:
       return eColorAttachmentWrite;
+    case ColorAttachmentReadNoncoherent:
+      return eColorAttachmentReadNoncoherentEXT;
     case DepthStencilAttachmentRead:
       return eDepthStencilAttachmentRead;
     case DepthStencilAttachmentWrite:
       return eDepthStencilAttachmentWrite;
+    case FragmentShadingRateAttachmentRead:
+      return eFragmentShadingRateAttachmentReadKHR;
+    case FragmentDensityMapRead:
+      return eFragmentDensityMapReadEXT;
     case TransferRead:
       return eTransferRead;
     case TransferWrite:
@@ -60,6 +74,42 @@ vk::AccessFlagBits2 getAccessFlagBits(pandora::core::AccessFlag access_flag) {
       return eMemoryRead;
     case MemoryWrite:
       return eMemoryWrite;
+    case AccelerationStructureRead:
+      return eAccelerationStructureReadKHR;
+    case AccelerationStructureWrite:
+      return eAccelerationStructureWriteKHR;
+    case RayTracingShaderBindingTableRead:
+      return eShaderBindingTableReadKHR;
+    case CommandPreprocessRead:
+      return eCommandPreprocessReadNV;
+    case CommandPreprocessWrite:
+      return eCommandPreprocessWriteNV;
+    case TransformFeedbackWrite:
+      return eTransformFeedbackWriteEXT;
+    case TransformFeedbackCounterRead:
+      return eTransformFeedbackCounterReadEXT;
+    case TransformFeedbackCounterWrite:
+      return eTransformFeedbackCounterWriteEXT;
+    case MicromapRead:
+      return eMicromapReadEXT;
+    case MicromapWrite:
+      return eMicromapWriteEXT;
+    case DescriptorBufferRead:
+      return eDescriptorBufferReadEXT;
+    case VideoDecodeRead:
+      return eVideoDecodeReadKHR;
+    case VideoDecodeWrite:
+      return eVideoDecodeWriteKHR;
+    case VideoEncodeRead:
+      return eVideoEncodeReadKHR;
+    case VideoEncodeWrite:
+      return eVideoEncodeWriteKHR;
+    case ConditionalRenderingRead:
+      return eConditionalRenderingReadEXT;
+    case OpticalFlowRead:
+      return eOpticalFlowReadNV;
+    case OpticalFlowWrite:
+      return eOpticalFlowWriteNV;
     default:
       return vk::AccessFlagBits2{};
   }
@@ -70,12 +120,18 @@ vk::PipelineStageFlagBits2 getPipelineStageFlagBits(
   switch (stage) {
     using enum pandora::core::PipelineStage;
     using enum vk::PipelineStageFlagBits2;
+    case None:
+      return eNone;
     case TopOfPipe:
       return eTopOfPipe;
     case DrawIndirect:
       return eDrawIndirect;
     case VertexInput:
       return eVertexInput;
+    case IndexInput:
+      return eIndexInput;
+    case VertexAttributeInput:
+      return eVertexAttributeInput;
     case VertexShader:
       return eVertexShader;
     case TessellationControlShader:
@@ -84,6 +140,8 @@ vk::PipelineStageFlagBits2 getPipelineStageFlagBits(
       return eTessellationEvaluationShader;
     case GeometryShader:
       return eGeometryShader;
+    case PreRasterizationShaders:
+      return ePreRasterizationShaders;
     case FragmentShader:
       return eFragmentShader;
     case EarlyFragmentTests:
@@ -92,10 +150,28 @@ vk::PipelineStageFlagBits2 getPipelineStageFlagBits(
       return eLateFragmentTests;
     case ColorAttachmentOutput:
       return eColorAttachmentOutput;
+    case FragmentShadingRateAttachment:
+      return eFragmentShadingRateAttachmentKHR;
     case ComputeShader:
       return eComputeShader;
     case Transfer:
       return eTransfer;
+    case Copy:
+      return eCopy;
+    case Resolve:
+      return eResolve;
+    case Blit:
+      return eBlit;
+    case Clear:
+      return eClear;
+    case AccelerationStructureBuild:
+      return eAccelerationStructureBuildKHR;
+    case RayTracingShader:
+      return eRayTracingShaderKHR;
+    case TaskShader:
+      return eTaskShaderEXT;
+    case MeshShader:
+      return eMeshShaderEXT;
     case BottomOfPipe:
       return eBottomOfPipe;
     case Host:

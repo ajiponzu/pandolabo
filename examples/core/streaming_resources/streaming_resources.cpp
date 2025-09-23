@@ -176,6 +176,15 @@ void StreamingResources::constructRenderpass(const bool is_resized) {
           .setLayout(plc::ImageLayout::ColorAttachmentOptimal));
   m_supassIndexMap["main"] = subpass_graph.appendNode(subpass_node);
 
+  subpass_graph.appendEdge(
+      plc::SubpassEdge{}
+          .setDstIndex(m_supassIndexMap.at("main"))
+          .setSrcAccess({plc::AccessFlag::Unknown})
+          .setDstAccess({plc::AccessFlag::ColorAttachmentWrite})
+          .setSrcStages({plc::PipelineStage::ColorAttachmentOutput})
+          .setDstStages({plc::PipelineStage::ColorAttachmentOutput})
+          .setDependencyFlag(plc::DependencyFlag::ByRegion));
+
   if (is_resized) {
     m_ptrRenderKit->resetFramebuffer(
         m_ptrContext,
@@ -470,7 +479,7 @@ void StreamingResources::setGraphicCommands() {
           .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
           .setDstAccessFlags({plc::AccessFlag::VertexAttributeRead})
           .setSrcStages({plc::PipelineStage::Transfer})
-          .setDstStages({plc::PipelineStage::VertexInput})
+          .setDstStages({plc::PipelineStage::VertexAttributeInput})
           .setSrcQueueFamilyIndex(queue_family_indices.first)
           .setDstQueueFamilyIndex(queue_family_indices.second)
           .build();
@@ -512,9 +521,11 @@ void StreamingResources::setGraphicCommands() {
                          {plc::SubmitSemaphore{}
                               .setSemaphore(*m_currentTimelineSemaphore)
                               .setValue(m_currentSemaphoreValue)
-                              .setStageMask(plc::PipelineStage::VertexShader),
+                              .setStageMask(
+                                  plc::PipelineStage::VertexAttributeInput),
                           plc::SubmitSemaphore{}
                               .setSemaphore(image_semaphore)
+                              // Wait at CAO to cover beginRenderPass transition
                               .setStageMask(
                                   plc::PipelineStage::ColorAttachmentOutput)})
                      .setSignalSemaphores(
@@ -536,6 +547,7 @@ void StreamingResources::setGraphicCommands() {
                          {plc::SubmitSemaphore{}
                               .setSemaphore(image_semaphore)
                               .setValue(0u)
+                              // Wait at CAO to cover beginRenderPass transition
                               .setStageMask(
                                   plc::PipelineStage::ColorAttachmentOutput)})
                      .setSignalSemaphores(
