@@ -202,7 +202,8 @@ enum class ImageLayout {
 
 /// @brief Pipeline stage flags
 enum class PipelineStage {
-  TopOfPipe = 0u,
+  None = 0u,
+  TopOfPipe,
   DrawIndirect,
   VertexInput,
   VertexShader,

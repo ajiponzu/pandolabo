@@ -11,7 +11,15 @@ constexpr auto g_lamda_convert_access_flags =
     [](const std::vector<pandora::core::AccessFlag>& access_flags) {
       return std::ranges::fold_left(
           access_flags | std::views::transform(vk_helper::getAccessFlagBits),
-          vk::AccessFlags{},
+          vk::AccessFlags2{},
+          std::bit_or());
+    };
+
+constexpr auto g_lamda_convert_stage_flags =
+    [](const std::vector<pandora::core::PipelineStage>& stages) {
+      return std::ranges::fold_left(
+          stages | std::views::transform(vk_helper::getPipelineStageFlagBits),
+          vk::PipelineStageFlags2{},
           std::bit_or());
     };
 
@@ -19,16 +27,32 @@ constexpr auto g_lamda_convert_access_flags =
 
 namespace pandora::core::gpu {
 
-BufferBarrier::BufferBarrier(
-    const Buffer& buffer,
-    const std::vector<AccessFlag>& priority_access_flags,
-    const std::vector<AccessFlag>& wait_access_flags,
-    uint32_t src_queue_family,
-    uint32_t dst_queue_family) {
+MemoryBarrier::MemoryBarrier(const std::vector<AccessFlag>& src_access_flags,
+                             const std::vector<AccessFlag>& dst_access_flags,
+                             const std::vector<PipelineStage>& src_stages,
+                             const std::vector<PipelineStage>& dst_stages) {
+  m_memoryBarrier
+      .setSrcAccessMask(g_lamda_convert_access_flags(src_access_flags))
+      .setDstAccessMask(g_lamda_convert_access_flags(dst_access_flags))
+      .setSrcStageMask(g_lamda_convert_stage_flags(src_stages))
+      .setDstStageMask(g_lamda_convert_stage_flags(dst_stages));
+}
+
+MemoryBarrier::~MemoryBarrier() {}
+
+BufferBarrier::BufferBarrier(const Buffer& buffer,
+                             const std::vector<AccessFlag>& src_access_flags,
+                             const std::vector<AccessFlag>& dst_access_flags,
+                             const std::vector<PipelineStage>& src_stages,
+                             const std::vector<PipelineStage>& dst_stages,
+                             uint32_t src_queue_family,
+                             uint32_t dst_queue_family) {
   m_bufferMemoryBarrier.setBuffer(buffer.getBuffer())
       .setSize(buffer.getSize())
-      .setSrcAccessMask(g_lamda_convert_access_flags(priority_access_flags))
-      .setDstAccessMask(g_lamda_convert_access_flags(wait_access_flags))
+      .setSrcAccessMask(g_lamda_convert_access_flags(src_access_flags))
+      .setDstAccessMask(g_lamda_convert_access_flags(dst_access_flags))
+      .setSrcStageMask(g_lamda_convert_stage_flags(src_stages))
+      .setDstStageMask(g_lamda_convert_stage_flags(dst_stages))
       .setSrcQueueFamilyIndex(src_queue_family)
       .setDstQueueFamilyIndex(dst_queue_family);
 }
@@ -36,8 +60,10 @@ BufferBarrier::BufferBarrier(
 BufferBarrier::~BufferBarrier() {}
 
 ImageBarrier::ImageBarrier(const Image& image,
-                           const std::vector<AccessFlag>& priority_access_flags,
-                           const std::vector<AccessFlag>& wait_access_flags,
+                           const std::vector<AccessFlag>& src_access_flags,
+                           const std::vector<AccessFlag>& dst_access_flags,
+                           const std::vector<PipelineStage>& src_stages,
+                           const std::vector<PipelineStage>& dst_stages,
                            ImageLayout old_layout,
                            ImageLayout new_layout,
                            const ImageViewInfo& image_view_info,
@@ -71,8 +97,10 @@ ImageBarrier::ImageBarrier(const Image& image,
       .setLayerCount(image_view_info.array_layers);
 
   m_imageMemoryBarrier.setImage(image.getImage())
-      .setSrcAccessMask(g_lamda_convert_access_flags(priority_access_flags))
-      .setDstAccessMask(g_lamda_convert_access_flags(wait_access_flags))
+      .setSrcAccessMask(g_lamda_convert_access_flags(src_access_flags))
+      .setDstAccessMask(g_lamda_convert_access_flags(dst_access_flags))
+      .setSrcStageMask(g_lamda_convert_stage_flags(src_stages))
+      .setDstStageMask(g_lamda_convert_stage_flags(dst_stages))
       .setOldLayout(vk_helper::getImageLayout(old_layout))
       .setNewLayout(vk_helper::getImageLayout(new_layout))
       .setSubresourceRange(subresource_range)
@@ -81,15 +109,19 @@ ImageBarrier::ImageBarrier(const Image& image,
 }
 
 ImageBarrier::ImageBarrier(const std::unique_ptr<Context>& ptr_context,
-                           const std::vector<AccessFlag>& priority_access_flags,
-                           const std::vector<AccessFlag>& wait_access_flags,
+                           const std::vector<AccessFlag>& src_access_flags,
+                           const std::vector<AccessFlag>& dst_access_flags,
+                           const std::vector<PipelineStage>& src_stages,
+                           const std::vector<PipelineStage>& dst_stages,
                            ImageLayout old_layout,
                            ImageLayout new_layout,
                            uint32_t src_queue_family,
                            uint32_t dst_queue_family) {
   m_imageMemoryBarrier.setImage(ptr_context->getPtrSwapchain()->getImage())
-      .setSrcAccessMask(g_lamda_convert_access_flags(priority_access_flags))
-      .setDstAccessMask(g_lamda_convert_access_flags(wait_access_flags))
+      .setSrcAccessMask(g_lamda_convert_access_flags(src_access_flags))
+      .setDstAccessMask(g_lamda_convert_access_flags(dst_access_flags))
+      .setSrcStageMask(g_lamda_convert_stage_flags(src_stages))
+      .setDstStageMask(g_lamda_convert_stage_flags(dst_stages))
       .setOldLayout(vk_helper::getImageLayout(old_layout))
       .setNewLayout(vk_helper::getImageLayout(new_layout))
       .setSubresourceRange(vk::ImageSubresourceRange()

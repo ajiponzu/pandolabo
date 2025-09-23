@@ -37,28 +37,9 @@ void CommandBuffer::end() const {
   m_commandBuffer.end();
 }
 
-void CommandBuffer::setPipelineBarrier(const gpu::BufferBarrier& barrier,
-                                       PipelineStage src_stage,
-                                       PipelineStage dst_stage) const {
-  m_commandBuffer.pipelineBarrier(
-      vk_helper::getPipelineStageFlagBits(src_stage),
-      vk_helper::getPipelineStageFlagBits(dst_stage),
-      vk::DependencyFlagBits{0u},
-      nullptr,
-      barrier.getBarrier(),
-      nullptr);
-}
-
-void CommandBuffer::setPipelineBarrier(const gpu::ImageBarrier& barrier,
-                                       PipelineStage src_stage,
-                                       PipelineStage dst_stage) const {
-  m_commandBuffer.pipelineBarrier(
-      vk_helper::getPipelineStageFlagBits(src_stage),
-      vk_helper::getPipelineStageFlagBits(dst_stage),
-      vk::DependencyFlagBits{0u},
-      nullptr,
-      nullptr,
-      barrier.getBarrier());
+void CommandBuffer::setPipelineBarrier(
+    const BarrierDependency& dependency) const {
+  m_commandBuffer.pipelineBarrier2(dependency.getDependencyInfo());
 }
 
 void CommandBuffer::bindPipeline(const Pipeline& pipeline) const {
@@ -176,8 +157,10 @@ void TransferCommandBuffer::setMipmaps(const gpu::Image& image,
   const auto src_image_barrier =
       gpu::ImageBarrierBuilder::create()
           .setImage(image)
-          .setPriorityAccessFlags(std::vector{AccessFlag::TransferWrite})
-          .setWaitAccessFlags(std::vector{AccessFlag::TransferRead})
+          .setSrcAccessFlags({AccessFlag::TransferWrite})
+          .setDstAccessFlags({AccessFlag::TransferRead})
+          .setSrcStages({PipelineStage::Transfer})
+          .setDstStages({PipelineStage::Transfer})
           .setOldLayout(ImageLayout::TransferDstOptimal)
           .setNewLayout(ImageLayout::TransferSrcOptimal)
           .setImageViewInfo(image_view_info)
@@ -186,19 +169,21 @@ void TransferCommandBuffer::setMipmaps(const gpu::Image& image,
   const auto dst_image_barrier =
       gpu::ImageBarrierBuilder::create()
           .setImage(image)
-          .setPriorityAccessFlags(std::vector{AccessFlag::TransferRead})
-          .setWaitAccessFlags(std::vector{AccessFlag::ShaderRead})
+          .setSrcAccessFlags({AccessFlag::TransferRead})
+          .setDstAccessFlags({AccessFlag::ShaderRead})
+          .setSrcStages({PipelineStage::Transfer})
+          .setDstStages({dst_stage})
           .setOldLayout(ImageLayout::TransferSrcOptimal)
           .setNewLayout(ImageLayout::ShaderReadOnlyOptimal)
           .setImageViewInfo(image_view_info)
           .build();
 
-  vk::ImageMemoryBarrier src_barrier = src_image_barrier.getBarrier();
-  vk::ImageMemoryBarrier dst_barrier = dst_image_barrier.getBarrier();
+  auto src_barrier = src_image_barrier.getBarrier();
+  auto dst_barrier = dst_image_barrier.getBarrier();
 
   if (dst_stage == PipelineStage::Transfer) {
     dst_barrier.setNewLayout(vk::ImageLayout::eTransferDstOptimal)
-        .setDstAccessMask(vk::AccessFlagBits::eTransferWrite);
+        .setDstAccessMask(vk::AccessFlagBits2::eTransferWrite);
   }
   if (dst_stage == PipelineStage::BottomOfPipe) {
     dst_barrier.setNewLayout(vk::ImageLayout::eTransferDstOptimal);
@@ -210,12 +195,9 @@ void TransferCommandBuffer::setMipmaps(const gpu::Image& image,
   uint32_t mip_level = 1u;
   for (; mip_level < image_view_info.mip_levels; mip_level += 1u) {
     src_barrier.subresourceRange.setBaseMipLevel(mip_level - 1u);
-    m_commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
-                                    vk::PipelineStageFlagBits::eTransfer,
-                                    vk::DependencyFlagBits{0u},
-                                    nullptr,
-                                    nullptr,
-                                    src_barrier);
+
+    m_commandBuffer.pipelineBarrier2(
+        vk::DependencyInfo{}.setImageMemoryBarriers(src_barrier));
 
     const auto blit =
         vk::ImageBlit()
@@ -246,13 +228,9 @@ void TransferCommandBuffer::setMipmaps(const gpu::Image& image,
                               vk::Filter::eLinear);
 
     dst_barrier.subresourceRange.setBaseMipLevel(mip_level - 1u);
-    m_commandBuffer.pipelineBarrier(
-        vk::PipelineStageFlagBits::eTransfer,
-        vk_helper::getPipelineStageFlagBits(dst_stage),
-        vk::DependencyFlagBits{0u},
-        nullptr,
-        nullptr,
-        dst_barrier);
+
+    m_commandBuffer.pipelineBarrier2(
+        vk::DependencyInfo{}.setImageMemoryBarriers(dst_barrier));
 
     mip_width = std::max(1u, mip_width / 2U);
     mip_height = std::max(1u, mip_height / 2U);
@@ -261,13 +239,8 @@ void TransferCommandBuffer::setMipmaps(const gpu::Image& image,
   dst_barrier.subresourceRange.setBaseMipLevel(mip_level - 1);
   dst_barrier.setOldLayout(vk::ImageLayout::eTransferDstOptimal);
 
-  m_commandBuffer.pipelineBarrier(
-      vk::PipelineStageFlagBits::eTransfer,
-      vk_helper::getPipelineStageFlagBits(dst_stage),
-      vk::DependencyFlagBits{0u},
-      nullptr,
-      nullptr,
-      dst_barrier);
+  m_commandBuffer.pipelineBarrier2(
+      vk::DependencyInfo{}.setImageMemoryBarriers(dst_barrier));
 }
 
 void TransferCommandBuffer::transferMipmapImages(
@@ -283,28 +256,24 @@ void TransferCommandBuffer::transferMipmapImages(
   const auto image_barrier =
       gpu::ImageBarrierBuilder::create()
           .setImage(image)
-          .setPriorityAccessFlags(std::vector{AccessFlag::TransferWrite})
-          .setWaitAccessFlags(std::vector{AccessFlag::TransferRead})
+          .setSrcAccessFlags({AccessFlag::TransferWrite})
+          .setDstAccessFlags({AccessFlag::TransferRead})
+          .setSrcStages({src_stage})
+          .setDstStages({dst_stage})
           .setOldLayout(ImageLayout::TransferDstOptimal)
           .setNewLayout(ImageLayout::TransferDstOptimal)
           .setImageViewInfo(image_view_info)
+          .setSrcQueueFamilyIndex(queue_family_index.first)
+          .setDstQueueFamilyIndex(queue_family_index.second)
           .build();
-
-  vk::ImageMemoryBarrier barrier = image_barrier.getBarrier();
-  barrier.setSrcQueueFamilyIndex(queue_family_index.first)
-      .setDstQueueFamilyIndex(queue_family_index.second);
 
   for (uint32_t mip_level = 1u; mip_level <= image.getMipLevels();
        mip_level += 1u) {
+    auto barrier = image_barrier.getBarrier();
     barrier.subresourceRange.setBaseMipLevel(mip_level - 1u);
 
-    m_commandBuffer.pipelineBarrier(
-        vk_helper::getPipelineStageFlagBits(src_stage),
-        vk_helper::getPipelineStageFlagBits(dst_stage),
-        vk::DependencyFlagBits{0u},
-        nullptr,
-        nullptr,
-        barrier);
+    m_commandBuffer.pipelineBarrier2(
+        vk::DependencyInfo{}.setImageMemoryBarriers(barrier));
   }
 }
 
@@ -323,28 +292,24 @@ void TransferCommandBuffer::acquireMipmapImages(
   const auto image_barrier =
       gpu::ImageBarrierBuilder::create()
           .setImage(image)
-          .setPriorityAccessFlags(std::vector{AccessFlag::TransferWrite})
-          .setWaitAccessFlags(std::vector{AccessFlag::TransferRead})
+          .setSrcAccessFlags({AccessFlag::TransferWrite})
+          .setDstAccessFlags({AccessFlag::TransferRead})
+          .setSrcStages({src_stage})
+          .setDstStages({dst_stage})
           .setOldLayout(ImageLayout::TransferDstOptimal)
           .setNewLayout(ImageLayout::ShaderReadOnlyOptimal)
           .setImageViewInfo(image_view_info)
+          .setSrcQueueFamilyIndex(queue_family_index.first)
+          .setDstQueueFamilyIndex(queue_family_index.second)
           .build();
-
-  vk::ImageMemoryBarrier barrier = image_barrier.getBarrier();
-  barrier.setSrcQueueFamilyIndex(queue_family_index.first);
-  barrier.setDstQueueFamilyIndex(queue_family_index.second);
 
   for (uint32_t mip_level = 1u; mip_level <= image.getMipLevels();
        mip_level += 1u) {
+    auto barrier = image_barrier.getBarrier();
     barrier.subresourceRange.setBaseMipLevel(mip_level - 1u);
 
-    m_commandBuffer.pipelineBarrier(
-        vk_helper::getPipelineStageFlagBits(src_stage),
-        vk_helper::getPipelineStageFlagBits(dst_stage),
-        vk::DependencyFlagBits{0u},
-        nullptr,
-        nullptr,
-        barrier);
+    m_commandBuffer.pipelineBarrier2(
+        vk::DependencyInfo{}.setImageMemoryBarriers(barrier));
   }
 }
 

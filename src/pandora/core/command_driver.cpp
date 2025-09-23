@@ -87,20 +87,19 @@ void CommandDriver::mergeSecondaryCommands() const {
       | std::ranges::to<std::vector<vk::CommandBuffer>>());
 }
 
-void CommandDriver::submit(const std::vector<PipelineStage>& dst_stages,
-                           const SubmitSemaphoreGroup& semaphore_group,
+void CommandDriver::submit(const SubmitSemaphoreGroup& semaphore_group,
                            const gpu::Fence& fence) const {
-  auto submit_info =
-      vk::SubmitInfo()
-          .setPNext(semaphore_group.getPtrTimelineSubmitInfo())
-          .setCommandBuffers(m_ptrPrimaryCommandBuffer.get())
-          .setWaitSemaphores(semaphore_group.getWaitSemaphores())
-          .setSignalSemaphores(semaphore_group.getSignalSemaphores());
+  const auto command_buffer_info =
+      vk::CommandBufferSubmitInfo().setCommandBuffer(
+          m_ptrPrimaryCommandBuffer.get());
 
-  semaphore_group.setWaitStages(dst_stages);
-  submit_info.setWaitDstStageMask(semaphore_group.getWaitStages());
+  const auto submit_info =
+      vk::SubmitInfo2()
+          .setCommandBufferInfos(command_buffer_info)
+          .setWaitSemaphoreInfos(semaphore_group.getWaitSemaphores())
+          .setSignalSemaphoreInfos(semaphore_group.getSignalSemaphores());
 
-  m_queue.submit(submit_info, fence.getFence());
+  m_queue.submit2(submit_info, fence.getFence());
 }
 
 void CommandDriver::present(const std::unique_ptr<gpu::Context>& ptr_context,

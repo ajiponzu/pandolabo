@@ -19,6 +19,96 @@ class Image;
 
 namespace pandora::core::gpu {
 
+/// @brief Vulkan memory barrier wrapper class
+/// This class manages synchronization for memory access operations.
+/// It provides control over:
+/// - Memory access ordering (read-after-write, write-after-read dependencies)
+/// - Queue family ownership transfers for multi-queue operations
+/// - Memory visibility between different pipeline stages
+class MemoryBarrier {
+ private:
+  vk::MemoryBarrier2 m_memoryBarrier{};
+
+ public:
+  /// @brief Construct memory barrier
+  /// @param src_access_flags Memory access types that must complete before this
+  /// barrier
+  /// @param dst_access_flags Memory access types that wait for this barrier
+  /// @param src_stages Pipeline stages that must complete before this barrier
+  /// @param dst_stages Pipeline stages that wait for this barrier
+  MemoryBarrier(const std::vector<AccessFlag>& src_access_flags,
+                const std::vector<AccessFlag>& dst_access_flags,
+                const std::vector<PipelineStage>& src_stages,
+                const std::vector<PipelineStage>& dst_stages);
+
+  ~MemoryBarrier();
+
+  /// @brief Get const reference to underlying Vulkan barrier
+  /// @return Const reference to vk::MemoryBarrier
+  const auto& getBarrier() const {
+    return m_memoryBarrier;
+  }
+};
+
+class MemoryBarrierBuilder {
+ private:
+  std::vector<AccessFlag> m_srcAccessFlags{};
+  std::vector<AccessFlag> m_dstAccessFlags{};
+  std::vector<PipelineStage> m_srcStages{};
+  std::vector<PipelineStage> m_dstStages{};
+
+  // Private constructor - use create() factory method instead
+  MemoryBarrierBuilder() = default;
+
+ public:
+  /// @brief Static factory method to create a new MemoryBarrierBuilder
+  /// @return A new MemoryBarrierBuilder instance
+  static MemoryBarrierBuilder create() {
+    return MemoryBarrierBuilder{};
+  }
+
+  /// @brief Set source access flags
+  /// @param flags Memory access types that must complete before this barrier
+  /// @return Reference to this builder for method chaining
+  MemoryBarrierBuilder& setSrcAccessFlags(
+      const std::vector<AccessFlag>& flags) {
+    m_srcAccessFlags = flags;
+    return *this;
+  }
+
+  /// @brief Set destination access flags
+  /// @param flags Memory access types that wait for this barrier
+  /// @return Reference to this builder for method chaining
+  MemoryBarrierBuilder& setDstAccessFlags(
+      const std::vector<AccessFlag>& flags) {
+    m_dstAccessFlags = flags;
+    return *this;
+  }
+
+  /// @brief Set source pipeline stages
+  /// @param stages Pipeline stages that must complete before this barrier
+  /// @return Reference to this builder for method chaining
+  MemoryBarrierBuilder& setSrcStages(const std::vector<PipelineStage>& stages) {
+    m_srcStages = stages;
+    return *this;
+  }
+
+  /// @brief Set destination pipeline stages
+  /// @param stages Pipeline stages that wait for this barrier
+  /// @return Reference to this builder for method chaining
+  MemoryBarrierBuilder& setDstStages(const std::vector<PipelineStage>& stages) {
+    m_dstStages = stages;
+    return *this;
+  }
+
+  /// @brief Build and return the final MemoryBarrier instance
+  /// @return Constructed MemoryBarrier object
+  MemoryBarrier build() const {
+    return MemoryBarrier(
+        m_srcAccessFlags, m_dstAccessFlags, m_srcStages, m_dstStages);
+  }
+};
+
 /// @brief Vulkan buffer memory barrier wrapper class
 /// This class manages synchronization for buffer memory access operations.
 /// It provides control over:
@@ -31,17 +121,24 @@ namespace pandora::core::gpu {
 /// 2. Acquire barrier with destination queue family index
 class BufferBarrier {
  private:
-  vk::BufferMemoryBarrier m_bufferMemoryBarrier{};
+  vk::BufferMemoryBarrier2 m_bufferMemoryBarrier{};
 
  public:
   /// @brief Construct buffer memory barrier
   /// @param buffer The buffer to synchronize
-  /// @param priority_access_flags Memory access types that must complete before
+  /// @param src_access_flags Memory access types that must complete before
   /// this barrier
-  /// @param wait_access_flags Memory access types that wait for this barrier
+  /// @param dst_access_flags Memory access types that wait for this barrier
+  /// @param src_stages Pipeline stages that must complete before this barrier
+  /// @param dst_stages Pipeline stages that wait for this barrier
+  /// @param src_queue_family Queue family index that currently owns the buffer
+  /// @param dst_queue_family Queue family index that will receive buffer
+  /// ownership
   BufferBarrier(const Buffer& buffer,
-                const std::vector<AccessFlag>& priority_access_flags,
-                const std::vector<AccessFlag>& wait_access_flags,
+                const std::vector<AccessFlag>& src_access_flags,
+                const std::vector<AccessFlag>& dst_access_flags,
+                const std::vector<PipelineStage>& src_stages,
+                const std::vector<PipelineStage>& dst_stages,
                 uint32_t src_queue_family = 0u,
                 uint32_t dst_queue_family = 0u);
   ~BufferBarrier();
@@ -70,8 +167,10 @@ class BufferBarrier {
 class BufferBarrierBuilder {
  private:
   const Buffer* m_ptrBuffer = nullptr;
-  std::vector<AccessFlag> m_priorityAccessFlags{};
-  std::vector<AccessFlag> m_waitAccessFlags{};
+  std::vector<AccessFlag> m_srcAccessFlags{};
+  std::vector<AccessFlag> m_dstAccessFlags{};
+  std::vector<PipelineStage> m_srcStages{};
+  std::vector<PipelineStage> m_dstStages{};
   uint32_t m_srcQueueFamily = 0u;
   uint32_t m_dstQueueFamily = 0u;
 
@@ -93,21 +192,37 @@ class BufferBarrierBuilder {
     return *this;
   }
 
-  /// @brief Set priority access flags
+  /// @brief Set source access flags
   /// @param flags Memory access types that must complete before this barrier
   /// @return Reference to this builder for method chaining
-  BufferBarrierBuilder& setPriorityAccessFlags(
+  BufferBarrierBuilder& setSrcAccessFlags(
       const std::vector<AccessFlag>& flags) {
-    m_priorityAccessFlags = flags;
+    m_srcAccessFlags = flags;
     return *this;
   }
 
-  /// @brief Set wait access flags
+  /// @brief Set destination access flags
   /// @param flags Memory access types that wait for this barrier
   /// @return Reference to this builder for method chaining
-  BufferBarrierBuilder& setWaitAccessFlags(
+  BufferBarrierBuilder& setDstAccessFlags(
       const std::vector<AccessFlag>& flags) {
-    m_waitAccessFlags = flags;
+    m_dstAccessFlags = flags;
+    return *this;
+  }
+
+  /// @brief Set source pipeline stages
+  /// @param stages Pipeline stages that must complete before this barrier
+  /// @return Reference to this builder for method chaining
+  BufferBarrierBuilder& setSrcStages(const std::vector<PipelineStage>& stages) {
+    m_srcStages = stages;
+    return *this;
+  }
+
+  /// @brief Set destination pipeline stages
+  /// @param stages Pipeline stages that wait for this barrier
+  /// @return Reference to this builder for method chaining
+  BufferBarrierBuilder& setDstStages(const std::vector<PipelineStage>& stages) {
+    m_dstStages = stages;
     return *this;
   }
 
@@ -137,8 +252,10 @@ class BufferBarrierBuilder {
     }
 
     return BufferBarrier(*m_ptrBuffer,
-                         m_priorityAccessFlags,
-                         m_waitAccessFlags,
+                         m_srcAccessFlags,
+                         m_dstAccessFlags,
+                         m_srcStages,
+                         m_dstStages,
                          m_srcQueueFamily,
                          m_dstQueueFamily);
   }
@@ -159,20 +276,24 @@ class BufferBarrierBuilder {
 /// barrier
 class ImageBarrier {
  private:
-  vk::ImageMemoryBarrier m_imageMemoryBarrier{};
+  vk::ImageMemoryBarrier2 m_imageMemoryBarrier{};
 
  public:
   ImageBarrier(const Image& image,
-               const std::vector<AccessFlag>& priority_access_flags,
-               const std::vector<AccessFlag>& wait_access_flags,
+               const std::vector<AccessFlag>& src_access_flags,
+               const std::vector<AccessFlag>& dst_access_flags,
+               const std::vector<PipelineStage>& src_stages,
+               const std::vector<PipelineStage>& dst_stages,
                ImageLayout old_layout,
                ImageLayout new_layout,
                const ImageViewInfo& image_view_info,
                uint32_t src_queue_family = 0u,
                uint32_t dst_queue_family = 0u);
   ImageBarrier(const std::unique_ptr<Context>& ptr_context,
-               const std::vector<AccessFlag>& priority_access_flags,
-               const std::vector<AccessFlag>& wait_access_flags,
+               const std::vector<AccessFlag>& src_access_flags,
+               const std::vector<AccessFlag>& dst_access_flags,
+               const std::vector<PipelineStage>& src_stages,
+               const std::vector<PipelineStage>& dst_stages,
                ImageLayout old_layout,
                ImageLayout new_layout,
                uint32_t src_queue_family = 0u,
@@ -197,8 +318,10 @@ class ImageBarrier {
 class ImageBarrierBuilder {
  private:
   const Image* m_ptrImage = nullptr;
-  std::vector<AccessFlag> m_priorityAccessFlags{};
-  std::vector<AccessFlag> m_waitAccessFlags{};
+  std::vector<AccessFlag> m_srcAccessFlags{};
+  std::vector<AccessFlag> m_dstAccessFlags{};
+  std::vector<PipelineStage> m_srcStages{};
+  std::vector<PipelineStage> m_dstStages{};
   ImageLayout m_oldLayout = ImageLayout::Undefined;
   ImageLayout m_newLayout = ImageLayout::Undefined;
   std::optional<ImageViewInfo> m_imageViewInfo{};
@@ -226,18 +349,30 @@ class ImageBarrierBuilder {
   /// @brief Set priority access flags
   /// @param flags Memory access types that must complete before this barrier
   /// @return Reference to this builder for method chaining
-  ImageBarrierBuilder& setPriorityAccessFlags(
-      const std::vector<AccessFlag>& flags) {
-    m_priorityAccessFlags = flags;
+  ImageBarrierBuilder& setSrcAccessFlags(const std::vector<AccessFlag>& flags) {
+    m_srcAccessFlags = flags;
     return *this;
   }
 
   /// @brief Set wait access flags
   /// @param flags Memory access types that wait for this barrier
   /// @return Reference to this builder for method chaining
-  ImageBarrierBuilder& setWaitAccessFlags(
-      const std::vector<AccessFlag>& flags) {
-    m_waitAccessFlags = flags;
+  ImageBarrierBuilder& setDstAccessFlags(const std::vector<AccessFlag>& flags) {
+    m_dstAccessFlags = flags;
+    return *this;
+  }
+
+  /// @brief Set source pipeline stages
+  /// @param stages Pipeline stages that must complete before this barrier
+  ImageBarrierBuilder& setSrcStages(const std::vector<PipelineStage>& stages) {
+    m_srcStages = stages;
+    return *this;
+  }
+
+  /// @brief Set destination pipeline stages
+  /// @param stages Pipeline stages that wait for this barrier
+  ImageBarrierBuilder& setDstStages(const std::vector<PipelineStage>& stages) {
+    m_dstStages = stages;
     return *this;
   }
 
@@ -291,8 +426,10 @@ class ImageBarrierBuilder {
     if (m_ptrImage && m_imageViewInfo) {
       // Build with image and image view info
       return ImageBarrier(*m_ptrImage,
-                          m_priorityAccessFlags,
-                          m_waitAccessFlags,
+                          m_srcAccessFlags,
+                          m_dstAccessFlags,
+                          m_srcStages,
+                          m_dstStages,
                           m_oldLayout,
                           m_newLayout,
                           *m_imageViewInfo,
@@ -301,8 +438,10 @@ class ImageBarrierBuilder {
     } else if (ptr_context) {
       // Build with context
       return ImageBarrier(ptr_context,
-                          m_priorityAccessFlags,
-                          m_waitAccessFlags,
+                          m_srcAccessFlags,
+                          m_dstAccessFlags,
+                          m_srcStages,
+                          m_dstStages,
                           m_oldLayout,
                           m_newLayout,
                           m_srcQueueFamily,

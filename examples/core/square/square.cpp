@@ -41,15 +41,30 @@ void Square::run() {
 
     plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
     m_ptrTransferCommandDriver->submit(
-        {plc::PipelineStage::BottomOfPipe},
         plc::SubmitSemaphoreGroup{}
-            .setWaitSemaphores(semaphore.forWait(0u))
-            .setSignalSemaphores(semaphore.forSignal(1u)));
+            .setWaitSemaphores(
+                {plc::SubmitSemaphore{}
+                     .setSemaphore(semaphore)
+                     .setValue(0u)
+                     .setStageMask(plc::PipelineStage::Transfer)})
+            .setSignalSemaphores(
+                {plc::SubmitSemaphore{}
+                     .setSemaphore(semaphore)
+                     .setValue(1u)
+                     .setStageMask(plc::PipelineStage::Transfer)}));
+
     m_ptrGraphicCommandDriver.at(0u)->submit(
-        {plc::PipelineStage::VertexShader},
         plc::SubmitSemaphoreGroup{}
-            .setWaitSemaphores(semaphore.forWait(1u))
-            .setSignalSemaphores(semaphore.forSignal(2u)));
+            .setWaitSemaphores(
+                {plc::SubmitSemaphore{}
+                     .setSemaphore(semaphore)
+                     .setValue(1u)
+                     .setStageMask(plc::PipelineStage::Transfer)})
+            .setSignalSemaphores(
+                {plc::SubmitSemaphore{}
+                     .setSemaphore(semaphore)
+                     .setValue(2u)
+                     .setStageMask(plc::PipelineStage::AllCommands)}));
 
     plc::TimelineSemaphoreDriver{}
         .setSemaphores({semaphore})
@@ -77,11 +92,18 @@ void Square::run() {
     const auto finished_fence = ptr_swapchain->getFence();
 
     m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
-        ->submit({plc::PipelineStage::ColorAttachmentOutput},
-                 plc::SubmitSemaphoreGroup{}
-                     .setWaitSemaphores(image_semaphore)
-                     .setSignalSemaphores(finished_semaphore),
+        ->submit(plc::SubmitSemaphoreGroup{}
+                     .setWaitSemaphores(
+                         {plc::SubmitSemaphore{}
+                              .setSemaphore(image_semaphore)
+                              .setStageMask(
+                                  plc::PipelineStage::ColorAttachmentOutput)})
+                     .setSignalSemaphores(
+                         {plc::SubmitSemaphore{}
+                              .setSemaphore(finished_semaphore)
+                              .setStageMask(plc::PipelineStage::AllGraphics)}),
                  finished_fence);
+
     m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
         ->present(m_ptrContext, finished_semaphore);
 
@@ -259,16 +281,17 @@ void Square::setTransferCommands(
       const auto buffer_barrier =
           plc::gpu::BufferBarrierBuilder::create()
               .setBuffer(*m_ptrVertexBuffer)
-              .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
-              .setWaitAccessFlags(
+              .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
+              .setDstAccessFlags(
                   {plc::AccessFlag::ShaderRead, plc::AccessFlag::ShaderWrite})
+              .setSrcStages({plc::PipelineStage::Transfer})
+              .setDstStages({plc::PipelineStage::Transfer})
               .setSrcQueueFamilyIndex(queue_family_indices.first)
               .setDstQueueFamilyIndex(queue_family_indices.second)
               .build();
 
-      command_buffer.setPipelineBarrier(buffer_barrier,
-                                        plc::PipelineStage::Transfer,
-                                        plc::PipelineStage::BottomOfPipe);
+      command_buffer.setPipelineBarrier(
+          plc::BarrierDependency().setBufferBarriers({buffer_barrier}));
     }
 
     {
@@ -291,16 +314,17 @@ void Square::setTransferCommands(
       const auto buffer_barrier =
           plc::gpu::BufferBarrierBuilder::create()
               .setBuffer(*m_ptrIndexBuffer)
-              .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
-              .setWaitAccessFlags(
+              .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
+              .setDstAccessFlags(
                   {plc::AccessFlag::ShaderRead, plc::AccessFlag::ShaderWrite})
+              .setSrcStages({plc::PipelineStage::Transfer})
+              .setDstStages({plc::PipelineStage::Transfer})
               .setSrcQueueFamilyIndex(queue_family_indices.first)
               .setDstQueueFamilyIndex(queue_family_indices.second)
               .build();
 
-      command_buffer.setPipelineBarrier(buffer_barrier,
-                                        plc::PipelineStage::Transfer,
-                                        plc::PipelineStage::BottomOfPipe);
+      command_buffer.setPipelineBarrier(
+          plc::BarrierDependency().setBufferBarriers({buffer_barrier}));
     }
 
     command_buffer.end();
@@ -314,32 +338,34 @@ void Square::setTransferCommands(
       const auto buffer_barrier =
           plc::gpu::BufferBarrierBuilder::create()
               .setBuffer(*m_ptrVertexBuffer)
-              .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
-              .setWaitAccessFlags(
+              .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
+              .setDstAccessFlags(
                   {plc::AccessFlag::ShaderRead, plc::AccessFlag::ShaderWrite})
+              .setSrcStages({plc::PipelineStage::Transfer})
+              .setDstStages({plc::PipelineStage::VertexShader})
               .setSrcQueueFamilyIndex(queue_family_indices.first)
               .setDstQueueFamilyIndex(queue_family_indices.second)
               .build();
 
-      command_buffer.setPipelineBarrier(buffer_barrier,
-                                        plc::PipelineStage::BottomOfPipe,
-                                        plc::PipelineStage::VertexShader);
+      command_buffer.setPipelineBarrier(
+          plc::BarrierDependency().setBufferBarriers({buffer_barrier}));
     }
 
     {
       const auto buffer_barrier =
           plc::gpu::BufferBarrierBuilder::create()
               .setBuffer(*m_ptrIndexBuffer)
-              .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
-              .setWaitAccessFlags(
+              .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
+              .setDstAccessFlags(
                   {plc::AccessFlag::ShaderRead, plc::AccessFlag::ShaderWrite})
+              .setSrcStages({plc::PipelineStage::Transfer})
+              .setDstStages({plc::PipelineStage::VertexShader})
               .setSrcQueueFamilyIndex(queue_family_indices.first)
               .setDstQueueFamilyIndex(queue_family_indices.second)
               .build();
 
-      command_buffer.setPipelineBarrier(buffer_barrier,
-                                        plc::PipelineStage::BottomOfPipe,
-                                        plc::PipelineStage::VertexShader);
+      command_buffer.setPipelineBarrier(
+          plc::BarrierDependency().setBufferBarriers({buffer_barrier}));
     }
 
     command_buffer.end();

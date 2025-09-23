@@ -11,10 +11,16 @@ namespace vk_helper {
 vk::MemoryPropertyFlags getMemoryPropertyFlags(
     pandora::core::MemoryUsage memory_usage);
 
-vk::AccessFlagBits getAccessFlagBits(pandora::core::AccessFlag access_flag);
+vk::AccessFlagBits2 getAccessFlagBits(pandora::core::AccessFlag access_flag);
 
-vk::PipelineStageFlagBits getPipelineStageFlagBits(
+vk::PipelineStageFlagBits2 getPipelineStageFlagBits(
     pandora::core::PipelineStage stage);
+
+vk::AccessFlags2 getAccessFlags(
+    const std::vector<pandora::core::AccessFlag>& access_flags);
+
+vk::PipelineStageFlags2 getPipelineStageFlags(
+    const std::vector<pandora::core::PipelineStage>& stages);
 
 vk::PipelineBindPoint getPipelineBindPoint(
     pandora::core::PipelineBind bind_point);

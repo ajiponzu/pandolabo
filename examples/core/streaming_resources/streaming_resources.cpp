@@ -12,7 +12,7 @@ StreamingResources::StreamingResources()
     : m_startTime(std::chrono::high_resolution_clock::now()),
       m_randomGenerator(std::random_device{}()),
       m_colorDist(0.2f, 1.0f),
-      m_currentSemaphoreValue(0),
+      m_currentSemaphoreValue(0u),
       m_triangleSpawnAngle(0.0f),
       m_lastSpawnTime(0.0f) {
   std::println("Initializing StreamingResources...");
@@ -53,7 +53,7 @@ StreamingResources::StreamingResources()
   std::println("Command Drivers created successfully.");
 
   // Initialize Timeline Semaphore management variables
-  m_currentSemaphoreValue = 0;
+  m_currentSemaphoreValue = 0u;
   // Timeline Semaphore will be created on first use
 
   // Create frame-specific vertex buffers and staging buffers (increased size
@@ -61,7 +61,7 @@ StreamingResources::StreamingResources()
   std::println("Creating frame-specific buffers...");
   const size_t frame_count = m_ptrContext->getPtrSwapchain()->getImageCount();
   const size_t buffer_size =
-      sizeof(Vertex) * MAX_TRIANGLES * 3;  // 3 vertices per triangle
+      sizeof(Vertex) * MAX_TRIANGLES * 3u;  // 3 vertices per triangle
   for (size_t idx = 0u; idx < frame_count; idx += 1u) {
     m_ptrVertexBuffers.push_back(
         plc::createUniqueVertexBuffer(m_ptrContext, buffer_size));
@@ -96,20 +96,19 @@ void StreamingResources::run() {
   std::println("🚀 Streaming Resources Example 開始");
   std::println("動的三角形生成とストリーミングバッファリング");
   std::println("回転方向に新しい三角形を出力し、古い三角形を消去");
-  std::println("ESCキーまたはウィンドウを閉じて終了\n");
 
   while (m_ptrWindow->update()) {
-    const auto frame_index =
-        m_ptrContext->getPtrSwapchain()->getFrameSyncIndex();
+    // const auto frame_index =
+    //     m_ptrContext->getPtrSwapchain()->getFrameSyncIndex();
 
     // Reset command pools AFTER rendering completion (simultaneousUse=false)
-    m_ptrGraphicCommandDriver.at(frame_index)
-        ->resetAllCommandPools(m_ptrContext);
+    // m_ptrGraphicCommandDriver.at(frame_index)
+    //     ->resetAllCommandPools(m_ptrContext);
 
     // Also reset transfer command pool for the next frame to prevent reuse
     // issues
-    m_ptrTransferCommandDriver.at(frame_index)
-        ->resetAllCommandPools(m_ptrContext);
+    // m_ptrTransferCommandDriver.at(frame_index)
+    //     ->resetAllCommandPools(m_ptrContext);
 
     updateVertexData();
     setGraphicCommands();
@@ -260,7 +259,7 @@ void StreamingResources::updateVertexData() {
   auto vertices = getCurrentTriangles(time);
   std::println("Current vertices: {} ({} triangles)",
                vertices.size(),
-               vertices.size() / 3);
+               vertices.size() / 3u);
 
   // Skip if no triangles to render
   if (vertices.empty()) {
@@ -287,22 +286,22 @@ void StreamingResources::updateVertexData() {
   if (!m_currentTimelineSemaphore) {
     m_currentTimelineSemaphore =
         std::make_unique<plc::gpu::TimelineSemaphore>(m_ptrContext);
-    m_currentSemaphoreValue = 0;  // Initial state
+    m_currentSemaphoreValue = 0u;  // Initial state
   }
 
   // Check if timeline value is getting too large and needs reset
-  constexpr uint64_t TIMELINE_RESET_THRESHOLD = 1000000;  // 1 million
+  constexpr uint64_t TIMELINE_RESET_THRESHOLD = 1000000u;  // 1 million
   if (m_currentSemaphoreValue > TIMELINE_RESET_THRESHOLD) {
     std::println(
         "Timeline Semaphore value ({}) exceeded threshold, recreating...",
         m_currentSemaphoreValue);
     m_currentTimelineSemaphore =
         std::make_unique<plc::gpu::TimelineSemaphore>(m_ptrContext);
-    m_currentSemaphoreValue = 0;  // Reset to initial state
+    m_currentSemaphoreValue = 0u;  // Reset to initial state
   }
 
   // Increment timeline value for this frame
-  ++m_currentSemaphoreValue;
+  m_currentSemaphoreValue += 1u;
 
   // Use transfer command to copy from staging to vertex buffer
   const auto command_buffer = transfer_driver->getTransfer();
@@ -317,32 +316,37 @@ void StreamingResources::updateVertexData() {
   const auto buffer_barrier =
       plc::gpu::BufferBarrierBuilder::create()
           .setBuffer(*vertex_buffer)
-          .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
-          .setWaitAccessFlags({plc::AccessFlag::VertexAttributeRead})
+          .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
+          .setDstAccessFlags({plc::AccessFlag::TransferRead})
+          .setSrcStages({plc::PipelineStage::Transfer})
+          .setDstStages({plc::PipelineStage::Transfer})
           .setSrcQueueFamilyIndex(queue_family_indices.first)
           .setDstQueueFamilyIndex(queue_family_indices.second)
           .build();
 
-  command_buffer.setPipelineBarrier(buffer_barrier,
-                                    plc::PipelineStage::Transfer,
-                                    plc::PipelineStage::BottomOfPipe);
+  command_buffer.setPipelineBarrier(
+      plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
 
   command_buffer.end();
 
   // Submit transfer command with Timeline Semaphore synchronization
   transfer_driver->submit(
-      {plc::PipelineStage::VertexInput},  // Wait stage for Timeline Semaphore
       plc::SubmitSemaphoreGroup{}
-          .setWaitSemaphores(m_currentTimelineSemaphore->forWait(
-              0))  // Wait for initial value 0
+          .setWaitSemaphores({plc::SubmitSemaphore{}
+                                  .setSemaphore(*m_currentTimelineSemaphore)
+                                  .setValue(0u)
+                                  .setStageMask(plc::PipelineStage::Transfer)})
           .setSignalSemaphores(
-              m_currentTimelineSemaphore->forSignal(m_currentSemaphoreValue)));
+              {plc::SubmitSemaphore{}
+                   .setSemaphore(*m_currentTimelineSemaphore)
+                   .setValue(m_currentSemaphoreValue)
+                   .setStageMask(plc::PipelineStage::Transfer)}));
 
   // Do NOT wait here - let Graphics queue wait for the Timeline Semaphore
   // The Graphics operation in setGraphicCommands() will wait for this signal
 }
 
-void StreamingResources::spawnNewTriangle(float currentTime) {
+void StreamingResources::spawnNewTriangle(float_t currentTime) {
   if (m_triangleInfos.size() >= MAX_TRIANGLES) {
     return;  // Maximum triangles reached
   }
@@ -354,8 +358,8 @@ void StreamingResources::spawnNewTriangle(float currentTime) {
   m_triangleInfos.push_back(triangleInfo);
 
   // Create a new triangle at the current spawn angle
-  float radius = 0.15f;
-  float angleStep =
+  auto radius = 0.15f;
+  auto angleStep =
       2.0f * std::numbers::pi_v<float_t> / 3.0f;  // 120 degrees = 2π/3
 
   glm::vec3 color = {m_colorDist(m_randomGenerator),
@@ -363,8 +367,8 @@ void StreamingResources::spawnNewTriangle(float currentTime) {
                      m_colorDist(m_randomGenerator)};
 
   // Generate 3 vertices for the triangle
-  for (int i = 0; i < 3; ++i) {
-    float angle = m_triangleSpawnAngle + (i * angleStep);
+  for (int i = 0; i < 3; i += 1) {
+    auto angle = m_triangleSpawnAngle + (i * angleStep);
     glm::vec2 pos = {std::cos(angle) * radius, std::sin(angle) * radius};
     Vertex vertex;
     vertex.pos = pos;
@@ -380,7 +384,7 @@ void StreamingResources::spawnNewTriangle(float currentTime) {
   }
 }
 
-void StreamingResources::removeOldTriangles(float currentTime) {
+void StreamingResources::removeOldTriangles(float_t currentTime) {
   // Remove old triangles and their corresponding vertices
   auto triangleIt = m_triangleInfos.begin();
   while (triangleIt != m_triangleInfos.end()) {
@@ -388,12 +392,12 @@ void StreamingResources::removeOldTriangles(float currentTime) {
       // Remove the 3 vertices for this triangle
       size_t startIndex = triangleIt->vertexStartIndex;
       m_activeTriangles.erase(m_activeTriangles.begin() + startIndex,
-                              m_activeTriangles.begin() + startIndex + 3);
+                              m_activeTriangles.begin() + startIndex + 3u);
 
       // Update indices for remaining triangles
       for (auto& info : m_triangleInfos) {
         if (info.vertexStartIndex > startIndex) {
-          info.vertexStartIndex -= 3;
+          info.vertexStartIndex -= 3u;
         }
       }
 
@@ -406,19 +410,19 @@ void StreamingResources::removeOldTriangles(float currentTime) {
 }
 
 std::vector<StreamingResources::Vertex> StreamingResources::getCurrentTriangles(
-    float currentTime) {
+    float_t currentTime) {
   // Apply fading effect based on triangle age
   std::vector<Vertex> result;
   result.reserve(m_activeTriangles.size());
 
-  for (size_t i = 0; i < m_triangleInfos.size(); ++i) {
+  for (size_t i = 0; i < m_triangleInfos.size(); i += 1) {
     const auto& triangleInfo = m_triangleInfos[i];
-    float age = currentTime - triangleInfo.spawnTime;
-    float alpha = 1.0f - (age / TRIANGLE_LIFETIME);
+    auto age = currentTime - triangleInfo.spawnTime;
+    auto alpha = 1.0f - (age / TRIANGLE_LIFETIME);
     alpha = std::max(0.0f, std::min(1.0f, alpha));
 
     // Add the 3 vertices for this triangle with fading
-    for (int j = 0; j < 3; ++j) {
+    for (int j = 0; j < 3; j += 1) {
       size_t vertexIndex = triangleInfo.vertexStartIndex + j;
       if (vertexIndex < m_activeTriangles.size()) {
         Vertex vertex = m_activeTriangles[vertexIndex];
@@ -463,15 +467,16 @@ void StreamingResources::setGraphicCommands() {
   const auto buffer_barrier =
       plc::gpu::BufferBarrierBuilder::create()
           .setBuffer(*frame_vertex_buffer)
-          .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
-          .setWaitAccessFlags({plc::AccessFlag::VertexAttributeRead})
+          .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
+          .setDstAccessFlags({plc::AccessFlag::VertexAttributeRead})
+          .setSrcStages({plc::PipelineStage::Transfer})
+          .setDstStages({plc::PipelineStage::VertexInput})
           .setSrcQueueFamilyIndex(queue_family_indices.first)
           .setDstQueueFamilyIndex(queue_family_indices.second)
           .build();
 
-  command_buffer.setPipelineBarrier(buffer_barrier,
-                                    plc::PipelineStage::BottomOfPipe,
-                                    plc::PipelineStage::VertexShader);
+  command_buffer.setPipelineBarrier(
+      plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
 
   command_buffer.beginRenderpass(
       *m_ptrRenderKit,
@@ -502,15 +507,21 @@ void StreamingResources::setGraphicCommands() {
   // Include Timeline Semaphore to wait for transfer completion if available
   if (m_currentTimelineSemaphore) {
     m_ptrGraphicCommandDriver.at(frame_index)
-        ->submit(
-            {plc::PipelineStage::ColorAttachmentOutput,  // for image_semaphore
-             plc::PipelineStage::VertexShader},  // for timeline semaphore
-            plc::SubmitSemaphoreGroup{}
-                .setWaitSemaphores(image_semaphore,
-                                   m_currentTimelineSemaphore->forWait(
-                                       m_currentSemaphoreValue))
-                .setSignalSemaphores(finished_semaphore),
-            finished_fence);
+        ->submit(plc::SubmitSemaphoreGroup{}
+                     .setWaitSemaphores(
+                         {plc::SubmitSemaphore{}
+                              .setSemaphore(*m_currentTimelineSemaphore)
+                              .setValue(m_currentSemaphoreValue)
+                              .setStageMask(plc::PipelineStage::VertexShader),
+                          plc::SubmitSemaphore{}
+                              .setSemaphore(image_semaphore)
+                              .setStageMask(
+                                  plc::PipelineStage::ColorAttachmentOutput)})
+                     .setSignalSemaphores(
+                         {plc::SubmitSemaphore{}
+                              .setSemaphore(finished_semaphore)
+                              .setStageMask(plc::PipelineStage::AllGraphics)}),
+                 finished_fence);
 
     // Wait for Timeline Semaphore completion to ensure proper synchronization
     plc::TimelineSemaphoreDriver{}
@@ -520,10 +531,18 @@ void StreamingResources::setGraphicCommands() {
   } else {
     // No Timeline Semaphore available, just use image semaphore
     m_ptrGraphicCommandDriver.at(frame_index)
-        ->submit({plc::PipelineStage::ColorAttachmentOutput},
-                 plc::SubmitSemaphoreGroup{}
-                     .setWaitSemaphores(image_semaphore)
-                     .setSignalSemaphores(finished_semaphore),
+        ->submit(plc::SubmitSemaphoreGroup{}
+                     .setWaitSemaphores(
+                         {plc::SubmitSemaphore{}
+                              .setSemaphore(image_semaphore)
+                              .setValue(0u)
+                              .setStageMask(
+                                  plc::PipelineStage::ColorAttachmentOutput)})
+                     .setSignalSemaphores(
+                         {plc::SubmitSemaphore{}
+                              .setSemaphore(finished_semaphore)
+                              .setValue(0u)
+                              .setStageMask(plc::PipelineStage::AllGraphics)}),
                  finished_fence);
   }
 

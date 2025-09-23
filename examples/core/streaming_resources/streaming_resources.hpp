@@ -22,7 +22,7 @@ class StreamingResources {
   };
 
   struct TriangleInfo {
-    float spawnTime;
+    float_t spawnTime;
     size_t vertexStartIndex;  // Index in m_activeTriangles where this triangle
                               // starts
   };
@@ -51,16 +51,16 @@ class StreamingResources {
   // Triangle generation state
   std::vector<Vertex> m_activeTriangles;
   std::vector<TriangleInfo> m_triangleInfos;
-  float m_triangleSpawnAngle;
-  float m_lastSpawnTime;
+  float_t m_triangleSpawnAngle;
+  float_t m_lastSpawnTime;
   static constexpr size_t MAX_TRIANGLES = 200;
-  static constexpr float SPAWN_INTERVAL = 0.05f;    // seconds
-  static constexpr float TRIANGLE_LIFETIME = 5.0f;  // seconds
+  static constexpr float_t SPAWN_INTERVAL = 0.05f;    // seconds
+  static constexpr float_t TRIANGLE_LIFETIME = 5.0f;  // seconds
 
   // Animation state
   std::chrono::high_resolution_clock::time_point m_startTime;
   std::mt19937 m_randomGenerator;
-  std::uniform_real_distribution<float> m_colorDist;
+  std::uniform_real_distribution<float_t> m_colorDist;
 
  public:
   StreamingResources();
@@ -74,9 +74,9 @@ class StreamingResources {
   void constructGraphicPipeline();
   void updateVertexData();
   void setGraphicCommands();
-  void spawnNewTriangle(float currentTime);
-  void removeOldTriangles(float currentTime);
-  std::vector<Vertex> getCurrentTriangles(float currentTime);
+  void spawnNewTriangle(float_t currentTime);
+  void removeOldTriangles(float_t currentTime);
+  std::vector<Vertex> getCurrentTriangles(float_t currentTime);
 };
 
 }  // namespace core

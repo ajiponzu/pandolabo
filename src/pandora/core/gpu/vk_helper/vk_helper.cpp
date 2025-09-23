@@ -21,10 +21,10 @@ vk::MemoryPropertyFlags getMemoryPropertyFlags(
   }
 }
 
-vk::AccessFlagBits getAccessFlagBits(pandora::core::AccessFlag access_flag) {
+vk::AccessFlagBits2 getAccessFlagBits(pandora::core::AccessFlag access_flag) {
   switch (access_flag) {
     using enum pandora::core::AccessFlag;
-    using enum vk::AccessFlagBits;
+    using enum vk::AccessFlagBits2;
 
     case IndirectCommandRead:
       return eIndirectCommandRead;
@@ -61,16 +61,15 @@ vk::AccessFlagBits getAccessFlagBits(pandora::core::AccessFlag access_flag) {
     case MemoryWrite:
       return eMemoryWrite;
     default:
-      return eNone;
+      return vk::AccessFlagBits2{};
   }
 }
 
-vk::PipelineStageFlagBits getPipelineStageFlagBits(
+vk::PipelineStageFlagBits2 getPipelineStageFlagBits(
     pandora::core::PipelineStage stage) {
   switch (stage) {
     using enum pandora::core::PipelineStage;
-    using enum vk::PipelineStageFlagBits;
-
+    using enum vk::PipelineStageFlagBits2;
     case TopOfPipe:
       return eTopOfPipe;
     case DrawIndirect:
@@ -106,8 +105,26 @@ vk::PipelineStageFlagBits getPipelineStageFlagBits(
     case AllCommands:
       return eAllCommands;
     default:
-      return eNone;
+      return vk::PipelineStageFlagBits2{};
   }
+}
+
+vk::AccessFlags2 getAccessFlags(
+    const std::vector<pandora::core::AccessFlag>& access_flags) {
+  vk::AccessFlags2 flags{};
+  for (auto a : access_flags) {
+    flags |= static_cast<vk::AccessFlags2>(getAccessFlagBits(a));
+  }
+  return flags;
+}
+
+vk::PipelineStageFlags2 getPipelineStageFlags(
+    const std::vector<pandora::core::PipelineStage>& stages) {
+  vk::PipelineStageFlags2 flags{};
+  for (auto s : stages) {
+    flags |= static_cast<vk::PipelineStageFlags2>(getPipelineStageFlagBits(s));
+  }
+  return flags;
 }
 
 vk::PipelineBindPoint getPipelineBindPoint(

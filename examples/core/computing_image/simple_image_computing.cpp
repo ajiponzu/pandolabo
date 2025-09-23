@@ -44,19 +44,33 @@ void SimpleImageComputing::run() {
   {
     std::vector<plc::gpu::Buffer> staging_buffers;
     setTransferCommands(staging_buffers);
-
     setComputeCommands(result_buffer);
 
     m_ptrTransferCommandDriver->submit(
-        {plc::PipelineStage::BottomOfPipe},
         plc::SubmitSemaphoreGroup{}
-            .setWaitSemaphores(semaphore.forWait(0u))
-            .setSignalSemaphores(semaphore.forSignal(1u)));
+            .setWaitSemaphores(
+                {plc::SubmitSemaphore()
+                     .setSemaphore(semaphore)
+                     .setValue(0u)
+                     .setStageMask(plc::PipelineStage::Transfer)})
+            .setSignalSemaphores(
+                {plc::SubmitSemaphore()
+                     .setSemaphore(semaphore)
+                     .setValue(1u)
+                     .setStageMask(plc::PipelineStage::Transfer)}));
+
     m_ptrComputeCommandDriver->submit(
-        {plc::PipelineStage::ComputeShader},
         plc::SubmitSemaphoreGroup{}
-            .setWaitSemaphores(semaphore.forWait(1u))
-            .setSignalSemaphores(semaphore.forSignal(2u)));
+            .setWaitSemaphores(
+                {plc::SubmitSemaphore()
+                     .setSemaphore(semaphore)
+                     .setValue(1u)
+                     .setStageMask(plc::PipelineStage::Transfer)})
+            .setSignalSemaphores(
+                {plc::SubmitSemaphore()
+                     .setSemaphore(semaphore)
+                     .setValue(2u)
+                     .setStageMask(plc::PipelineStage::AllCommands)}));
 
     plc::TimelineSemaphoreDriver{}
         .setSemaphores({semaphore})
@@ -206,16 +220,17 @@ void SimpleImageComputing::setTransferCommands(
     const auto image_barrier =
         plc::gpu::ImageBarrierBuilder::create()
             .setImage(*m_ptrImage)
-            .setPriorityAccessFlags({plc::AccessFlag::Unknown})
-            .setWaitAccessFlags({plc::AccessFlag::TransferWrite})
+            .setSrcAccessFlags({plc::AccessFlag::Unknown})
+            .setDstAccessFlags({plc::AccessFlag::TransferWrite})
+            .setSrcStages({plc::PipelineStage::Transfer})
+            .setDstStages({plc::PipelineStage::Transfer})
             .setOldLayout(plc::ImageLayout::Undefined)
             .setNewLayout(plc::ImageLayout::TransferDstOptimal)
             .setImageViewInfo(image_view_info)
             .build();
 
-    command_buffer.setPipelineBarrier(image_barrier,
-                                      plc::PipelineStage::TopOfPipe,
-                                      plc::PipelineStage::Transfer);
+    command_buffer.setPipelineBarrier(
+        plc::BarrierDependency{}.setImageBarriers({image_barrier}));
   }
 
   command_buffer.copyBufferToImage(staging_buffer,
@@ -227,8 +242,10 @@ void SimpleImageComputing::setTransferCommands(
     const auto image_barrier =
         plc::gpu::ImageBarrierBuilder::create()
             .setImage(*m_ptrImage)
-            .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
-            .setWaitAccessFlags({plc::AccessFlag::ShaderRead})
+            .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
+            .setDstAccessFlags({plc::AccessFlag::ShaderRead})
+            .setSrcStages({plc::PipelineStage::Transfer})
+            .setDstStages({plc::PipelineStage::Transfer})
             .setOldLayout(plc::ImageLayout::TransferDstOptimal)
             .setNewLayout(plc::ImageLayout::TransferDstOptimal)
             .setImageViewInfo(image_view_info)
@@ -238,9 +255,8 @@ void SimpleImageComputing::setTransferCommands(
                 m_ptrComputeCommandDriver->getQueueFamilyIndex())
             .build();
 
-    command_buffer.setPipelineBarrier(image_barrier,
-                                      plc::PipelineStage::Transfer,
-                                      plc::PipelineStage::BottomOfPipe);
+    command_buffer.setPipelineBarrier(
+        plc::BarrierDependency{}.setImageBarriers({image_barrier}));
   }
 
   command_buffer.end();
@@ -262,8 +278,10 @@ void SimpleImageComputing::setComputeCommands(
     const auto image_barrier =
         plc::gpu::ImageBarrierBuilder::create()
             .setImage(*m_ptrImage)
-            .setPriorityAccessFlags({plc::AccessFlag::TransferWrite})
-            .setWaitAccessFlags({plc::AccessFlag::ShaderRead})
+            .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
+            .setDstAccessFlags({plc::AccessFlag::ShaderRead})
+            .setSrcStages({plc::PipelineStage::Transfer})
+            .setDstStages({plc::PipelineStage::ComputeShader})
             .setOldLayout(plc::ImageLayout::TransferDstOptimal)
             .setNewLayout(plc::ImageLayout::ShaderReadOnlyOptimal)
             .setImageViewInfo(image_view_info)
@@ -273,9 +291,8 @@ void SimpleImageComputing::setComputeCommands(
                 m_ptrComputeCommandDriver->getQueueFamilyIndex())
             .build();
 
-    command_buffer.setPipelineBarrier(image_barrier,
-                                      plc::PipelineStage::BottomOfPipe,
-                                      plc::PipelineStage::ComputeShader);
+    command_buffer.setPipelineBarrier(
+        plc::BarrierDependency{}.setImageBarriers({image_barrier}));
   }
 
   const plc::ImageViewInfo image_view_info =
@@ -284,16 +301,17 @@ void SimpleImageComputing::setComputeCommands(
     const auto image_barrier =
         plc::gpu::ImageBarrierBuilder::create()
             .setImage(*m_ptrStorageImage)
-            .setPriorityAccessFlags({plc::AccessFlag::Unknown})
-            .setWaitAccessFlags({plc::AccessFlag::ShaderWrite})
+            .setSrcAccessFlags({plc::AccessFlag::Unknown})
+            .setDstAccessFlags({plc::AccessFlag::ShaderWrite})
+            .setSrcStages({plc::PipelineStage::Transfer})
+            .setDstStages({plc::PipelineStage::ComputeShader})
             .setOldLayout(plc::ImageLayout::Undefined)
             .setNewLayout(plc::ImageLayout::General)
             .setImageViewInfo(image_view_info)
             .build();
 
-    command_buffer.setPipelineBarrier(image_barrier,
-                                      plc::PipelineStage::TopOfPipe,
-                                      plc::PipelineStage::ComputeShader);
+    command_buffer.setPipelineBarrier(
+        plc::BarrierDependency{}.setImageBarriers({image_barrier}));
   }
 
   command_buffer.pushConstants(
@@ -309,37 +327,22 @@ void SimpleImageComputing::setComputeCommands(
     const auto image_barrier =
         plc::gpu::ImageBarrierBuilder::create()
             .setImage(*m_ptrStorageImage)
-            .setPriorityAccessFlags({plc::AccessFlag::ShaderWrite})
-            .setWaitAccessFlags({plc::AccessFlag::TransferRead})
+            .setSrcAccessFlags({plc::AccessFlag::ShaderWrite})
+            .setDstAccessFlags({plc::AccessFlag::TransferRead})
+            .setSrcStages({plc::PipelineStage::ComputeShader})
+            .setDstStages({plc::PipelineStage::Transfer})
             .setOldLayout(plc::ImageLayout::General)
             .setNewLayout(plc::ImageLayout::General)
             .setImageViewInfo(image_view_info)
             .build();
 
-    command_buffer.setPipelineBarrier(image_barrier,
-                                      plc::PipelineStage::ComputeShader,
-                                      plc::PipelineStage::Transfer);
+    command_buffer.setPipelineBarrier(
+        plc::BarrierDependency{}.setImageBarriers({image_barrier}));
 
     command_buffer.copyImageToBuffer(*m_ptrStorageImage,
                                      staging_buffer,
                                      plc::ImageLayout::General,
                                      image_view_info);
-  }
-
-  {
-    const auto image_barrier =
-        plc::gpu::ImageBarrierBuilder::create()
-            .setImage(*m_ptrStorageImage)
-            .setPriorityAccessFlags({plc::AccessFlag::TransferRead})
-            .setWaitAccessFlags({plc::AccessFlag::ShaderWrite})
-            .setOldLayout(plc::ImageLayout::General)
-            .setNewLayout(plc::ImageLayout::General)
-            .setImageViewInfo(image_view_info)
-            .build();
-
-    command_buffer.setPipelineBarrier(image_barrier,
-                                      plc::PipelineStage::Transfer,
-                                      plc::PipelineStage::ComputeShader);
   }
 
   command_buffer.end();

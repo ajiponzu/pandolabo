@@ -10,10 +10,46 @@
 #include <vulkan/vulkan.hpp>
 
 #include "gpu.hpp"
+#include "gpu/vk_helper.hpp"
 #include "io.hpp"
+#include "structures.hpp"
+#include "types.hpp"
 #include "ui.hpp"
 
 namespace pandora::core {
+
+class BarrierDependency {
+ private:
+  std::vector<vk::MemoryBarrier2> m_memoryBarriers{};
+  std::vector<vk::BufferMemoryBarrier2> m_bufferBarriers{};
+  std::vector<vk::ImageMemoryBarrier2> m_imageBarriers{};
+
+  vk::DependencyInfo m_dependencyInfo{};
+
+ public:
+  BarrierDependency() = default;
+  ~BarrierDependency() = default;
+  BarrierDependency(const BarrierDependency&) = delete;
+  BarrierDependency& operator=(const BarrierDependency&) = delete;
+  BarrierDependency(BarrierDependency&&) = default;
+  BarrierDependency& operator=(BarrierDependency&&) = default;
+
+  BarrierDependency& setMemoryBarriers(
+      const std::vector<std::reference_wrapper<const gpu::MemoryBarrier>>&
+          memory_barriers);
+
+  BarrierDependency& setBufferBarriers(
+      const std::vector<std::reference_wrapper<const gpu::BufferBarrier>>&
+          buffer_barriers);
+
+  BarrierDependency& setImageBarriers(
+      const std::vector<std::reference_wrapper<const gpu::ImageBarrier>>&
+          image_barriers);
+
+  const vk::DependencyInfo& getDependencyInfo() const {
+    return m_dependencyInfo;
+  }
+};
 
 /// @brief Driver class for managing multiple fences
 /// This class provides methods to wait on multiple fences
@@ -79,139 +115,65 @@ concept SemaphoreConcept = requires(T a) {
   { a.getSemaphore() } -> std::same_as<const vk::Semaphore&>;
 };
 
-template <typename T>
-concept WaitConcept = SemaphoreConcept<T> && requires(T a) {
-  { a.getWaitValue() } -> std::same_as<uint64_t>;
+/// @brief Semaphore used in GPU submission
+/// This class encapsulates a semaphore along with its associated timeline value
+/// and pipeline stage mask for GPU command submissions. It provides methods to
+/// set these parameters and retrieve the underlying Vulkan semaphore submission
+/// info.
+class SubmitSemaphore {
+ private:
+  vk::SemaphoreSubmitInfo m_semaphoreSubmitInfo{};
+
+ public:
+  SubmitSemaphore() = default;
+  ~SubmitSemaphore() = default;
+
+  const vk::SemaphoreSubmitInfo& getSemaphoreSubmitInfo() const {
+    return m_semaphoreSubmitInfo;
+  }
+
+  template <pandora::core::SemaphoreConcept T>
+  SubmitSemaphore& setSemaphore(const T& semaphore) {
+    m_semaphoreSubmitInfo.setSemaphore(semaphore.getSemaphore());
+    return *this;
+  }
+
+  SubmitSemaphore& setValue(uint64_t value) {
+    m_semaphoreSubmitInfo.setValue(value);
+    return *this;
+  }
+
+  SubmitSemaphore& setStageMask(const PipelineStage& stage_mask) {
+    m_semaphoreSubmitInfo.setStageMask(
+        vk_helper::getPipelineStageFlagBits(stage_mask));
+    return *this;
+  }
 };
 
-template <typename T>
-concept SignalConcept = SemaphoreConcept<T> && requires(T a) {
-  { a.getSignalValue() } -> std::same_as<uint64_t>;
-};
-
-template <typename T>
-concept WaitSemaphoreConcept =
-    (SemaphoreConcept<T> || WaitConcept<T>) && !SignalConcept<T>;
-
-template <typename T>
-concept SignalSemaphoreConcept =
-    (SemaphoreConcept<T> || SignalConcept<T>) && !WaitConcept<T>;
-
-/// @brief Group of semaphores for GPU submission
-/// This class manages a collection of semaphores to be used in GPU command
-/// submissions. It allows adding multiple wait and signal semaphores, along
-/// with their associated timeline values if applicable. The group can then be
-/// used to submit all semaphores at once.
+/// @brief Group of semaphores used in GPU submission
+/// This class manages a group of semaphores to be used for waiting and
+/// signaling during GPU command submissions. It provides methods to add wait
+/// and signal semaphores, and retrieve the lists of semaphores for submission.
 class SubmitSemaphoreGroup {
  private:
-  std::vector<vk::Semaphore> m_waitSemaphores;
-  std::vector<vk::Semaphore> m_signalSemaphores;
-
-  std::vector<uint64_t> m_waitValues;
-  std::vector<uint64_t> m_signalValues;
-
-  mutable std::vector<vk::PipelineStageFlags> m_waitStages;
-
-  vk::TimelineSemaphoreSubmitInfoKHR m_timelineSubmitInfo{};
+  std::vector<vk::SemaphoreSubmitInfo> m_waitSemaphores;
+  std::vector<vk::SemaphoreSubmitInfo> m_signalSemaphores;
 
  public:
   SubmitSemaphoreGroup() = default;
   ~SubmitSemaphoreGroup() = default;
-  SubmitSemaphoreGroup(const SubmitSemaphoreGroup&) = delete;
-  SubmitSemaphoreGroup& operator=(const SubmitSemaphoreGroup&) = delete;
-  SubmitSemaphoreGroup(SubmitSemaphoreGroup&&) = default;
-  SubmitSemaphoreGroup& operator=(SubmitSemaphoreGroup&&) = default;
 
-  /// @brief Create wait semaphores
-  /// @tparam T Semaphore type
-  /// @param semaphore Semaphore object (one or more)
-  template <pandora::core::WaitSemaphoreConcept... Ts>
-  pandora::core::SubmitSemaphoreGroup& setWaitSemaphores(
-      const Ts&... semaphore) {
-    m_waitValues.clear();
-    m_waitSemaphores.clear();
-    m_waitValues.reserve(sizeof...(Ts));
-    m_waitSemaphores.reserve(sizeof...(Ts));
+  SubmitSemaphoreGroup& setWaitSemaphores(
+      const std::vector<SubmitSemaphore>& semaphores);
+  SubmitSemaphoreGroup& setSignalSemaphores(
+      const std::vector<SubmitSemaphore>& semaphores);
 
-    (addWaitSemaphore(semaphore), ...);
-    m_timelineSubmitInfo.setWaitSemaphoreValues(m_waitValues);
-
-    return *this;
-  }
-
-  /// @brief Create signal semaphores
-  /// @tparam T Semaphore type
-  /// @param semaphore Semaphore object (one or more)
-  template <pandora::core::SignalSemaphoreConcept... Ts>
-  pandora::core::SubmitSemaphoreGroup& setSignalSemaphores(
-      const Ts&... semaphore) {
-    m_signalValues.clear();
-    m_signalSemaphores.clear();
-    m_signalValues.reserve(sizeof...(Ts));
-    m_signalSemaphores.reserve(sizeof...(Ts));
-
-    (addSignalSemaphore(semaphore), ...);
-    m_timelineSubmitInfo.setSignalSemaphoreValues(m_signalValues);
-
-    return *this;
-  }
-
-  void setWaitStages(const std::vector<PipelineStage>& stages) const;
-
-  /// @brief Get pointer to timeline submit info for vk::SubmitInfo
-  /// @return Pointer to vk::TimelineSemaphoreSubmitInfoKHR
-  auto getPtrTimelineSubmitInfo() const {
-    return &m_timelineSubmitInfo;
-  }
-
-  /// @brief Get wait semaphores for vk::SubmitInfo
-  /// @return Wait semaphores
-  const auto& getWaitSemaphores() const {
+  const std::vector<vk::SemaphoreSubmitInfo>& getWaitSemaphores() const {
     return m_waitSemaphores;
   }
 
-  /// @brief Get signal semaphores for vk::SubmitInfo
-  /// @return Signal semaphores
-  const auto& getSignalSemaphores() const {
+  const std::vector<vk::SemaphoreSubmitInfo>& getSignalSemaphores() const {
     return m_signalSemaphores;
-  }
-
-  /// @brief Get wait pipeline stages for vk::SubmitInfo
-  /// @return Wait pipeline stages
-  const auto& getWaitStages() const {
-    return m_waitStages;
-  }
-
- private:
-  /// @brief Add wait semaphore to the submission info
-  /// @tparam T Semaphore type
-  /// @param semaphore Semaphore object
-  template <pandora::core::WaitSemaphoreConcept T>
-  void addWaitSemaphore(const T& semaphore) {
-    m_waitSemaphores.push_back(semaphore.getSemaphore());
-    if constexpr (std::is_same_v<T, gpu::TimelineSemaphore::WaitInfo>) {
-      m_waitValues.push_back(
-          static_cast<const gpu::TimelineSemaphore::WaitInfo&>(semaphore)
-              .getWaitValue());
-    } else {
-      m_waitValues.push_back(0u);
-    }
-  }
-
-  /// @brief Add signal semaphore to the submission info
-  /// @tparam T Semaphore type
-  /// @param semaphore Semaphore object
-  template <pandora::core::SignalSemaphoreConcept T>
-  void addSignalSemaphore(const T& semaphore) {
-    m_signalSemaphores.push_back(semaphore.getSemaphore());
-    if constexpr (std::is_same_v<T, gpu::TimelineSemaphore::SignalInfo>) {
-      const auto& signal_info =
-          static_cast<const gpu::TimelineSemaphore::SignalInfo&>(semaphore);
-
-      m_signalValues.push_back(signal_info.getSignalValue());
-    } else {
-      m_signalValues.push_back(0u);
-    }
   }
 };
 

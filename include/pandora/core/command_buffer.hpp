@@ -54,9 +54,9 @@ class CommandBeginInfo {
 
  public:
   CommandBufferUsage usage =
-      CommandBufferUsage::OneTimeSubmit;  ///< How the command buffer will be
-                                          ///< used
-  uint32_t subpass_index = 0u;            ///< Subpass index for inheritance
+      CommandBufferUsage::SimultaneousUse;  ///< How the command buffer will be
+                                            ///< used
+  uint32_t subpass_index = 0u;              ///< Subpass index for inheritance
 
   // Rule of Zero
   CommandBeginInfo() = default;
@@ -119,21 +119,9 @@ class CommandBuffer {
   /// This function must be called to finish command buffer recording.
   void end() const;
 
-  /// @brief Set buffer access barrier
-  /// @param barrier Buffer barrier configuration
-  /// @param src_stage Source pipeline stage
-  /// @param dst_stage Destination pipeline stage (wait stage)
-  void setPipelineBarrier(const gpu::BufferBarrier& barrier,
-                          const PipelineStage src_stage,
-                          const PipelineStage dst_stage) const;
-
-  /// @brief Set image access barrier
-  /// @param barrier Image barrier configuration
-  /// @param src_stage Source pipeline stage
-  /// @param dst_stage Destination pipeline stage
-  void setPipelineBarrier(const gpu::ImageBarrier& barrier,
-                          const PipelineStage src_stage,
-                          const PipelineStage dst_stage) const;
+  /// @brief Set pipeline barrier for command buffer
+  /// @param dependency Barrier dependency information
+  void setPipelineBarrier(const BarrierDependency& dependency) const;
 
   /// @brief Bind pipeline to command buffer
   /// @param pipeline Pipeline to bind for subsequent draw/dispatch commands
@@ -414,11 +402,9 @@ class CommandDriver {
   void mergeSecondaryCommands() const;
 
   /// @brief Submit GPU commands with timeline semaphore synchronization
-  /// @param dst_stages Pipeline stages to wait for
-  /// @param semaphore_group Semaphore group containing wait/signal semaphores
+  /// @param semaphore_group Group of semaphores for synchronization
   /// @param fence Fence to wait on before execution
-  void submit(const std::vector<PipelineStage>& dst_stages,
-              const SubmitSemaphoreGroup& semaphore_group,
+  void submit(const SubmitSemaphoreGroup& semaphore_group,
               const gpu::Fence& fence = {}) const;
 
   /// @brief Present rendered image to display

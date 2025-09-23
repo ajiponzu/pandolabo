@@ -6,6 +6,48 @@
 
 namespace pandora::core {
 
+BarrierDependency& BarrierDependency::setMemoryBarriers(
+    const std::vector<std::reference_wrapper<const gpu::MemoryBarrier>>&
+        barriers) {
+  m_memoryBarriers =
+      barriers | std::views::transform([](const gpu::MemoryBarrier& barrier) {
+        return barrier.getBarrier();
+      })
+      | std::ranges::to<std::vector>();
+
+  m_dependencyInfo.setMemoryBarriers(m_memoryBarriers);
+
+  return *this;
+}
+
+BarrierDependency& BarrierDependency::setBufferBarriers(
+    const std::vector<std::reference_wrapper<const gpu::BufferBarrier>>&
+        barriers) {
+  m_bufferBarriers =
+      barriers | std::views::transform([](const gpu::BufferBarrier& barrier) {
+        return barrier.getBarrier();
+      })
+      | std::ranges::to<std::vector>();
+
+  m_dependencyInfo.setBufferMemoryBarriers(m_bufferBarriers);
+
+  return *this;
+}
+
+BarrierDependency& BarrierDependency::setImageBarriers(
+    const std::vector<std::reference_wrapper<const gpu::ImageBarrier>>&
+        barriers) {
+  m_imageBarriers =
+      barriers | std::views::transform([](const gpu::ImageBarrier& barrier) {
+        return barrier.getBarrier();
+      })
+      | std::ranges::to<std::vector>();
+
+  m_dependencyInfo.setImageMemoryBarriers(m_imageBarriers);
+
+  return *this;
+}
+
 WaitedFences::WaitedFences(const std::vector<gpu::Fence>& fences) {
   m_fences =
       fences
@@ -37,7 +79,7 @@ TimelineSemaphoreDriver& TimelineSemaphoreDriver::setSemaphores(
         semaphores) {
   m_semaphores = semaphores
                  | std::views::transform([](const gpu::TimelineSemaphore& sem) {
-                     return sem.getTimelineSemaphore();
+                     return sem.getSemaphore();
                    })
                  | std::ranges::to<std::vector>();
 
@@ -80,13 +122,26 @@ void TimelineSemaphoreDriver::signal(
   }
 }
 
-void SubmitSemaphoreGroup::setWaitStages(
-    const std::vector<PipelineStage>& stages) const {
-  m_waitStages = stages | std::views::transform([](const PipelineStage& stage) {
-                   return static_cast<vk::PipelineStageFlags>(
-                       vk_helper::getPipelineStageFlagBits(stage));
-                 })
-                 | std::ranges::to<std::vector>();
+SubmitSemaphoreGroup& SubmitSemaphoreGroup::setWaitSemaphores(
+    const std::vector<SubmitSemaphore>& semaphores) {
+  m_waitSemaphores = semaphores
+                     | std::views::transform([](const SubmitSemaphore& sem) {
+                         return sem.getSemaphoreSubmitInfo();
+                       })
+                     | std::ranges::to<std::vector>();
+
+  return *this;
+}
+
+SubmitSemaphoreGroup& SubmitSemaphoreGroup::setSignalSemaphores(
+    const std::vector<SubmitSemaphore>& semaphores) {
+  m_signalSemaphores = semaphores
+                       | std::views::transform([](const SubmitSemaphore& sem) {
+                           return sem.getSemaphoreSubmitInfo();
+                         })
+                       | std::ranges::to<std::vector>();
+
+  return *this;
 }
 
 }  // namespace pandora::core
