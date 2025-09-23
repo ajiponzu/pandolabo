@@ -107,15 +107,39 @@ function Show-Menu {
     Write-Host ""
 }
 
+function Get-ExamplesFromCMake {
+    $cmakePath = Join-Path $ProjectRoot "examples/CMakeLists.txt"
+    if (-not (Test-Path $cmakePath)) {
+        return @()
+    }
+    try {
+        $content = Get-Content -Path $cmakePath -Raw -Encoding UTF8
+        # Regex to capture: pdl_add_example(example_name ...)
+        $regex = [regex]'(?m)^\s*pdl_add_example\s*\(\s*([^\s\)]+)'
+        $matches = $regex.Matches($content)
+        $names = @()
+        foreach ($m in $matches) {
+            $n = $m.Groups[1].Value
+            if ($names -notcontains $n) { $names += $n }
+        }
+        return $names
+    } catch {
+        return @()
+    }
+}
+
 function Select-Example {
-    # 既知のExampleターゲット一覧（CMakeLists.txtに合わせて更新）
-    $examples = @(
-        "example_basic_compute",
-        "example_basic_cube",
-        "example_simple_image",
-        "example_square",
-        "example_streaming_resources"
-    )
+    # CMakeから自動抽出。失敗時は既知のリストでフォールバック
+    $examples = Get-ExamplesFromCMake
+    if (-not $examples -or $examples.Count -eq 0) {
+        $examples = @(
+            "example_basic_compute",
+            "example_basic_cube",
+            "example_simple_image",
+            "example_square",
+            "example_streaming_resources"
+        )
+    }
 
     Write-Host ""; Write-Host "🎯 実行するExampleを選択してください:" -ForegroundColor Yellow
     for ($i = 0; $i -lt $examples.Count; $i++) {
@@ -343,12 +367,22 @@ try {
                         $VenvPython = "python"
                     }
 
-                    # Configuration に応じて引数を決定
-                    if ($Configuration -eq "Debug") {
-                        & $VenvPython $vscodeScript
-                    } else {
-                        & $VenvPython $vscodeScript "--release"
+                    # デフォルト例を選択（キャンセル可）
+                    $exampleForLaunch = $Example
+                    if (-not $exampleForLaunch -or $exampleForLaunch.Trim() -eq "") {
+                        $exampleForLaunch = Select-Example
+                        if ($null -eq $exampleForLaunch) {
+                            Write-Host "⏭️  例の選択をキャンセルしました。設定は変更しません。" -ForegroundColor Yellow
+                            Start-Sleep -Seconds 1
+                            continue
+                        }
                     }
+
+                    # Configuration に応じて引数を決定
+                    $args = @()
+                    if ($Configuration -ne "Debug") { $args += "--release" }
+                    if ($exampleForLaunch -and $exampleForLaunch.Trim() -ne "") { $args += @("--example", $exampleForLaunch) }
+                    & $VenvPython $vscodeScript @args
                     if ($LASTEXITCODE -eq 0) {
                         Write-Host "✅ VSCode設定一式が更新されました" -ForegroundColor Green
                     } else {
@@ -522,7 +556,7 @@ try {
         } while ($true)
     } else {
         # 直接コマンド実行
-    if ($Command -eq "vscode") {
+            if ($Command -eq "vscode") {
             Write-Host "🎯 VSCode設定一式を生成中..." -ForegroundColor Green
             Write-Host "   設定モード: $Configuration" -ForegroundColor Cyan
             $vscodeScript = Join-Path $ScriptDir "generate_vscode_config.py"
@@ -534,11 +568,11 @@ try {
                 }
 
                 # Configuration に応じて引数を決定
-                if ($Configuration -eq "Debug") {
-                    & $VenvPython $vscodeScript
-                } else {
-                    & $VenvPython $vscodeScript "--release"
-                }
+                $args = @()
+                if ($Configuration -ne "Debug") { $args += "--release" }
+                if ($Example -and $Example.Trim() -ne ""
+                ) { $args += @("--example", $Example) }
+                & $VenvPython $vscodeScript @args
                 if ($LASTEXITCODE -eq 0) {
                     Write-Host "✅ VSCode設定一式が更新されました" -ForegroundColor Green
                     exit 0

@@ -10,6 +10,15 @@ import subprocess
 import argparse
 from pathlib import Path
 
+# Known example targets
+EXAMPLES = [
+    "example_basic_compute",
+    "example_basic_cube",
+    "example_simple_image",
+    "example_square",
+    "example_streaming_resources",
+]
+
 
 def get_conan_home():
     """Conanホームディレクトリを取得"""
@@ -478,12 +487,7 @@ def generate_tasks_json():
                     "id": "examplePicker",
                     "type": "pickString",
                     "description": "Choose example target to run",
-                    "options": [
-                        "example_basic_compute",
-                        "example_basic_cube",
-                        "example_simple_image",
-                        "example_square",
-                    ],
+                    "options": EXAMPLES,
                     "default": "example_basic_cube",
                 },
                 {
@@ -497,9 +501,13 @@ def generate_tasks_json():
     return tasks
 
 
-def generate_launch_json():
-    """launch.jsonを生成 - Debug/Release両対応（Windows専用）"""
-    return {
+def generate_launch_json(default_example: str | None = None):
+    """launch.jsonを生成 - Debug/Release両対応（Windows専用）
+
+    default_example: Named example to use for the primary example entries.
+    """
+    default_example = default_example or "example_basic_cube"
+    config = {
             "version": "0.2.0",
             "configurations": [
                 {
@@ -518,7 +526,7 @@ def generate_launch_json():
                     "name": "🐛 Debug Example (Debug)",
                     "type": "cppvsdbg",
                     "request": "launch",
-                    "program": "${workspaceFolder}/build/examples/Debug/example_basic_cube.exe",
+                    "program": f"${{workspaceFolder}}/build/examples/Debug/{default_example}.exe",
                     "args": [],
                     "stopAtEntry": False,
                     "cwd": "${workspaceFolder}",
@@ -542,7 +550,7 @@ def generate_launch_json():
                     "name": "🚀 Debug Example (Release)",
                     "type": "cppvsdbg",
                     "request": "launch",
-                    "program": "${workspaceFolder}/build/examples/Release/example_basic_cube.exe",
+                    "program": f"${{workspaceFolder}}/build/examples/Release/{default_example}.exe",
                     "args": [],
                     "stopAtEntry": False,
                     "cwd": "${workspaceFolder}",
@@ -580,12 +588,7 @@ def generate_launch_json():
                     "id": "examplePickerLaunch",
                     "type": "pickString",
                     "description": "Choose example target to debug",
-                    "options": [
-                        "example_basic_compute",
-                        "example_basic_cube",
-                        "example_simple_image",
-                        "example_square",
-                    ],
+                    "options": EXAMPLES,
                     "default": "example_basic_cube",
                 },
                 {
@@ -596,6 +599,39 @@ def generate_launch_json():
                 },
             ],
         }
+
+    # Add per-example configurations for convenience
+    for ex in EXAMPLES:
+        config["configurations"].append(
+            {
+                "name": f"🐛 {ex} (Debug)",
+                "type": "cppvsdbg",
+                "request": "launch",
+                "program": f"${{workspaceFolder}}/build/examples/Debug/{ex}.exe",
+                "args": [],
+                "stopAtEntry": False,
+                "cwd": "${workspaceFolder}",
+                "environment": [],
+                "console": "integratedTerminal",
+                "preLaunchTask": "🐛 Build (Debug)",
+            }
+        )
+        config["configurations"].append(
+            {
+                "name": f"🚀 {ex} (Release)",
+                "type": "cppvsdbg",
+                "request": "launch",
+                "program": f"${{workspaceFolder}}/build/examples/Release/{ex}.exe",
+                "args": [],
+                "stopAtEntry": False,
+                "cwd": "${workspaceFolder}",
+                "environment": [],
+                "console": "integratedTerminal",
+                "preLaunchTask": "🔨 Build (Release)",
+            }
+        )
+
+    return config
 
 def generate_extensions_json():
     """extensions.jsonを生成 (フォーマット拡張機能含む、Windows用)"""
@@ -732,7 +768,7 @@ def generate_cpp_properties(debug_mode=True):
     return config
 
 
-def generate_all_vscode_configs(debug_mode=True):
+def generate_all_vscode_configs(debug_mode=True, default_example: str | None = None):
     workspace_folder = Path.cwd()
     vscode_dir = workspace_folder / ".vscode"
     vscode_dir.mkdir(exist_ok=True)
@@ -743,7 +779,7 @@ def generate_all_vscode_configs(debug_mode=True):
     configs = {
         "settings.json": generate_settings_json(),
         "tasks.json": generate_tasks_json(),
-        "launch.json": generate_launch_json(),
+        "launch.json": generate_launch_json(default_example),
         "extensions.json": generate_extensions_json(),
     }
     for filename, config in configs.items():
@@ -767,6 +803,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Generate configuration for Release mode (default: Debug mode)",
     )
+    parser.add_argument(
+        "--example",
+        help="Set default example for primary example debug entries",
+        choices=EXAMPLES,
+    )
     args = parser.parse_args()
     debug_mode = not args.release
-    generate_all_vscode_configs(debug_mode)
+    generate_all_vscode_configs(debug_mode, args.example)
