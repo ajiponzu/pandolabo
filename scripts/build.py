@@ -262,6 +262,12 @@ def main():
         help="個別Example名 (例: example_basic_cube, example_square)。build/run/all と併用可",
     )
 
+    parser.add_argument(
+        "--no-final-log",
+        action="store_true",
+        help="最終的な成功/失敗メッセージの出力を抑止（親スクリプト側で集約表示する用途）",
+    )
+
     args = parser.parse_args()
 
     print("🚀 Pandolabo ビルドスクリプト開始")
@@ -298,12 +304,15 @@ def main():
             builder.log(f"❓ 不明なコマンド: {args.command}", "red")
             return 1
 
-        if success:
-            builder.log(f"✅ 完了！ ({args.config})", "green")
-            return 0
+        if args.no_final_log:
+            return 0 if success else 1
         else:
-            builder.log(f"❌ 失敗しました。 ({args.config})", "red")
-            return 1
+            if success:
+                builder.log(f"✅ 完了！ ({args.config})", "green")
+                return 0
+            else:
+                builder.log(f"❌ 失敗しました。 ({args.config})", "red")
+                return 1
 
     except Exception as e:
         builder.log(f"❌ エラー: {e}", "red")

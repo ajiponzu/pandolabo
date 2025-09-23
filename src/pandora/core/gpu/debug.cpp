@@ -122,6 +122,5 @@ vk::UniqueInstance debug::Messenger::createDebugInstance(
 
   return std::move(ptr_vk_instance);
 }
-#endif
-
 }  // namespace pandora::core::gpu
+#endif

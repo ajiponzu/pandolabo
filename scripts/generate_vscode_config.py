@@ -141,7 +141,8 @@ def generate_settings_json():
             "C_Cpp.default.cStandard": "c17",
             "C_Cpp.default.compilerPath": "cl.exe",
             "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
-            "C_Cpp.intelliSenseEngine": "Disabled",
+            # Enable IntelliSense so preprocessor conditions reflect current defines
+            "C_Cpp.intelliSenseEngine": "Default",
         }
     )
 
@@ -697,7 +698,8 @@ def generate_cpp_properties(debug_mode=True):
 
     base_defines = ["VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1"]
     platform_defines = ["_WIN32", "_UNICODE", "UNICODE"]
-    debug_defines = ["_DEBUG"] if debug_mode else []
+    # Make GPU_DEBUG visible to IntelliSense in Debug only
+    debug_defines = ["_DEBUG", "GPU_DEBUG"] if debug_mode else []
     all_defines = platform_defines + base_defines + debug_defines
 
     config = {

@@ -16,7 +16,6 @@
 #include "gpu/buffer.hpp"
 #include "gpu/config.hpp"
 #include "gpu/context.hpp"
-#include "gpu/debug.hpp"
 #include "gpu/descriptor.hpp"
 #include "gpu/device.hpp"
 #include "gpu/fence.hpp"
