@@ -12,5 +12,11 @@
 #endif
 
 // GPU module version constants
+// Need Vulkan core macros definitions. Include the lightweight core header
+// instead of full C++ wrapper here.
+#include <vulkan/vulkan_core.h>
+
+namespace pandora::core::gpu {
 constexpr auto PANDOLABO_VK_VERSION = VK_MAKE_VERSION(1, 4, 0);
 constexpr auto PANDOLABO_VK_API_VERSION = VK_MAKE_API_VERSION(0, 1, 4, 0);
+}  // namespace pandora::core::gpu

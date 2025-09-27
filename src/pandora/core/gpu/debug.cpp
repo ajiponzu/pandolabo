@@ -1,3 +1,4 @@
+#include "pandora/core/err/dispatch.hpp"
 #include "pandora/core/gpu.hpp"
 
 #ifdef GPU_DEBUG
@@ -20,11 +21,22 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debug_utils_messenger_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
     VkDebugUtilsMessageTypeFlagsEXT message_types,
     VkDebugUtilsMessengerCallbackDataEXT const* p_callback_data,
-    void* p_user_data) {
-  std::println(
-      stderr, "[****] validation layer: {}", p_callback_data->pMessage);
-
-  return VK_FALSE;
+    void* /*p_user_data*/) {
+  using namespace pandora::core::err;
+  Error e;
+  e.domain = pandora::core::gpu::debug::map_domain(message_types);
+  e.severity = pandora::core::gpu::debug::map_severity(message_severity);
+  e.code = Code::invalid_state;  // TODO: refine by message id classification
+  e.native_code = p_callback_data ? p_callback_data->messageIdNumber : 0u;
+  if (p_callback_data && p_callback_data->pMessage) {
+    e.message = p_callback_data->pMessage;
+  } else {
+    e.message = "validation message";
+  }
+  dispatch_error(e);
+  // Also optionally print in debug builds (could be controlled by flag)
+  std::println(stderr, "[validation][{}] {}", to_string(e.severity), e.message);
+  return VK_FALSE;  // never block
 }
   #pragma warning(pop)
 
@@ -74,7 +86,6 @@ vk::UniqueInstance debug::Messenger::createDebugInstance(
       | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
       | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
 
-  // 拡張有無を判定
   const auto ext_contains = [&](const char* name) {
     for (auto* e : extensions) {
       if (std::strcmp(e, name) == 0)
@@ -122,5 +133,53 @@ vk::UniqueInstance debug::Messenger::createDebugInstance(
 
   return std::move(ptr_vk_instance);
 }
+
+// --- Mapping helpers (definitions) ---
+namespace debug {
+::pandora::core::err::Severity map_severity(
+    VkDebugUtilsMessageSeverityFlagBitsEXT raw) noexcept {
+  using S = ::pandora::core::err::Severity;
+  switch (raw) {
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+      return S::note;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+      return S::note;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+      return S::warning;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+      return S::recoverable;
+    default:
+      return S::note;
+  }
+}
+::pandora::core::err::Domain map_domain(
+    VkDebugUtilsMessageTypeFlagsEXT types) noexcept {
+  using D = ::pandora::core::err::Domain;
+  if (types & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT)
+    return D::gpu_validation;
+  if (types & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
+    return D::gpu;
+  return D::gpu;
+}
+
+vk::UniqueDebugUtilsMessengerEXT Messenger::attachTo(vk::Instance instance) {
+  vk::DebugUtilsMessengerCreateInfoEXT info{};
+  info.setMessageSeverity(vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
+                          | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
+                          | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
+                          | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo);
+  info.setMessageType(vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
+                      | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
+                      | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
+  info.setPfnUserCallback(
+      reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT>(
+          &debug_utils_messenger_callback));
+  auto unique = instance.createDebugUtilsMessengerEXTUnique(info);
+  m_ptrMessenger =
+      vk::UniqueDebugUtilsMessengerEXT{};  // ensure previous released
+  m_ptrMessenger = instance.createDebugUtilsMessengerEXTUnique(info);
+  return std::move(unique);
+}
+}  // namespace debug
 }  // namespace pandora::core::gpu
 #endif

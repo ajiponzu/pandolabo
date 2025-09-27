@@ -23,3 +23,6 @@
 #include "gpu/semaphore.hpp"
 #include "gpu/shader.hpp"
 #include "gpu/swapchain.hpp"
+#ifdef GPU_DEBUG
+  #include "gpu/debug.hpp"
+#endif
