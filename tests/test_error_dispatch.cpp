@@ -10,8 +10,12 @@ using namespace pandora::core;
 static std::atomic<int> g_sink_calls{0};
 static bool test_sink(const err::Error& e) {
   ++g_sink_calls;
-  // Basic invariant: native_code must match cast of VkResult enumerator used.
-  REQUIRE(e.native_code != 0u || e.code == err::Code::ok);
+  // Basic invariant: if native_code is zero, logical error code must be ok.
+  if (e.native_code == 0u) {
+    REQUIRE(e.code == err::Code::ok);
+  } else {
+    REQUIRE(e.native_code != 0u);
+  }
   return false;  // not consumed
 }
 

@@ -11,5 +11,4 @@
 #pragma once
 
 #include "pandora/core/err/dispatch.hpp"
-#include "pandora/core/err/error.hpp"
 #include "pandora/core/err/result.hpp"
