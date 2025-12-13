@@ -18,7 +18,7 @@ This file provides guidance for GitHub Copilot when working with the Pandolabo p
 - **Language**: C++23 (MSVC with `/std:c++23preview`)
 - **Graphics API**: Vulkan 1.4+ with Vulkan.hpp
 - **Platform**: Windows-only (Win10/Win11)
-- **Compiler**: MSVC (Visual Studio 2022)
+- **Compiler**: MSVC (Visual Studio 2026)
 - **Build System**: CMake 3.16+ with Conan 2.x
 - **Development Environment**: VS Code (primary)
 

@@ -470,7 +470,7 @@ try {
                     Start-Sleep -Seconds 1
                     continue
                 }
-                $exe = Join-Path $ProjectRoot ("build/tests/{0}/tests.exe" -f $Configuration)
+                $exe = Join-Path $ProjectRoot ("build/{0}/tests/tests.exe" -f $Configuration)
                 if (-not (Test-Path $exe)) {
                     Write-Host "❌ テスト実行ファイルが見つかりません: $exe" -ForegroundColor Red
                     Start-Sleep -Seconds 1
@@ -527,7 +527,7 @@ try {
                     Start-Sleep -Seconds 1
                     continue
                 }
-                $exePath = Join-Path $ProjectRoot ("build/examples/{0}/{1}.exe" -f $Configuration,$exampleToUse)
+                $exePath = Join-Path $ProjectRoot ("build/{0}/examples/{1}.exe" -f $Configuration,$exampleToUse)
                 if (-not (Test-Path $exePath)) {
                     Write-Host "❌ 実行ファイルが見つかりません: $exePath" -ForegroundColor Red
                     Start-Sleep -Seconds 1
@@ -650,7 +650,7 @@ try {
                     Write-Host "❌ テストのビルドに失敗しました" -ForegroundColor Red
                     exit $buildCode
                 }
-                $exe = Join-Path $ProjectRoot ("build/tests/{0}/tests.exe" -f $Configuration)
+                $exe = Join-Path $ProjectRoot ("build/{0}/tests/tests.exe" -f $Configuration)
                 if (-not (Test-Path $exe)) {
                     Write-Host "❌ テスト実行ファイルが見つかりません: $exe" -ForegroundColor Red
                     exit 1
@@ -674,7 +674,7 @@ try {
                 Write-Host "🎯 Exampleをビルドして実行します: $exampleToUse ($Configuration)" -ForegroundColor Green
                 $b = Invoke-PythonBuild "examples" $Configuration $exampleToUse
                 if ($b -ne 0) { Write-Host "❌ Exampleのビルドに失敗しました" -ForegroundColor Red; exit $b }
-                $exePath = Join-Path $ProjectRoot ("build/examples/{0}/{1}.exe" -f $Configuration,$exampleToUse)
+                $exePath = Join-Path $ProjectRoot ("build/{0}/examples/{1}.exe" -f $Configuration,$exampleToUse)
                 if (-not (Test-Path $exePath)) { Write-Host "❌ 実行ファイルが見つかりません: $exePath" -ForegroundColor Red; exit 1 }
                 $run = Start-Process -FilePath $exePath -NoNewWindow -Wait -PassThru
                 exit $run.ExitCode

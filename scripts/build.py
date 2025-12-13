@@ -30,13 +30,13 @@ class PandolaboBuilder:
         }
         print(f"{colors.get(color, colors['default'])}{message}{colors['default']}")
 
-    def run_command(self, cmd, check=False):
+    def run_command(self, cmd, check=False, shell=False):
         """コマンド実行"""
         self.log(f"実行中: {' '.join(cmd) if isinstance(cmd, list) else cmd}", "cyan")
-        if isinstance(cmd, str):
+        if isinstance(cmd, str) and not shell:
             cmd = cmd.split()
         try:
-            result = subprocess.run(cmd, check=False, capture_output=False)
+            result = subprocess.run(cmd, check=False, capture_output=False, shell=shell)
             success = result.returncode == 0
             if success:
                 self.log(f"✅ コマンド成功 (終了コード: {result.returncode})", "green")
@@ -82,6 +82,7 @@ class PandolaboBuilder:
 
         # Conan依存関係インストール
         self.log("🔗 Conan依存関係をインストール中...", "yellow")
+        # Conan 2.x uses build_type from profile, output directly to conan/
         conan_install_cmd = [
             conan_cmd,
             "install",
@@ -96,21 +97,29 @@ class PandolaboBuilder:
 
         # CMake設定
         self.log("⚙️ CMakeを設定中...", "yellow")
-        cmake_cmd = [
-            "cmake",
-            "-DCMAKE_TOOLCHAIN_FILE=conan/build/generators/conan_toolchain.cmake",
-            "-B",
-            "build",
-        ]
+        # Conan 2.x creates build/Release or build/Debug subfolder automatically
+        toolchain_file = f"conan/build/{self.config}/generators/conan_toolchain.cmake"
 
+        # Ninja is single-config, use build/{config} structure
+        build_dir = f"build/{self.config}"
+
+        # Windows: Activate Conan environment before CMake (for Ninja and compilers)
         if self.is_windows:
-            cmake_cmd.extend(
-                ["-G", "Visual Studio 17 2022", "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"]
-            )
+            # Run CMake with Conan environment activated
+            # Explicitly specify CMAKE_BUILD_TYPE for single-config generator (Ninja)
+            env_script = f"conan\\build\\{self.config}\\generators\\conanbuild.bat"
+            cmake_cmd = f"{env_script} && cmake -DCMAKE_TOOLCHAIN_FILE={toolchain_file} -B {build_dir} -G Ninja -DCMAKE_BUILD_TYPE={self.config} -DCMAKE_POLICY_DEFAULT_CMP0091=NEW"
+            return self.run_command(cmake_cmd, shell=True)
         else:
-            cmake_cmd.extend(["-G", "Ninja"])
-
-        return self.run_command(cmake_cmd)
+            cmake_cmd = [
+                "cmake",
+                f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
+                "-B",
+                build_dir,
+                "-G", "Ninja",  # Ninja使用でVisual Studioバージョン非依存
+                f"-DCMAKE_BUILD_TYPE={self.config}",  # Explicitly specify build type
+            ]
+            return self.run_command(cmake_cmd)
 
     def _get_conan_command(self):
         """Conanコマンドパスを取得"""
@@ -125,23 +134,34 @@ class PandolaboBuilder:
         """ビルド実行"""
         self.log(f"🔨 {target} を{self.config}でビルド中...", "green")
 
-        cmd = ["cmake", "--build", "build", "--config", self.config]
+        # Ninja is single-config, use build/{config} structure
+        build_dir = f"build/{self.config}"
 
-        if target != "all":
-            cmd.extend(["--target", target])
-
-        return self.run_command(cmd)
+        if self.is_windows:
+            # Windows: Activate Conan environment before build
+            env_script = f"conan\\build\\{self.config}\\generators\\conanbuild.bat"
+            if target != "all":
+                cmd = f"{env_script} && cmake --build {build_dir} --target {target}"
+            else:
+                cmd = f"{env_script} && cmake --build {build_dir}"
+            return self.run_command(cmd, shell=True)
+        else:
+            cmd = ["cmake", "--build", build_dir]
+            if target != "all":
+                cmd.extend(["--target", target])
+            return self.run_command(cmd)
 
     def clean(self):
         """ビルドディレクトリをクリーン"""
         self.log("🧹 ビルドディレクトリをクリーン中...", "yellow")
 
         # クリーンするディレクトリとファイル
+        # Ninja single-config: build/Debug and build/Release
         directories_to_clean = [
-            self.build_path,  # build
-            Path("build_debug"),  # Debug用ビルドディレクトリ
-            Path("conan"),  # Release用Conanディレクトリ
-            Path("conan_debug"),  # Debug用Conanディレクトリ
+            Path("build/Debug"),
+            Path("build/Release"),
+            Path("build"),  # Remove parent if empty
+            Path("conan"),
         ]
         files_to_clean = [
             Path("CMakeUserPresets.json"),
@@ -198,9 +218,9 @@ class PandolaboBuilder:
         target = example or "example_basic_cube"
         exe_name = target
         if self.is_windows:
-            example_path = Path("build") / "examples" / self.config / f"{exe_name}.exe"
+            example_path = Path("build") / self.config / "examples" / f"{exe_name}.exe"
         else:
-            example_path = Path("build") / "examples" / exe_name
+            example_path = Path("build") / self.config / "examples" / exe_name
 
         if example_path.exists():
             self.log(f"🚀 Example '{exe_name}' ({self.config}) を実行中...", "green")

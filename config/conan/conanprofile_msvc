@@ -2,7 +2,8 @@
 os=Windows
 arch=x86_64
 compiler=msvc
-compiler.version=194
+# Build Tools 2026 (MSVC 14.50)
+compiler.version=195
 compiler.runtime=static
 compiler.cppstd=23
 build_type=Release
@@ -15,5 +16,9 @@ CXX=cl
 tools.system.package_manager:mode=install
 tools.system.package_manager:sudo=False
 
-# C++23プレビュー対応コンパイラフラグ
-tools.cmake.cmaketoolchain:generator=Visual Studio 17 2022
+# Ninja使用でVisual Studioバージョン非依存
+tools.cmake.cmaketoolchain:generator=Ninja
+
+# Build Tools 2026 (MSBuild Tools 18)
+tools.microsoft.msbuild:vs_version=18
+tools.microsoft.msbuild:installation_path=C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools
