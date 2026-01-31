@@ -2,21 +2,18 @@
 
 namespace pandora::core::gpu_ui {
 
-WindowSurface::WindowSurface(GLFWwindow* const ptr_window) {
-  m_ptrWindow = ptr_window;
-
+WindowSurface::WindowSurface(GLFWwindow& window) : m_window(window) {
   setWindowSize();
 }
 
 WindowSurface::~WindowSurface() {
   m_ptrSurface.release();
-  glfwDestroyWindow(m_ptrWindow);
 }
 
 void WindowSurface::constructSurface(const vk::UniqueInstance& ptr_instance) {
   VkSurfaceKHR surface{};
   if (glfwCreateWindowSurface(
-          VkInstance(ptr_instance.get()), m_ptrWindow, nullptr, &surface)
+          VkInstance(ptr_instance.get()), &m_window.get(), nullptr, &surface)
       != ::VkResult::VK_SUCCESS) {
     m_ptrSurface = vk::UniqueSurfaceKHR(nullptr);
 
@@ -28,7 +25,7 @@ void WindowSurface::constructSurface(const vk::UniqueInstance& ptr_instance) {
 
 void WindowSurface::setWindowSize() {
   int window_width = 0, window_height = 0;
-  glfwGetWindowSize(m_ptrWindow, &window_width, &window_height);
+  glfwGetWindowSize(&m_window.get(), &window_width, &window_height);
 
   m_windowSize.width = window_width;
   m_windowSize.height = window_height;

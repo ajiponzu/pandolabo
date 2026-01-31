@@ -9,6 +9,7 @@ This header file contains a module connecting connect gpu.hpp and ui.hpp.
 #include <GLFW/glfw3.h>
 
 #include <concepts>
+#include <functional>
 #include <type_traits>
 
 namespace pandora::core::gpu_ui {
@@ -28,16 +29,17 @@ struct GraphicalSize {
 /// providing the surface interface needed for presentation.
 class WindowSurface {
  private:
-  GLFWwindow* m_ptrWindow;                 ///< GLFW window handle
+  std::reference_wrapper<GLFWwindow>
+      m_window;                            ///< Non-owning GLFW window handle
   vk::UniqueSurfaceKHR m_ptrSurface;       ///< Vulkan surface for presentation
   GraphicalSize<uint32_t> m_windowSize{};  ///< Window dimensions
 
  public:
-  WindowSurface(GLFWwindow* const ptr_window);
+  explicit WindowSurface(GLFWwindow& window);
   ~WindowSurface();
 
   auto getWindow() const {
-    return m_ptrWindow;
+    return &m_window.get();
   };
   const auto& getSurface() const {
     return m_ptrSurface;

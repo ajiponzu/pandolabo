@@ -58,29 +58,29 @@ Window::Window(const std::string& title, int32_t width, int32_t height) {
 
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-  m_ptrWindow =
-      glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+  m_ptrWindow.reset(
+      glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr));
   if (m_ptrWindow == nullptr) {
     glfwTerminate();
     throw std::runtime_error("Failed to create GLFW window.");
   }
 
-  glfwMakeContextCurrent(m_ptrWindow);
+  glfwMakeContextCurrent(m_ptrWindow.get());
 
 #ifdef _DEBUG
   glfwSetErrorCallback(error_callback);
 #endif
 
-  glfwSetKeyCallback(m_ptrWindow, callback_input_key);
-  glfwSetCursorPosCallback(m_ptrWindow, callback_cursor_pos);
-  glfwSetScrollCallback(m_ptrWindow, callback_scroll);
-  glfwSetWindowSizeCallback(m_ptrWindow, callback_resized);
+  glfwSetKeyCallback(m_ptrWindow.get(), callback_input_key);
+  glfwSetCursorPosCallback(m_ptrWindow.get(), callback_cursor_pos);
+  glfwSetScrollCallback(m_ptrWindow.get(), callback_scroll);
+  glfwSetWindowSizeCallback(m_ptrWindow.get(), callback_resized);
 
-  m_ptrWindowSurface = std::make_shared<gpu_ui::WindowSurface>(m_ptrWindow);
+  m_ptrWindowSurface = std::make_shared<gpu_ui::WindowSurface>(*m_ptrWindow);
 }
 
 Window::~Window() {
-  glfwDestroyWindow(m_ptrWindow);
+  m_ptrWindow.reset();
   glfwTerminate();
 
 #ifdef _DEBUG
@@ -89,7 +89,7 @@ Window::~Window() {
 }
 
 bool Window::update() {
-  setResizedBool(m_ptrWindow, false);
+  setResizedBool(m_ptrWindow.get(), false);
 
   glfwPollEvents();
 
@@ -97,7 +97,7 @@ bool Window::update() {
     callback();
   }
 
-  return !glfwWindowShouldClose(m_ptrWindow);
+  return !glfwWindowShouldClose(m_ptrWindow.get());
 }
 
 }  // namespace pandora::core::ui

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -166,7 +167,7 @@ class BufferBarrier {
 /// Provides a fluent interface for constructing BufferBarrier instances
 class BufferBarrierBuilder {
  private:
-  const Buffer* m_ptrBuffer = nullptr;
+  std::optional<std::reference_wrapper<const Buffer>> m_buffer{};
   std::vector<AccessFlag> m_srcAccessFlags{};
   std::vector<AccessFlag> m_dstAccessFlags{};
   std::vector<PipelineStage> m_srcStages{};
@@ -188,7 +189,7 @@ class BufferBarrierBuilder {
   /// @param buffer The buffer to apply the barrier to
   /// @return Reference to this builder for method chaining
   BufferBarrierBuilder& setBuffer(const Buffer& buffer) {
-    m_ptrBuffer = &buffer;
+    m_buffer = buffer;
     return *this;
   }
 
@@ -246,12 +247,12 @@ class BufferBarrierBuilder {
   /// @return BufferBarrier instance
   /// @throws std::runtime_error if buffer is not set
   BufferBarrier build() {
-    if (!m_ptrBuffer) {
+    if (!m_buffer.has_value()) {
       throw std::runtime_error(
           "Buffer must be set before building BufferBarrier");
     }
 
-    return BufferBarrier(*m_ptrBuffer,
+    return BufferBarrier(m_buffer->get(),
                          m_srcAccessFlags,
                          m_dstAccessFlags,
                          m_srcStages,
@@ -317,7 +318,7 @@ class ImageBarrier {
 /// Provides a fluent interface for constructing ImageBarrier instances
 class ImageBarrierBuilder {
  private:
-  const Image* m_ptrImage = nullptr;
+  std::optional<std::reference_wrapper<const Image>> m_image{};
   std::vector<AccessFlag> m_srcAccessFlags{};
   std::vector<AccessFlag> m_dstAccessFlags{};
   std::vector<PipelineStage> m_srcStages{};
@@ -342,7 +343,7 @@ class ImageBarrierBuilder {
   /// @param image The image to apply the barrier to
   /// @return Reference to this builder for method chaining
   ImageBarrierBuilder& setImage(const Image& image) {
-    m_ptrImage = &image;
+    m_image = image;
     return *this;
   }
 
@@ -423,9 +424,9 @@ class ImageBarrierBuilder {
   /// @return ImageBarrier instance
   /// @throws std::runtime_error if required parameters are not set
   ImageBarrier build(const std::unique_ptr<Context>& ptr_context = nullptr) {
-    if (m_ptrImage && m_imageViewInfo) {
+    if (m_image.has_value() && m_imageViewInfo) {
       // Build with image and image view info
-      return ImageBarrier(*m_ptrImage,
+      return ImageBarrier(m_image->get(),
                           m_srcAccessFlags,
                           m_dstAccessFlags,
                           m_srcStages,

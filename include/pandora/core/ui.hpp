@@ -130,13 +130,20 @@ namespace ui {
 /// - Integration with Vulkan surface creation for rendering
 class Window {
  private:
+  struct GLFWwindowDeleter {
+    void operator()(GLFWwindow* window) const noexcept {
+      if (window != nullptr) {
+        glfwDestroyWindow(window);
+      }
+    }
+  };
   static std::unordered_map<uint64_t, std::unordered_set<int32_t>>
       s_inputKeySetMap;
   static std::unordered_map<uint64_t, Mouse> s_mouseMap;
   static std::unordered_map<uint64_t, bool> s_resizedBoolMap;
 
   std::shared_ptr<gpu_ui::WindowSurface> m_ptrWindowSurface;
-  GLFWwindow* m_ptrWindow;
+  std::unique_ptr<GLFWwindow, GLFWwindowDeleter> m_ptrWindow;
   std::vector<std::function<void()>> m_callbacks;
 
  private:
@@ -173,13 +180,13 @@ class Window {
   Window& operator=(Window&&) = default;
 
   const auto& getMouse() const {
-    return s_mouseMap.at(convertWindowPtr(m_ptrWindow));
+    return s_mouseMap.at(convertWindowPtr(m_ptrWindow.get()));
   }
   const auto& getWindowSurface() const {
     return m_ptrWindowSurface;
   }
   auto isResized() const {
-    return s_resizedBoolMap.at(convertWindowPtr(m_ptrWindow));
+    return s_resizedBoolMap.at(convertWindowPtr(m_ptrWindow.get()));
   }
 
   /// @brief Update window and input
@@ -196,7 +203,7 @@ class Window {
   }
 
   bool findInputKey(KeyCode key) const {
-    return s_inputKeySetMap.at(convertWindowPtr(m_ptrWindow))
+    return s_inputKeySetMap.at(convertWindowPtr(m_ptrWindow.get()))
         .contains(convertKeyCodeToInt(key));
   }
 };
