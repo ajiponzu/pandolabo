@@ -192,23 +192,23 @@ plc::VoidResult BasicComputing::setTransferCommands(
   std::thread transfer_thread0([&]() {
     const size_t thread_index = 0u;
 
-    std::shared_lock lock(mutex);
+    std::unique_lock<std::shared_mutex> buffer_lock(mutex);
     const auto command_buffer =
         m_ptrTransferCommandDriver->getTransfer(thread_index);
-    lock.unlock();
+    buffer_lock.unlock();
 
-    lock.lock();
+    buffer_lock.lock();
     auto& staging_buffer = staging_buffers[thread_index];
     const auto mapped_address = staging_buffer.mapMemory(m_ptrContext);
-    lock.unlock();
+    buffer_lock.unlock();
 
     std::fill_n(reinterpret_cast<uint32_t*>(mapped_address),
                 staging_buffer.getSize() / sizeof(uint32_t),
                 5U);
 
-    lock.lock();
+    buffer_lock.lock();
     staging_buffer.unmapMemory(m_ptrContext);
-    lock.unlock();
+    buffer_lock.unlock();
 
     const auto result = set_transfer_secondary_command(
         command_buffer,
@@ -216,7 +216,7 @@ plc::VoidResult BasicComputing::setTransferCommands(
         {src_queue_family_index, dst_queue_family_index},
         staging_buffer);
     if (!result.isOk()) {
-      std::scoped_lock lock(error_mutex);
+      std::scoped_lock error_lock(error_mutex);
       if (!thread_error.has_value()) {
         thread_error = result.error();
       }
@@ -226,23 +226,23 @@ plc::VoidResult BasicComputing::setTransferCommands(
   std::thread transfer_thread1([&]() {
     const size_t thread_index = 1u;
 
-    std::shared_lock lock(mutex);
+    std::unique_lock<std::shared_mutex> buffer_lock(mutex);
     const auto command_buffer =
         m_ptrTransferCommandDriver->getTransfer(thread_index);
-    lock.unlock();
+    buffer_lock.unlock();
 
-    lock.lock();
+    buffer_lock.lock();
     auto& staging_buffer = staging_buffers[thread_index];
     const auto mapped_address = staging_buffer.mapMemory(m_ptrContext);
-    lock.unlock();
+    buffer_lock.unlock();
 
     std::fill_n(reinterpret_cast<uint32_t*>(mapped_address),
                 staging_buffer.getSize() / sizeof(uint32_t),
                 5U);
 
-    lock.lock();
+    buffer_lock.lock();
     staging_buffer.unmapMemory(m_ptrContext);
-    lock.unlock();
+    buffer_lock.unlock();
 
     const auto result = set_transfer_secondary_command(
         command_buffer,
@@ -250,7 +250,7 @@ plc::VoidResult BasicComputing::setTransferCommands(
         {src_queue_family_index, dst_queue_family_index},
         staging_buffer);
     if (!result.isOk()) {
-      std::scoped_lock lock(error_mutex);
+      std::scoped_lock error_lock(error_mutex);
       if (!thread_error.has_value()) {
         thread_error = result.error();
       }
