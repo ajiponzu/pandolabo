@@ -1,5 +1,8 @@
 #include "basic_computing.hpp"
 
+#include <cstdio>
+#include <mutex>
+#include <optional>
 #include <print>
 #include <shared_mutex>
 #include <thread>
@@ -9,7 +12,7 @@ namespace plc = pandora::core;
 
 namespace {
 
-void set_transfer_secondary_command(
+plc::VoidResult set_transfer_secondary_command(
     const plc::TransferCommandBuffer& command_buffer,
     const std::unique_ptr<plc::gpu::Buffer>& transfered_buffer,
     const std::pair<uint32_t, uint32_t> queue_family_indices,
@@ -19,22 +22,24 @@ void set_transfer_secondary_command(
   command_buffer.copyBuffer(staging_buffer, *transfered_buffer);
 
   // release the ownership of the gpu storage buffer
-  const auto buffer_barrier =
-      plc::gpu::BufferBarrierBuilder::create()
-          .setBuffer(*transfered_buffer)
-          .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
-          .setDstAccessFlags(
-              {plc::AccessFlag::ShaderRead, plc::AccessFlag::ShaderWrite})
-          .setSrcStages({plc::PipelineStage::Transfer})
-          .setDstStages({plc::PipelineStage::Transfer})
-          .setSrcQueueFamilyIndex(queue_family_indices.first)
-          .setDstQueueFamilyIndex(queue_family_indices.second)
-          .build();
+  PANDORA_TRY_ASSIGN(buffer_barrier,
+                     plc::gpu::BufferBarrierBuilder::create()
+                         .setBuffer(*transfered_buffer)
+                         .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
+                         .setDstAccessFlags({plc::AccessFlag::ShaderRead,
+                                             plc::AccessFlag::ShaderWrite})
+                         .setSrcStages({plc::PipelineStage::Transfer})
+                         .setDstStages({plc::PipelineStage::Transfer})
+                         .setSrcQueueFamilyIndex(queue_family_indices.first)
+                         .setDstQueueFamilyIndex(queue_family_indices.second)
+                         .build());
 
   command_buffer.setPipelineBarrier(
       plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
 
   command_buffer.end();
+
+  return plc::ok();
 }
 
 }  // namespace
@@ -80,9 +85,27 @@ void BasicComputing::run() {
     {
       std::vector<plc::gpu::Buffer> staging_buffers;
 
-      constructShaderResources();
-      setTransferCommands(staging_buffers);
-      setComputeCommands(result_buffer);
+      const auto shader_result = constructShaderResources();
+      if (!shader_result.isOk()) {
+        std::println(stderr,
+                     "BasicComputing shader load error: {}",
+                     shader_result.error().toString());
+        return;
+      }
+      const auto transfer_result = setTransferCommands(staging_buffers);
+      if (!transfer_result.isOk()) {
+        std::println(stderr,
+                     "BasicComputing transfer error: {}",
+                     transfer_result.error().toString());
+        return;
+      }
+      const auto compute_result = setComputeCommands(result_buffer);
+      if (!compute_result.isOk()) {
+        std::println(stderr,
+                     "BasicComputing compute error: {}",
+                     compute_result.error().toString());
+        return;
+      }
 
       plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
 
@@ -145,9 +168,11 @@ void BasicComputing::run() {
   }
 }
 
-void BasicComputing::setTransferCommands(
+plc::VoidResult BasicComputing::setTransferCommands(
     std::vector<plc::gpu::Buffer>& staging_buffers) {
   std::shared_mutex mutex;
+  std::mutex error_mutex;
+  std::optional<plc::Error> thread_error;
 
   m_ptrTransferCommandDriver->constructSecondary(m_ptrContext, 2);
 
@@ -185,11 +210,17 @@ void BasicComputing::setTransferCommands(
     staging_buffer.unmapMemory(m_ptrContext);
     lock.unlock();
 
-    set_transfer_secondary_command(
+    const auto result = set_transfer_secondary_command(
         command_buffer,
         m_ptrInputStorageBuffer,
         {src_queue_family_index, dst_queue_family_index},
         staging_buffer);
+    if (!result.isOk()) {
+      std::scoped_lock lock(error_mutex);
+      if (!thread_error.has_value()) {
+        thread_error = result.error();
+      }
+    }
   });
 
   std::thread transfer_thread1([&]() {
@@ -213,11 +244,17 @@ void BasicComputing::setTransferCommands(
     staging_buffer.unmapMemory(m_ptrContext);
     lock.unlock();
 
-    set_transfer_secondary_command(
+    const auto result = set_transfer_secondary_command(
         command_buffer,
         m_ptrOutputStorageBuffer,
         {src_queue_family_index, dst_queue_family_index},
         staging_buffer);
+    if (!result.isOk()) {
+      std::scoped_lock lock(error_mutex);
+      if (!thread_error.has_value()) {
+        thread_error = result.error();
+      }
+    }
   });
 
   const auto primary_command_buffer = m_ptrTransferCommandDriver->getPrimary();
@@ -232,11 +269,18 @@ void BasicComputing::setTransferCommands(
   m_ptrTransferCommandDriver->mergeSecondaryCommands();
 
   primary_command_buffer.end();
+
+  if (thread_error.has_value()) {
+    return *thread_error;
+  }
+
+  return plc::ok();
 }
 
-void BasicComputing::constructShaderResources() {
-  const auto spirv_binary =
-      plc::io::shader::read("examples/core/basic_compute/basic.comp");
+plc::VoidResult BasicComputing::constructShaderResources() {
+  PANDORA_TRY_ASSIGN(
+      spirv_binary,
+      plc::io::shader::read("examples/core/basic_compute/basic.comp"));
 
   m_shaderModuleMap["compute"] =
       plc::gpu::ShaderModule(m_ptrContext, spirv_binary);
@@ -271,9 +315,12 @@ void BasicComputing::constructShaderResources() {
                                       plc::PipelineBind::Compute);
   m_ptrComputePipeline->constructComputePipeline(
       m_ptrContext, m_shaderModuleMap.at("compute"));
+
+  return plc::ok();
 }
 
-void BasicComputing::setComputeCommands(plc::gpu::Buffer& staging_buffer) {
+plc::VoidResult BasicComputing::setComputeCommands(
+    plc::gpu::Buffer& staging_buffer) {
   const auto command_buffer = m_ptrComputeCommandDriver->getCompute();
 
   command_buffer.begin();
@@ -281,7 +328,8 @@ void BasicComputing::setComputeCommands(plc::gpu::Buffer& staging_buffer) {
   {
     // acquire the ownership of the gpu storage buffer
     // acrquire barrier parameters are same as the release barrier.
-    const auto buffer_barrier =
+    PANDORA_TRY_ASSIGN(
+        buffer_barrier,
         plc::gpu::BufferBarrierBuilder::create()
             .setBuffer(*m_ptrInputStorageBuffer)
             .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
@@ -293,7 +341,7 @@ void BasicComputing::setComputeCommands(plc::gpu::Buffer& staging_buffer) {
                 m_ptrTransferCommandDriver->getQueueFamilyIndex())
             .setDstQueueFamilyIndex(
                 m_ptrComputeCommandDriver->getQueueFamilyIndex())
-            .build();
+            .build());
 
     command_buffer.setPipelineBarrier(
         plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
@@ -301,7 +349,8 @@ void BasicComputing::setComputeCommands(plc::gpu::Buffer& staging_buffer) {
 
   {
     // acquire the ownership of the gpu storage buffer
-    const auto buffer_barrier =
+    PANDORA_TRY_ASSIGN(
+        buffer_barrier,
         plc::gpu::BufferBarrierBuilder::create()
             .setBuffer(*m_ptrOutputStorageBuffer)
             .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
@@ -313,7 +362,7 @@ void BasicComputing::setComputeCommands(plc::gpu::Buffer& staging_buffer) {
                 m_ptrTransferCommandDriver->getQueueFamilyIndex())
             .setDstQueueFamilyIndex(
                 m_ptrComputeCommandDriver->getQueueFamilyIndex())
-            .build();
+            .build());
 
     command_buffer.setPipelineBarrier(
         plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
@@ -324,7 +373,8 @@ void BasicComputing::setComputeCommands(plc::gpu::Buffer& staging_buffer) {
   command_buffer.compute(plc::ComputeWorkGroupSize{4u, 1u, 1u});
 
   {
-    const auto buffer_barrier =
+    PANDORA_TRY_ASSIGN(
+        buffer_barrier,
         plc::gpu::BufferBarrierBuilder::create()
             .setBuffer(*m_ptrOutputStorageBuffer)
             .setSrcAccessFlags(
@@ -336,7 +386,7 @@ void BasicComputing::setComputeCommands(plc::gpu::Buffer& staging_buffer) {
                 m_ptrTransferCommandDriver->getQueueFamilyIndex())
             .setDstQueueFamilyIndex(
                 m_ptrComputeCommandDriver->getQueueFamilyIndex())
-            .build();
+            .build());
 
     command_buffer.setPipelineBarrier(
         plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
@@ -345,7 +395,8 @@ void BasicComputing::setComputeCommands(plc::gpu::Buffer& staging_buffer) {
   command_buffer.copyBuffer(*m_ptrOutputStorageBuffer, staging_buffer);
 
   {
-    const auto buffer_barrier =
+    PANDORA_TRY_ASSIGN(
+        buffer_barrier,
         plc::gpu::BufferBarrierBuilder::create()
             .setBuffer(*m_ptrOutputStorageBuffer)
             .setSrcAccessFlags({plc::AccessFlag::TransferRead})
@@ -356,13 +407,15 @@ void BasicComputing::setComputeCommands(plc::gpu::Buffer& staging_buffer) {
                 m_ptrTransferCommandDriver->getQueueFamilyIndex())
             .setDstQueueFamilyIndex(
                 m_ptrComputeCommandDriver->getQueueFamilyIndex())
-            .build();
+            .build());
 
     command_buffer.setPipelineBarrier(
         plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
   }
 
   command_buffer.end();
+
+  return plc::ok();
 }
 
 }  // namespace samples::core

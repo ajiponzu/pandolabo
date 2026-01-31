@@ -20,14 +20,14 @@ void Swapchain::resetSwapchain(
   constructSwapchain(ptr_device, ptr_surface);
 }
 
-void Swapchain::updateImageIndex(const std::unique_ptr<Device>& ptr_device,
-                                 uint64_t timeout) {
+::pandora::core::VoidResult Swapchain::updateImageIndex(
+    const std::unique_ptr<Device>& ptr_device, uint64_t timeout) {
   const auto& ptr_vk_device = ptr_device->getPtrLogicalDevice();
 
   const auto vk_result = ptr_vk_device->waitForFences(
       m_fences.at(m_frameSyncIndex).get(), VK_TRUE, timeout);
   if (vk_result != vk::Result::eSuccess) {
-    throw std::runtime_error("Failed to wait for fence.");
+    return errorGpu("Failed to wait for fence.");
   }
 
   const auto next_image_opt = ptr_vk_device->acquireNextImageKHR(
@@ -38,11 +38,13 @@ void Swapchain::updateImageIndex(const std::unique_ptr<Device>& ptr_device,
 
   if (next_image_opt.result != vk::Result::eSuccess
       && next_image_opt.result != vk::Result::eSuboptimalKHR) {
-    throw std::runtime_error("Failed to acquire next image index.");
+    return errorGpu("Failed to acquire next image index.");
   }
   m_imageIndex = next_image_opt.value;
 
   ptr_vk_device->resetFences(m_fences.at(m_frameSyncIndex).get());
+
+  return ok();
 }
 
 void Swapchain::updateFrameSyncIndex() {

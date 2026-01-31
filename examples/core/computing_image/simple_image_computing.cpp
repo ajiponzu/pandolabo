@@ -28,7 +28,12 @@ SimpleImageComputing::SimpleImageComputing() {
   m_ptrUniformBuffer->unmapMemory(m_ptrContext);
 
   initializeImageResources();
-  constructShaderResources();
+  const auto shader_result = constructShaderResources();
+  if (!shader_result.isOk()) {
+    return;
+  }
+
+  m_isInitialized = true;
 }
 
 SimpleImageComputing::~SimpleImageComputing() {
@@ -37,14 +42,23 @@ SimpleImageComputing::~SimpleImageComputing() {
 }
 
 void SimpleImageComputing::run() {
+  if (!m_isInitialized) {
+    return;
+  }
   plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
 
   const auto result_buffer = plc::createStagingBufferFromGPU(
       m_ptrContext, m_image.width * m_image.height * m_image.channels);
   {
     std::vector<plc::gpu::Buffer> staging_buffers;
-    setTransferCommands(staging_buffers);
-    setComputeCommands(result_buffer);
+    const auto transfer_result = setTransferCommands(staging_buffers);
+    if (!transfer_result.isOk()) {
+      return;
+    }
+    const auto compute_result = setComputeCommands(result_buffer);
+    if (!compute_result.isOk()) {
+      return;
+    }
 
     m_ptrTransferCommandDriver->submit(
         plc::SubmitSemaphoreGroup{}
@@ -157,9 +171,10 @@ void SimpleImageComputing::initializeImageResources() {
   }
 }
 
-void SimpleImageComputing::constructShaderResources() {
-  const auto spirv_binary =
-      plc::io::shader::read("examples/core/computing_image/simple_image.comp");
+plc::VoidResult SimpleImageComputing::constructShaderResources() {
+  PANDORA_TRY_ASSIGN(
+      spirv_binary,
+      plc::io::shader::read("examples/core/computing_image/simple_image.comp"));
 
   m_shaderModuleMap["compute"] =
       plc::gpu::ShaderModule(m_ptrContext, spirv_binary);
@@ -198,9 +213,11 @@ void SimpleImageComputing::constructShaderResources() {
                                       plc::PipelineBind::Compute);
   m_ptrComputePipeline->constructComputePipeline(
       m_ptrContext, m_shaderModuleMap.at("compute"));
+
+  return plc::ok();
 }
 
-void SimpleImageComputing::setTransferCommands(
+plc::VoidResult SimpleImageComputing::setTransferCommands(
     std::vector<plc::gpu::Buffer>& staging_buffers) {
   const auto command_buffer = m_ptrTransferCommandDriver->getTransfer();
 
@@ -217,17 +234,17 @@ void SimpleImageComputing::setTransferCommands(
   plc::ImageViewInfo image_view_info = m_ptrImageView->getImageViewInfo();
 
   {
-    const auto image_barrier =
-        plc::gpu::ImageBarrierBuilder::create()
-            .setImage(*m_ptrImage)
-            .setSrcAccessFlags({plc::AccessFlag::Unknown})
-            .setDstAccessFlags({plc::AccessFlag::TransferWrite})
-            .setSrcStages({plc::PipelineStage::Transfer})
-            .setDstStages({plc::PipelineStage::Transfer})
-            .setOldLayout(plc::ImageLayout::Undefined)
-            .setNewLayout(plc::ImageLayout::TransferDstOptimal)
-            .setImageViewInfo(image_view_info)
-            .build();
+    PANDORA_TRY_ASSIGN(image_barrier,
+                       plc::gpu::ImageBarrierBuilder::create()
+                           .setImage(*m_ptrImage)
+                           .setSrcAccessFlags({plc::AccessFlag::Unknown})
+                           .setDstAccessFlags({plc::AccessFlag::TransferWrite})
+                           .setSrcStages({plc::PipelineStage::Transfer})
+                           .setDstStages({plc::PipelineStage::Transfer})
+                           .setOldLayout(plc::ImageLayout::Undefined)
+                           .setNewLayout(plc::ImageLayout::TransferDstOptimal)
+                           .setImageViewInfo(image_view_info)
+                           .build());
 
     command_buffer.setPipelineBarrier(
         plc::BarrierDependency{}.setImageBarriers({image_barrier}));
@@ -239,7 +256,8 @@ void SimpleImageComputing::setTransferCommands(
                                    image_view_info);
 
   {
-    const auto image_barrier =
+    PANDORA_TRY_ASSIGN(
+        image_barrier,
         plc::gpu::ImageBarrierBuilder::create()
             .setImage(*m_ptrImage)
             .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
@@ -253,16 +271,18 @@ void SimpleImageComputing::setTransferCommands(
                 m_ptrTransferCommandDriver->getQueueFamilyIndex())
             .setDstQueueFamilyIndex(
                 m_ptrComputeCommandDriver->getQueueFamilyIndex())
-            .build();
+            .build());
 
     command_buffer.setPipelineBarrier(
         plc::BarrierDependency{}.setImageBarriers({image_barrier}));
   }
 
   command_buffer.end();
+
+  return plc::ok();
 }
 
-void SimpleImageComputing::setComputeCommands(
+plc::VoidResult SimpleImageComputing::setComputeCommands(
     const plc::gpu::Buffer& staging_buffer) {
   static float_t push_timer = 0.0f;
   push_timer += 0.001f;
@@ -275,7 +295,8 @@ void SimpleImageComputing::setComputeCommands(
     const plc::ImageViewInfo image_view_info =
         m_ptrImageView->getImageViewInfo();
 
-    const auto image_barrier =
+    PANDORA_TRY_ASSIGN(
+        image_barrier,
         plc::gpu::ImageBarrierBuilder::create()
             .setImage(*m_ptrImage)
             .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
@@ -289,7 +310,7 @@ void SimpleImageComputing::setComputeCommands(
                 m_ptrTransferCommandDriver->getQueueFamilyIndex())
             .setDstQueueFamilyIndex(
                 m_ptrComputeCommandDriver->getQueueFamilyIndex())
-            .build();
+            .build());
 
     command_buffer.setPipelineBarrier(
         plc::BarrierDependency{}.setImageBarriers({image_barrier}));
@@ -298,17 +319,17 @@ void SimpleImageComputing::setComputeCommands(
   const plc::ImageViewInfo image_view_info =
       m_ptrStorageImageView->getImageViewInfo();
   {
-    const auto image_barrier =
-        plc::gpu::ImageBarrierBuilder::create()
-            .setImage(*m_ptrStorageImage)
-            .setSrcAccessFlags({plc::AccessFlag::Unknown})
-            .setDstAccessFlags({plc::AccessFlag::ShaderWrite})
-            .setSrcStages({plc::PipelineStage::Transfer})
-            .setDstStages({plc::PipelineStage::ComputeShader})
-            .setOldLayout(plc::ImageLayout::Undefined)
-            .setNewLayout(plc::ImageLayout::General)
-            .setImageViewInfo(image_view_info)
-            .build();
+    PANDORA_TRY_ASSIGN(image_barrier,
+                       plc::gpu::ImageBarrierBuilder::create()
+                           .setImage(*m_ptrStorageImage)
+                           .setSrcAccessFlags({plc::AccessFlag::Unknown})
+                           .setDstAccessFlags({plc::AccessFlag::ShaderWrite})
+                           .setSrcStages({plc::PipelineStage::Transfer})
+                           .setDstStages({plc::PipelineStage::ComputeShader})
+                           .setOldLayout(plc::ImageLayout::Undefined)
+                           .setNewLayout(plc::ImageLayout::General)
+                           .setImageViewInfo(image_view_info)
+                           .build());
 
     command_buffer.setPipelineBarrier(
         plc::BarrierDependency{}.setImageBarriers({image_barrier}));
@@ -324,17 +345,17 @@ void SimpleImageComputing::setComputeCommands(
                                 1u});
 
   {
-    const auto image_barrier =
-        plc::gpu::ImageBarrierBuilder::create()
-            .setImage(*m_ptrStorageImage)
-            .setSrcAccessFlags({plc::AccessFlag::ShaderWrite})
-            .setDstAccessFlags({plc::AccessFlag::TransferRead})
-            .setSrcStages({plc::PipelineStage::ComputeShader})
-            .setDstStages({plc::PipelineStage::Transfer})
-            .setOldLayout(plc::ImageLayout::General)
-            .setNewLayout(plc::ImageLayout::General)
-            .setImageViewInfo(image_view_info)
-            .build();
+    PANDORA_TRY_ASSIGN(image_barrier,
+                       plc::gpu::ImageBarrierBuilder::create()
+                           .setImage(*m_ptrStorageImage)
+                           .setSrcAccessFlags({plc::AccessFlag::ShaderWrite})
+                           .setDstAccessFlags({plc::AccessFlag::TransferRead})
+                           .setSrcStages({plc::PipelineStage::ComputeShader})
+                           .setDstStages({plc::PipelineStage::Transfer})
+                           .setOldLayout(plc::ImageLayout::General)
+                           .setNewLayout(plc::ImageLayout::General)
+                           .setImageViewInfo(image_view_info)
+                           .build());
 
     command_buffer.setPipelineBarrier(
         plc::BarrierDependency{}.setImageBarriers({image_barrier}));
@@ -346,6 +367,8 @@ void SimpleImageComputing::setComputeCommands(
   }
 
   command_buffer.end();
+
+  return plc::ok();
 }
 
 }  // namespace samples::core

@@ -14,6 +14,7 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
+#include "error.hpp"
 #include "gpu.hpp"
 #include "module_connection/gpu_ui.hpp"
 #include "pipeline.hpp"
@@ -202,7 +203,8 @@ class TransferCommandBuffer : public CommandBuffer {
   /// @brief Generate mipmaps for GPU image
   /// @param image Image to generate mipmaps for
   /// @param dst_stage Pipeline stage that will use the mipmapped image
-  void setMipmaps(const gpu::Image& image, const PipelineStage dst_stage) const;
+  VoidResult setMipmaps(const gpu::Image& image,
+                        const PipelineStage dst_stage) const;
 
   /// @brief Transfer mipmap image ownership to another queue family
   /// Source owner command buffer must call this function for queue family
@@ -212,7 +214,7 @@ class TransferCommandBuffer : public CommandBuffer {
   /// @param dst_stage Destination pipeline stage
   /// @param queue_family_index Queue family indices (first: source, second:
   /// destination)
-  void transferMipmapImages(
+  VoidResult transferMipmapImages(
       const gpu::Image& image,
       const PipelineStage src_stage,
       const PipelineStage dst_stage,
@@ -226,7 +228,7 @@ class TransferCommandBuffer : public CommandBuffer {
   /// @param dst_stage Destination pipeline stage
   /// @param queue_family_index Queue family indices (first: source, second:
   /// destination)
-  void acquireMipmapImages(
+  VoidResult acquireMipmapImages(
       const gpu::Image& image,
       const PipelineStage src_stage,
       const PipelineStage dst_stage,
@@ -329,9 +331,9 @@ class GraphicCommandBuffer : public ComputeCommandBuffer {
   /// @param render_kit Render kit containing render pass and framebuffer
   /// @param render_area Rendering area dimensions
   /// @param subpass_contents How subpass commands are provided
-  void beginRenderpass(const RenderKit& render_kit,
-                       const gpu_ui::GraphicalSize<uint32_t>& render_area,
-                       const SubpassContents subpass_contents) const;
+  VoidResult beginRenderpass(const RenderKit& render_kit,
+                             const gpu_ui::GraphicalSize<uint32_t>& render_area,
+                             const SubpassContents subpass_contents) const;
 
   /// @brief End current render pass
   void endRenderpass() const;
@@ -410,8 +412,8 @@ class CommandDriver {
   /// @brief Present rendered image to display
   /// @param ptr_context Vulkan context for presentation
   /// @param wait_semaphore Semaphore to wait for before presentation
-  void present(const std::unique_ptr<gpu::Context>& ptr_context,
-               const gpu::BinarySemaphore& wait_semaphore) const;
+  VoidResult present(const std::unique_ptr<gpu::Context>& ptr_context,
+                     const gpu::BinarySemaphore& wait_semaphore) const;
 
   /// @brief Wait for all operations on this queue to complete
   void queueWaitIdle() const {

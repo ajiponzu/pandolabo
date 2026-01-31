@@ -53,7 +53,8 @@ namespace pandora::core::ui {
 
 Window::Window(const std::string& title, int32_t width, int32_t height) {
   if (!glfwInit()) {
-    throw std::runtime_error("Failed to initialize GLFW.");
+    m_initError = errorRuntime("Failed to initialize GLFW.");
+    return;
   }
 
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -62,7 +63,8 @@ Window::Window(const std::string& title, int32_t width, int32_t height) {
       glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr));
   if (m_ptrWindow == nullptr) {
     glfwTerminate();
-    throw std::runtime_error("Failed to create GLFW window.");
+    m_initError = errorRuntime("Failed to create GLFW window.");
+    return;
   }
 
   glfwMakeContextCurrent(m_ptrWindow.get());
@@ -77,18 +79,35 @@ Window::Window(const std::string& title, int32_t width, int32_t height) {
   glfwSetWindowSizeCallback(m_ptrWindow.get(), callback_resized);
 
   m_ptrWindowSurface = std::make_shared<gpu_ui::WindowSurface>(*m_ptrWindow);
+  m_isInitialized = true;
 }
 
 Window::~Window() {
-  m_ptrWindow.reset();
-  glfwTerminate();
+  if (m_isInitialized) {
+    m_ptrWindow.reset();
+    glfwTerminate();
+  }
 
 #ifdef _DEBUG
   glfwSetErrorCallback(nullptr);
 #endif
 }
 
+Result<std::unique_ptr<Window>> Window::create(const std::string& title,
+                                               int32_t width,
+                                               int32_t height) {
+  auto window = std::make_unique<Window>(title, width, height);
+  const auto init_result = window->getInitResult();
+  if (!init_result.isOk()) {
+    return init_result.error();
+  }
+  return window;
+}
+
 bool Window::update() {
+  if (!m_isInitialized) {
+    return false;
+  }
   setResizedBool(m_ptrWindow.get(), false);
 
   glfwPollEvents();

@@ -62,6 +62,8 @@ class StreamingResources {
   std::mt19937 m_randomGenerator;
   std::uniform_real_distribution<float_t> m_colorDist;
 
+  bool m_isInitialized = false;
+
  public:
   StreamingResources();
   ~StreamingResources();
@@ -69,11 +71,11 @@ class StreamingResources {
   void run();
 
  private:
-  void constructShaderResources();
+  plc::VoidResult constructShaderResources();
   void constructRenderpass(bool is_resized = false);
   void constructGraphicPipeline();
-  void updateVertexData();
-  void setGraphicCommands();
+  plc::VoidResult updateVertexData();
+  plc::VoidResult setGraphicCommands();
   void spawnNewTriangle(float_t currentTime);
   void removeOldTriangles(float_t currentTime);
   std::vector<Vertex> getCurrentTriangles(float_t currentTime);

@@ -102,10 +102,11 @@ void CommandDriver::submit(const SubmitSemaphoreGroup& semaphore_group,
   m_queue.submit2(submit_info, fence.getFence());
 }
 
-void CommandDriver::present(const std::unique_ptr<gpu::Context>& ptr_context,
-                            const gpu::BinarySemaphore& wait_semaphore) const {
+VoidResult CommandDriver::present(
+    const std::unique_ptr<gpu::Context>& ptr_context,
+    const gpu::BinarySemaphore& wait_semaphore) const {
   if (m_queueFamilyType != QueueFamilyType::Graphics) {
-    throw std::runtime_error("Queue family type is not present.");
+    return errorGpu("Queue family type is not present.");
   }
 
   const auto& ptr_swapchain = ptr_context->getPtrSwapchain();
@@ -118,8 +119,10 @@ void CommandDriver::present(const std::unique_ptr<gpu::Context>& ptr_context,
                                .setSwapchains(ptr_swapchain->getSwapchain())
                                .setImageIndices(image_index)));
   } catch (const vk::SystemError&) {
-    throw std::runtime_error("Failed to present image.");
+    return errorGpu("Failed to present image.");
   }
+
+  return ok();
 }
 
 GraphicCommandBuffer CommandDriver::getGraphic(

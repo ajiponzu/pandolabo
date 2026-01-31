@@ -2,17 +2,32 @@
 #include <glslang/SPIRV/GlslangToSpv.h>
 
 #include <fstream>
-#include <print>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 
+#ifdef validation
+  #undef validation
+#endif
+#ifdef errorValidation
+  #undef errorValidation
+#endif
+#ifdef Validation
+  #undef Validation
+#endif
+
+#include "pandora/core/error.hpp"
 #include "pandora/core/io.hpp"
 
 namespace {
 
-std::pair<std::string, ::EShLanguage> translate_shader_stage(
-    const std::string& shader_code_path) {
+::pandora::core::Error errorValidation(std::string message) {
+  return ::pandora::core::Error(::pandora::core::ErrorType::Validation,
+                                std::move(message));
+}
+
+::pandora::core::Result<std::pair<std::string, ::EShLanguage>>
+translate_shader_stage(const std::string& shader_code_path) {
   static const std::unordered_map<std::string,
                                   std::pair<std::string, ::EShLanguage>>
       extension_map = {{".vert", {"vert", EShLangVertex}},
@@ -29,7 +44,7 @@ std::pair<std::string, ::EShLanguage> translate_shader_stage(
     }
   }
 
-  throw std::runtime_error("Unknown shader stage");
+  return errorValidation("Unknown shader stage");
 }
 
 TBuiltInResource init_t_built_in_resources() {
@@ -141,8 +156,8 @@ TBuiltInResource init_t_built_in_resources() {
   return resources;
 }
 
-std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage,
-                                     const std::string& shader_code) {
+::pandora::core::Result<std::vector<uint32_t>> compile_shader(
+    const ::EShLanguage& shader_stage, const std::string& shader_code) {
   glslang::InitializeProcess();
 
   std::vector shader_c_strings = {shader_code.data()};
@@ -156,14 +171,14 @@ std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage,
   EShMessages messages = (EShMessages)(EShMsgSpvRules | EShMsgVulkanRules);
   const auto t_built_in_resources = init_t_built_in_resources();
   if (!shader.parse(&t_built_in_resources, 100, false, messages)) {
-    throw std::runtime_error(shader_code + "\n" + shader.getInfoLog());
+    return errorValidation(shader_code + "\n" + shader.getInfoLog());
   }
 
   glslang::TProgram program{};
   program.addShader(&shader);
 
   if (!program.link(messages)) {
-    throw std::runtime_error(shader_code + "\n" + shader.getInfoLog());
+    return errorValidation(shader_code + "\n" + shader.getInfoLog());
   }
 
   std::vector<uint32_t> shader_binary;
@@ -177,23 +192,26 @@ std::vector<uint32_t> compile_shader(const ::EShLanguage& shader_stage,
 
 namespace pandora::core::io::shader {
 
-std::vector<uint32_t> readText(const std::string& file_path) {
-  const auto& [shader_type, stage] = translate_shader_stage(file_path);
+Result<std::vector<uint32_t>> readText(const std::string& file_path) {
+  PANDORA_TRY_ASSIGN(stage_info, translate_shader_stage(file_path));
+  const auto& stage = stage_info.second;
+
+  std::ifstream input_file(file_path);
+  if (!input_file.is_open()) {
+    return ::pandora::core::errorIo("Failed to open shader file: " + file_path);
+  }
 
   std::stringstream shader_code{};
-  std::ifstream input_file(file_path);
   shader_code << input_file.rdbuf();
   input_file.close();
 
   return compile_shader(stage, shader_code.str());
 }
 
-std::vector<uint32_t> readBinary(const std::string& file_path) {
+Result<std::vector<uint32_t>> readBinary(const std::string& file_path) {
   std::ifstream file(file_path, std::ios::ate | std::ios::binary);
   if (!file.is_open()) {
-    std::println("Failed to open file: {}", file_path);
-
-    return std::vector<uint32_t>();
+    return ::pandora::core::errorIo("Failed to open shader file: " + file_path);
   }
 
   size_t file_size = (size_t)file.tellg();
@@ -205,7 +223,7 @@ std::vector<uint32_t> readBinary(const std::string& file_path) {
   return shader_binary;
 }
 
-std::vector<uint32_t> read(const std::string& file_path) {
+Result<std::vector<uint32_t>> read(const std::string& file_path) {
   if (file_path.ends_with(".spv")) {
     return readBinary(file_path);
   } else {
@@ -213,12 +231,17 @@ std::vector<uint32_t> read(const std::string& file_path) {
   }
 }
 
-void write(const std::string& file_path,
-           const std::vector<uint32_t>& shader_binary) {
+VoidResult write(const std::string& file_path,
+                 const std::vector<uint32_t>& shader_binary) {
   std::ofstream output_file(file_path, std::ios::binary);
+  if (!output_file.is_open()) {
+    return ::pandora::core::errorIo("Failed to open shader output: "
+                                    + file_path);
+  }
 
   output_file.write(reinterpret_cast<const char*>(shader_binary.data()),
                     shader_binary.size() * sizeof(uint32_t));
+  return ok();
 }
 
 }  // namespace pandora::core::io::shader

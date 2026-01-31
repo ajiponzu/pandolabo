@@ -33,6 +33,8 @@ class Square {
   std::unique_ptr<plc::gpu::DescriptorSet> m_ptrDescriptorSet;
   std::unique_ptr<plc::gpu::DescriptorSetLayout> m_ptrDescriptorSetLayout;
 
+  bool m_isInitialized = false;
+
  public:
   Square();
   ~Square();
@@ -40,11 +42,12 @@ class Square {
   void run();
 
  private:
-  void constructShaderResources();
+  plc::VoidResult constructShaderResources();
   void constructRenderpass(bool is_resized = false);
   void constructGraphicPipeline();
-  void setTransferCommands(std::vector<plc::gpu::Buffer>& staging_buffers);
-  void setGraphicCommands();
+  plc::VoidResult setTransferCommands(
+      std::vector<plc::gpu::Buffer>& staging_buffers);
+  plc::VoidResult setGraphicCommands();
 };
 }  // namespace core
 }  // namespace samples

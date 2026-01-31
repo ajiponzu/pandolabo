@@ -11,10 +11,12 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_set>
 #include <vector>
 
+#include "error.hpp"
 #include "module_connection/gpu_ui.hpp"
 
 namespace pandora::core {
@@ -145,6 +147,8 @@ class Window {
   std::shared_ptr<gpu_ui::WindowSurface> m_ptrWindowSurface;
   std::unique_ptr<GLFWwindow, GLFWwindowDeleter> m_ptrWindow;
   std::vector<std::function<void()>> m_callbacks;
+  bool m_isInitialized = false;
+  std::optional<Error> m_initError;
 
  private:
   static auto convertWindowPtr(const GLFWwindow* ptr_window) {
@@ -171,6 +175,20 @@ class Window {
   }
 
   Window(const std::string& title, int32_t width, int32_t height);
+  /// @brief Create a window and return initialization result
+  static Result<std::unique_ptr<Window>> create(const std::string& title,
+                                                int32_t width,
+                                                int32_t height);
+  bool isInitialized() const {
+    return m_isInitialized;
+  }
+
+  VoidResult getInitResult() const {
+    if (m_initError.has_value()) {
+      return *m_initError;
+    }
+    return ok();
+  }
 
   // Rule of Five
   ~Window();

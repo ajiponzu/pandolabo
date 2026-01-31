@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "pandora/core/error.hpp"
 #include "pandora/core/gpu.hpp"
 #include "pandora/core/io.hpp"
 #include "pandora/core/ui.hpp"

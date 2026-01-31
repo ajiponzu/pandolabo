@@ -4,10 +4,10 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <stdexcept>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
+#include "../error.hpp"
 #include "../structures.hpp"
 #include "../types.hpp"
 
@@ -244,11 +244,10 @@ class BufferBarrierBuilder {
   }
 
   /// @brief Build and return the final BufferBarrier instance
-  /// @return BufferBarrier instance
-  /// @throws std::runtime_error if buffer is not set
-  BufferBarrier build() {
+  /// @return Result containing BufferBarrier instance or error
+  Result<BufferBarrier> build() {
     if (!m_buffer.has_value()) {
-      throw std::runtime_error(
+      return errorValidation(
           "Buffer must be set before building BufferBarrier");
     }
 
@@ -421,9 +420,9 @@ class ImageBarrierBuilder {
   /// @brief Build and return the final ImageBarrier instance
   /// @param ptr_context GPU context pointer (required for context-based
   /// construction)
-  /// @return ImageBarrier instance
-  /// @throws std::runtime_error if required parameters are not set
-  ImageBarrier build(const std::unique_ptr<Context>& ptr_context = nullptr) {
+  /// @return Result containing ImageBarrier instance or error
+  Result<ImageBarrier> build(
+      const std::unique_ptr<Context>& ptr_context = nullptr) {
     if (m_image.has_value() && m_imageViewInfo) {
       // Build with image and image view info
       return ImageBarrier(m_image->get(),
@@ -436,7 +435,8 @@ class ImageBarrierBuilder {
                           *m_imageViewInfo,
                           m_srcQueueFamily,
                           m_dstQueueFamily);
-    } else if (ptr_context) {
+    }
+    if (ptr_context) {
       // Build with context
       return ImageBarrier(ptr_context,
                           m_srcAccessFlags,
@@ -447,11 +447,11 @@ class ImageBarrierBuilder {
                           m_newLayout,
                           m_srcQueueFamily,
                           m_dstQueueFamily);
-    } else {
-      throw std::runtime_error(
-          "Either image with ImageViewInfo or context parameter must be "
-          "provided for building ImageBarrier");
     }
+
+    return errorValidation(
+        "Either image with ImageViewInfo or context parameter must be "
+        "provided for building ImageBarrier");
   }
 };
 

@@ -12,6 +12,7 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
+#include "../error.hpp"
 #include "../module_connection/gpu_ui.hpp"
 #include "../types.hpp"
 #include "fence.hpp"
@@ -135,7 +136,7 @@ class Swapchain {
   /// @details You must call this function before rendering in each frame.
   /// @param ptr_device GPU device wrapper pointer
   /// @param timeout Timeout in nanoseconds for image acquisition
-  void updateImageIndex(
+  pandora::core::VoidResult updateImageIndex(
       const std::unique_ptr<Device>& ptr_device,
       uint64_t timeout = std::numeric_limits<uint64_t>::max());
 

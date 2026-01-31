@@ -38,10 +38,11 @@ class BasicComputing {
   void run();
 
  private:
-  void setTransferCommands(std::vector<plc::gpu::Buffer>& staging_buffers);
+  plc::VoidResult setTransferCommands(
+      std::vector<plc::gpu::Buffer>& staging_buffers);
 
-  void constructShaderResources();
-  void setComputeCommands(plc::gpu::Buffer& staging_buffer);
+  plc::VoidResult constructShaderResources();
+  plc::VoidResult setComputeCommands(plc::gpu::Buffer& staging_buffer);
 };
 
 }  // namespace core

@@ -146,37 +146,37 @@ void TransferCommandBuffer::copyImageToBuffer(
       image.getImage(), vk_image_layout, buffer.getBuffer(), copy_region);
 }
 
-void TransferCommandBuffer::setMipmaps(const gpu::Image& image,
-                                       PipelineStage dst_stage) const {
+VoidResult TransferCommandBuffer::setMipmaps(const gpu::Image& image,
+                                             PipelineStage dst_stage) const {
   const auto image_view_info =
       ImageViewInfo{}
           .setAspect(pandora::core::ImageAspect::Color)
           .setMipRange(0u, 1u)  // for sending each mip level
           .setArrayRange(0u, 1u);
 
-  const auto src_image_barrier =
-      gpu::ImageBarrierBuilder::create()
-          .setImage(image)
-          .setSrcAccessFlags({AccessFlag::TransferWrite})
-          .setDstAccessFlags({AccessFlag::TransferRead})
-          .setSrcStages({PipelineStage::Transfer})
-          .setDstStages({PipelineStage::Transfer})
-          .setOldLayout(ImageLayout::TransferDstOptimal)
-          .setNewLayout(ImageLayout::TransferSrcOptimal)
-          .setImageViewInfo(image_view_info)
-          .build();
+  PANDORA_TRY_ASSIGN(src_image_barrier,
+                     gpu::ImageBarrierBuilder::create()
+                         .setImage(image)
+                         .setSrcAccessFlags({AccessFlag::TransferWrite})
+                         .setDstAccessFlags({AccessFlag::TransferRead})
+                         .setSrcStages({PipelineStage::Transfer})
+                         .setDstStages({PipelineStage::Transfer})
+                         .setOldLayout(ImageLayout::TransferDstOptimal)
+                         .setNewLayout(ImageLayout::TransferSrcOptimal)
+                         .setImageViewInfo(image_view_info)
+                         .build());
 
-  const auto dst_image_barrier =
-      gpu::ImageBarrierBuilder::create()
-          .setImage(image)
-          .setSrcAccessFlags({AccessFlag::TransferRead})
-          .setDstAccessFlags({AccessFlag::ShaderRead})
-          .setSrcStages({PipelineStage::Transfer})
-          .setDstStages({dst_stage})
-          .setOldLayout(ImageLayout::TransferSrcOptimal)
-          .setNewLayout(ImageLayout::ShaderReadOnlyOptimal)
-          .setImageViewInfo(image_view_info)
-          .build();
+  PANDORA_TRY_ASSIGN(dst_image_barrier,
+                     gpu::ImageBarrierBuilder::create()
+                         .setImage(image)
+                         .setSrcAccessFlags({AccessFlag::TransferRead})
+                         .setDstAccessFlags({AccessFlag::ShaderRead})
+                         .setSrcStages({PipelineStage::Transfer})
+                         .setDstStages({dst_stage})
+                         .setOldLayout(ImageLayout::TransferSrcOptimal)
+                         .setNewLayout(ImageLayout::ShaderReadOnlyOptimal)
+                         .setImageViewInfo(image_view_info)
+                         .build());
 
   auto src_barrier = src_image_barrier.getBarrier();
   auto dst_barrier = dst_image_barrier.getBarrier();
@@ -241,9 +241,11 @@ void TransferCommandBuffer::setMipmaps(const gpu::Image& image,
 
   m_commandBuffer.pipelineBarrier2(
       vk::DependencyInfo{}.setImageMemoryBarriers(dst_barrier));
+
+  return ok();
 }
 
-void TransferCommandBuffer::transferMipmapImages(
+VoidResult TransferCommandBuffer::transferMipmapImages(
     const gpu::Image& image,
     const PipelineStage src_stage,
     const PipelineStage dst_stage,
@@ -253,19 +255,19 @@ void TransferCommandBuffer::transferMipmapImages(
                                    .setMipRange(0u, 1u)
                                    .setArrayRange(0u, 1u);
 
-  const auto image_barrier =
-      gpu::ImageBarrierBuilder::create()
-          .setImage(image)
-          .setSrcAccessFlags({AccessFlag::TransferWrite})
-          .setDstAccessFlags({AccessFlag::TransferRead})
-          .setSrcStages({src_stage})
-          .setDstStages({dst_stage})
-          .setOldLayout(ImageLayout::TransferDstOptimal)
-          .setNewLayout(ImageLayout::TransferDstOptimal)
-          .setImageViewInfo(image_view_info)
-          .setSrcQueueFamilyIndex(queue_family_index.first)
-          .setDstQueueFamilyIndex(queue_family_index.second)
-          .build();
+  PANDORA_TRY_ASSIGN(image_barrier,
+                     gpu::ImageBarrierBuilder::create()
+                         .setImage(image)
+                         .setSrcAccessFlags({AccessFlag::TransferWrite})
+                         .setDstAccessFlags({AccessFlag::TransferRead})
+                         .setSrcStages({src_stage})
+                         .setDstStages({dst_stage})
+                         .setOldLayout(ImageLayout::TransferDstOptimal)
+                         .setNewLayout(ImageLayout::TransferDstOptimal)
+                         .setImageViewInfo(image_view_info)
+                         .setSrcQueueFamilyIndex(queue_family_index.first)
+                         .setDstQueueFamilyIndex(queue_family_index.second)
+                         .build());
 
   for (uint32_t mip_level = 1u; mip_level <= image.getMipLevels();
        mip_level += 1u) {
@@ -275,9 +277,11 @@ void TransferCommandBuffer::transferMipmapImages(
     m_commandBuffer.pipelineBarrier2(
         vk::DependencyInfo{}.setImageMemoryBarriers(barrier));
   }
+
+  return ok();
 }
 
-void TransferCommandBuffer::acquireMipmapImages(
+VoidResult TransferCommandBuffer::acquireMipmapImages(
     const gpu::Image& image,
     const PipelineStage src_stage,
     const PipelineStage dst_stage,
@@ -289,19 +293,19 @@ void TransferCommandBuffer::acquireMipmapImages(
                                    .setBaseArrayLayer(0u)
                                    .setArrayLayers(1u);
 
-  const auto image_barrier =
-      gpu::ImageBarrierBuilder::create()
-          .setImage(image)
-          .setSrcAccessFlags({AccessFlag::TransferWrite})
-          .setDstAccessFlags({AccessFlag::TransferRead})
-          .setSrcStages({src_stage})
-          .setDstStages({dst_stage})
-          .setOldLayout(ImageLayout::TransferDstOptimal)
-          .setNewLayout(ImageLayout::ShaderReadOnlyOptimal)
-          .setImageViewInfo(image_view_info)
-          .setSrcQueueFamilyIndex(queue_family_index.first)
-          .setDstQueueFamilyIndex(queue_family_index.second)
-          .build();
+  PANDORA_TRY_ASSIGN(image_barrier,
+                     gpu::ImageBarrierBuilder::create()
+                         .setImage(image)
+                         .setSrcAccessFlags({AccessFlag::TransferWrite})
+                         .setDstAccessFlags({AccessFlag::TransferRead})
+                         .setSrcStages({src_stage})
+                         .setDstStages({dst_stage})
+                         .setOldLayout(ImageLayout::TransferDstOptimal)
+                         .setNewLayout(ImageLayout::ShaderReadOnlyOptimal)
+                         .setImageViewInfo(image_view_info)
+                         .setSrcQueueFamilyIndex(queue_family_index.first)
+                         .setDstQueueFamilyIndex(queue_family_index.second)
+                         .build());
 
   for (uint32_t mip_level = 1u; mip_level <= image.getMipLevels();
        mip_level += 1u) {
@@ -311,6 +315,8 @@ void TransferCommandBuffer::acquireMipmapImages(
     m_commandBuffer.pipelineBarrier2(
         vk::DependencyInfo{}.setImageMemoryBarriers(barrier));
   }
+
+  return ok();
 }
 
 void ComputeCommandBuffer::compute(
@@ -368,12 +374,12 @@ void GraphicCommandBuffer::drawIndexed(uint32_t index_count,
       index_count, instance_count, first_index, vertex_offset, first_instance);
 }
 
-void GraphicCommandBuffer::beginRenderpass(
+VoidResult GraphicCommandBuffer::beginRenderpass(
     const RenderKit& render_kit,
     const gpu_ui::GraphicalSize<uint32_t>& render_area,
     const SubpassContents subpass_contents) const {
   if (m_isSecondary) {
-    throw std::runtime_error(
+    return errorValidation(
         "This command buffer is secondary. You can't use this function.");
   }
 
@@ -387,6 +393,8 @@ void GraphicCommandBuffer::beginRenderpass(
 
   m_commandBuffer.beginRenderPass(
       render_pass_info, vk_helper::getSubpassContents(subpass_contents));
+
+  return ok();
 }
 
 void GraphicCommandBuffer::endRenderpass() const {

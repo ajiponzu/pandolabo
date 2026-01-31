@@ -19,7 +19,7 @@ TEST_CASE("Windowed GPU Context initializes and creates swapchain",
 
   // Wrap in WindowSurface and create GPU Context with presentation
   {
-    auto surface = std::make_shared<gpu_ui::WindowSurface>(window);
+    auto surface = std::make_shared<gpu_ui::WindowSurface>(*window);
     gpu::Context ctx{surface};
 
     REQUIRE(ctx.isInitialized());

@@ -1,6 +1,7 @@
 #include "streaming_resources.hpp"
 
 #include <algorithm>
+#include <cstdio>
 #include <numbers>
 #include <print>
 #include <thread>
@@ -19,8 +20,15 @@ StreamingResources::StreamingResources()
 
   try {
     std::println("Creating Window...");
-    m_ptrWindow =
-        std::make_unique<plc::ui::Window>("Streaming Resources", 800u, 600u);
+    auto window_result =
+        plc::ui::Window::create("Streaming Resources", 800u, 600u);
+    if (!window_result.isOk()) {
+      std::println(stderr,
+                   "StreamingResources window error: {}",
+                   window_result.error().toString());
+      return;
+    }
+    m_ptrWindow = std::move(window_result).takeValue();
     std::println("Window created successfully.");
 
     std::println("Creating GPU Context...");
@@ -71,7 +79,13 @@ StreamingResources::StreamingResources()
   std::println("Buffers created successfully.");
 
   std::println("Constructing shader resources...");
-  constructShaderResources();
+  const auto shader_result = constructShaderResources();
+  if (!shader_result.isOk()) {
+    std::println(stderr,
+                 "StreamingResources shader load error: {}",
+                 shader_result.error().toString());
+    return;
+  }
   std::println("Shader resources constructed.");
 
   std::println("Constructing renderpass...");
@@ -86,6 +100,8 @@ StreamingResources::StreamingResources()
   spawnNewTriangle(0.0f);
   std::println("Generated initial triangle, total: {}", m_triangleInfos.size());
   std::println("StreamingResources initialization complete!");
+
+  m_isInitialized = true;
 }
 
 StreamingResources::~StreamingResources() {
@@ -93,6 +109,10 @@ StreamingResources::~StreamingResources() {
 }
 
 void StreamingResources::run() {
+  if (!m_isInitialized) {
+    std::println(stderr, "StreamingResources is not initialized.");
+    return;
+  }
   std::println("🚀 Streaming Resources Example 開始");
   std::println("動的三角形生成とストリーミングバッファリング");
   std::println("回転方向に新しい三角形を出力し、古い三角形を消去");
@@ -110,24 +130,39 @@ void StreamingResources::run() {
     // m_ptrTransferCommandDriver.at(frame_index)
     //     ->resetAllCommandPools(m_ptrContext);
 
-    updateVertexData();
-    setGraphicCommands();
+    const auto update_result = updateVertexData();
+    if (!update_result.isOk()) {
+      std::println(stderr,
+                   "StreamingResources update error: {}",
+                   update_result.error().toString());
+      return;
+    }
+
+    const auto graphic_result = setGraphicCommands();
+    if (!graphic_result.isOk()) {
+      std::println(stderr,
+                   "StreamingResources render error: {}",
+                   graphic_result.error().toString());
+      return;
+    }
   }
 
   std::println("✅ Streaming Resources Example 完了");
 }
 
-void StreamingResources::constructShaderResources() {
+plc::VoidResult StreamingResources::constructShaderResources() {
   {
-    const auto spirv_binary = plc::io::shader::read(
-        "examples/core/streaming_resources/streaming.vert");
+    PANDORA_TRY_ASSIGN(spirv_binary,
+                       plc::io::shader::read(
+                           "examples/core/streaming_resources/streaming.vert"));
 
     m_shaderModuleMap["vertex"] =
         plc::gpu::ShaderModule(m_ptrContext, spirv_binary);
   }
   {
-    const auto spirv_binary = plc::io::shader::read(
-        "examples/core/streaming_resources/streaming.frag");
+    PANDORA_TRY_ASSIGN(spirv_binary,
+                       plc::io::shader::read(
+                           "examples/core/streaming_resources/streaming.frag"));
 
     m_shaderModuleMap["fragment"] =
         plc::gpu::ShaderModule(m_ptrContext, spirv_binary);
@@ -145,6 +180,8 @@ void StreamingResources::constructShaderResources() {
                                         description_unit,
                                         *m_ptrDescriptorSetLayout,
                                         plc::PipelineBind::Graphics));
+
+  return plc::ok();
 }
 
 void StreamingResources::constructRenderpass(const bool is_resized) {
@@ -249,7 +286,7 @@ void StreamingResources::constructGraphicPipeline() {
                                            m_supassIndexMap.at("main"));
 }
 
-void StreamingResources::updateVertexData() {
+plc::VoidResult StreamingResources::updateVertexData() {
   auto current_time = std::chrono::high_resolution_clock::now();
   auto time =
       std::chrono::duration<float_t>(current_time - m_startTime).count();
@@ -272,7 +309,7 @@ void StreamingResources::updateVertexData() {
 
   // Skip if no triangles to render
   if (vertices.empty()) {
-    return;
+    return plc::ok();
   }
 
   // Get frame-specific resources to avoid contention
@@ -322,16 +359,16 @@ void StreamingResources::updateVertexData() {
       transfer_driver->getQueueFamilyIndex(),
       m_ptrGraphicCommandDriver.at(frame_index)->getQueueFamilyIndex());
 
-  const auto buffer_barrier =
-      plc::gpu::BufferBarrierBuilder::create()
-          .setBuffer(*vertex_buffer)
-          .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
-          .setDstAccessFlags({plc::AccessFlag::TransferRead})
-          .setSrcStages({plc::PipelineStage::Transfer})
-          .setDstStages({plc::PipelineStage::Transfer})
-          .setSrcQueueFamilyIndex(queue_family_indices.first)
-          .setDstQueueFamilyIndex(queue_family_indices.second)
-          .build();
+  PANDORA_TRY_ASSIGN(buffer_barrier,
+                     plc::gpu::BufferBarrierBuilder::create()
+                         .setBuffer(*vertex_buffer)
+                         .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
+                         .setDstAccessFlags({plc::AccessFlag::TransferRead})
+                         .setSrcStages({plc::PipelineStage::Transfer})
+                         .setDstStages({plc::PipelineStage::Transfer})
+                         .setSrcQueueFamilyIndex(queue_family_indices.first)
+                         .setDstQueueFamilyIndex(queue_family_indices.second)
+                         .build());
 
   command_buffer.setPipelineBarrier(
       plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
@@ -353,6 +390,8 @@ void StreamingResources::updateVertexData() {
 
   // Do NOT wait here - let Graphics queue wait for the Timeline Semaphore
   // The Graphics operation in setGraphicCommands() will wait for this signal
+
+  return plc::ok();
 }
 
 void StreamingResources::spawnNewTriangle(float_t currentTime) {
@@ -444,9 +483,13 @@ std::vector<StreamingResources::Vertex> StreamingResources::getCurrentTriangles(
   return result;
 }
 
-void StreamingResources::setGraphicCommands() {
+plc::VoidResult StreamingResources::setGraphicCommands() {
   const auto& ptr_swapchain = m_ptrContext->getPtrSwapchain();
-  ptr_swapchain->updateImageIndex(m_ptrContext->getPtrDevice());
+  const auto update_result =
+      ptr_swapchain->updateImageIndex(m_ptrContext->getPtrDevice());
+  if (!update_result.isOk()) {
+    return update_result.error();
+  }
   m_ptrRenderKit->updateIndex(ptr_swapchain->getImageIndex());
 
   const uint32_t frame_index = ptr_swapchain->getFrameSyncIndex();
@@ -473,7 +516,8 @@ void StreamingResources::setGraphicCommands() {
       m_ptrTransferCommandDriver.at(frame_index)->getQueueFamilyIndex(),
       m_ptrGraphicCommandDriver.at(frame_index)->getQueueFamilyIndex());
 
-  const auto buffer_barrier =
+  PANDORA_TRY_ASSIGN(
+      buffer_barrier,
       plc::gpu::BufferBarrierBuilder::create()
           .setBuffer(*frame_vertex_buffer)
           .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
@@ -482,15 +526,15 @@ void StreamingResources::setGraphicCommands() {
           .setDstStages({plc::PipelineStage::VertexAttributeInput})
           .setSrcQueueFamilyIndex(queue_family_indices.first)
           .setDstQueueFamilyIndex(queue_family_indices.second)
-          .build();
+          .build());
 
   command_buffer.setPipelineBarrier(
       plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
 
-  command_buffer.beginRenderpass(
+  PANDORA_TRY(command_buffer.beginRenderpass(
       *m_ptrRenderKit,
       m_ptrWindow->getWindowSurface()->getWindowSize(),
-      plc::SubpassContents::Inline);
+      plc::SubpassContents::Inline));
 
   command_buffer.bindPipeline(*m_ptrPipeline);
   command_buffer.bindDescriptorSet(*m_ptrPipeline, *m_ptrDescriptorSet);
@@ -559,10 +603,15 @@ void StreamingResources::setGraphicCommands() {
   }
 
   // Present after all rendering operations are complete
-  m_ptrGraphicCommandDriver.at(frame_index)
-      ->present(m_ptrContext, finished_semaphore);
+  const auto present_result = m_ptrGraphicCommandDriver.at(frame_index)
+                                  ->present(m_ptrContext, finished_semaphore);
+  if (!present_result.isOk()) {
+    return present_result.error();
+  }
 
   ptr_swapchain->updateFrameSyncIndex();
+
+  return plc::ok();
 }
 
 }  // namespace samples::core

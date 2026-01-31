@@ -1,9 +1,18 @@
 #include "square.hpp"
 
+#include <cstdio>
+#include <print>
+
 namespace samples::core {
 
 Square::Square() {
-  m_ptrWindow = std::make_unique<plc::ui::Window>("Square", 800u, 600u);
+  auto window_result = plc::ui::Window::create("Square", 800u, 600u);
+  if (!window_result.isOk()) {
+    std::println(
+        stderr, "Square window error: {}", window_result.error().toString());
+    return;
+  }
+  m_ptrWindow = std::move(window_result).takeValue();
   m_ptrContext =
       std::make_unique<plc::gpu::Context>(m_ptrWindow->getWindowSurface());
 
@@ -24,9 +33,17 @@ Square::Square() {
   m_ptrTransferCommandDriver.reset(
       new plc::CommandDriver(m_ptrContext, plc::QueueFamilyType::Transfer));
 
-  constructShaderResources();
+  const auto shader_result = constructShaderResources();
+  if (!shader_result.isOk()) {
+    std::println(stderr,
+                 "Square shader load error: {}",
+                 shader_result.error().toString());
+    return;
+  }
   constructRenderpass();
   constructGraphicPipeline();
+
+  m_isInitialized = true;
 }
 
 Square::~Square() {
@@ -34,10 +51,20 @@ Square::~Square() {
 }
 
 void Square::run() {
+  if (!m_isInitialized) {
+    std::println(stderr, "Square is not initialized.");
+    return;
+  }
   {
     std::vector<plc::gpu::Buffer> staging_buffers;
 
-    setTransferCommands(staging_buffers);
+    const auto transfer_result = setTransferCommands(staging_buffers);
+    if (!transfer_result.isOk()) {
+      std::println(stderr,
+                   "Square transfer command error: {}",
+                   transfer_result.error().toString());
+      return;
+    }
 
     plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
     m_ptrTransferCommandDriver->submit(
@@ -80,12 +107,25 @@ void Square::run() {
 
   while (m_ptrWindow->update()) {
     const auto& ptr_swapchain = m_ptrContext->getPtrSwapchain();
-    ptr_swapchain->updateImageIndex(m_ptrContext->getPtrDevice());
+    const auto update_result =
+        ptr_swapchain->updateImageIndex(m_ptrContext->getPtrDevice());
+    if (!update_result.isOk()) {
+      std::println(stderr,
+                   "Swapchain update failed: {}",
+                   update_result.error().toString());
+      return;
+    }
     m_ptrRenderKit->updateIndex(ptr_swapchain->getImageIndex());
 
     m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
         ->resetAllCommandPools(m_ptrContext);
-    setGraphicCommands();
+    const auto graphic_result = setGraphicCommands();
+    if (!graphic_result.isOk()) {
+      std::println(stderr,
+                   "Square graphic command error: {}",
+                   graphic_result.error().toString());
+      return;
+    }
 
     const auto image_semaphore = ptr_swapchain->getImageAvailableSemaphore();
     const auto finished_semaphore = ptr_swapchain->getFinishedSemaphore();
@@ -104,24 +144,32 @@ void Square::run() {
                               .setStageMask(plc::PipelineStage::AllGraphics)}),
                  finished_fence);
 
-    m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
-        ->present(m_ptrContext, finished_semaphore);
+    const auto present_result =
+        m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
+            ->present(m_ptrContext, finished_semaphore);
+    if (!present_result.isOk()) {
+      std::println(
+          stderr, "Present failed: {}", present_result.error().toString());
+      return;
+    }
 
     ptr_swapchain->updateFrameSyncIndex();
   }
 }
 
-void Square::constructShaderResources() {
+plc::VoidResult Square::constructShaderResources() {
   {
-    const auto spirv_binary =
-        plc::io::shader::read("examples/core/square/square.vert");
+    PANDORA_TRY_ASSIGN(
+        spirv_binary,
+        plc::io::shader::read("examples/core/square/square.vert"));
 
     m_shaderModuleMap["vertex"] =
         plc::gpu::ShaderModule(m_ptrContext, spirv_binary);
   }
   {
-    const auto spirv_binary =
-        plc::io::shader::read("examples/core/square/square.frag");
+    PANDORA_TRY_ASSIGN(
+        spirv_binary,
+        plc::io::shader::read("examples/core/square/square.frag"));
 
     m_shaderModuleMap["fragment"] =
         plc::gpu::ShaderModule(m_ptrContext, spirv_binary);
@@ -141,6 +189,8 @@ void Square::constructShaderResources() {
                                         description_unit,
                                         *m_ptrDescriptorSetLayout,
                                         plc::PipelineBind::Graphics));
+
+  return plc::ok();
 }
 
 void Square::constructRenderpass(bool is_resized) {
@@ -246,7 +296,7 @@ void Square::constructGraphicPipeline() {
                                            m_supassIndexMap.at("draw"));
 }
 
-void Square::setTransferCommands(
+plc::VoidResult Square::setTransferCommands(
     std::vector<plc::gpu::Buffer>& staging_buffers) {
   const auto queue_family_indices =
       std::make_pair(m_ptrTransferCommandDriver->getQueueFamilyIndex(),
@@ -278,7 +328,8 @@ void Square::setTransferCommands(
 
       command_buffer.copyBuffer(staging_buffers.at(0u), *m_ptrVertexBuffer);
 
-      const auto buffer_barrier =
+      PANDORA_TRY_ASSIGN(
+          buffer_barrier,
           plc::gpu::BufferBarrierBuilder::create()
               .setBuffer(*m_ptrVertexBuffer)
               .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
@@ -288,7 +339,7 @@ void Square::setTransferCommands(
               .setDstStages({plc::PipelineStage::Transfer})
               .setSrcQueueFamilyIndex(queue_family_indices.first)
               .setDstQueueFamilyIndex(queue_family_indices.second)
-              .build();
+              .build());
 
       command_buffer.setPipelineBarrier(
           plc::BarrierDependency().setBufferBarriers({buffer_barrier}));
@@ -311,7 +362,8 @@ void Square::setTransferCommands(
 
       command_buffer.copyBuffer(staging_buffers.at(1u), *m_ptrIndexBuffer);
 
-      const auto buffer_barrier =
+      PANDORA_TRY_ASSIGN(
+          buffer_barrier,
           plc::gpu::BufferBarrierBuilder::create()
               .setBuffer(*m_ptrIndexBuffer)
               .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
@@ -321,7 +373,7 @@ void Square::setTransferCommands(
               .setDstStages({plc::PipelineStage::Transfer})
               .setSrcQueueFamilyIndex(queue_family_indices.first)
               .setDstQueueFamilyIndex(queue_family_indices.second)
-              .build();
+              .build());
 
       command_buffer.setPipelineBarrier(
           plc::BarrierDependency().setBufferBarriers({buffer_barrier}));
@@ -335,7 +387,8 @@ void Square::setTransferCommands(
     command_buffer.begin();
 
     {
-      const auto buffer_barrier =
+      PANDORA_TRY_ASSIGN(
+          buffer_barrier,
           plc::gpu::BufferBarrierBuilder::create()
               .setBuffer(*m_ptrVertexBuffer)
               .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
@@ -345,14 +398,15 @@ void Square::setTransferCommands(
               .setDstStages({plc::PipelineStage::VertexShader})
               .setSrcQueueFamilyIndex(queue_family_indices.first)
               .setDstQueueFamilyIndex(queue_family_indices.second)
-              .build();
+              .build());
 
       command_buffer.setPipelineBarrier(
           plc::BarrierDependency().setBufferBarriers({buffer_barrier}));
     }
 
     {
-      const auto buffer_barrier =
+      PANDORA_TRY_ASSIGN(
+          buffer_barrier,
           plc::gpu::BufferBarrierBuilder::create()
               .setBuffer(*m_ptrIndexBuffer)
               .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
@@ -362,7 +416,7 @@ void Square::setTransferCommands(
               .setDstStages({plc::PipelineStage::VertexShader})
               .setSrcQueueFamilyIndex(queue_family_indices.first)
               .setDstQueueFamilyIndex(queue_family_indices.second)
-              .build();
+              .build());
 
       command_buffer.setPipelineBarrier(
           plc::BarrierDependency().setBufferBarriers({buffer_barrier}));
@@ -370,19 +424,21 @@ void Square::setTransferCommands(
 
     command_buffer.end();
   }
+
+  return plc::ok();
 }
 
-void Square::setGraphicCommands() {
+plc::VoidResult Square::setGraphicCommands() {
   const auto command_buffer =
       m_ptrGraphicCommandDriver
           .at(m_ptrContext->getPtrSwapchain()->getFrameSyncIndex())
           ->getGraphic();
   command_buffer.begin();
 
-  command_buffer.beginRenderpass(
+  PANDORA_TRY(command_buffer.beginRenderpass(
       *m_ptrRenderKit,
       m_ptrWindow->getWindowSurface()->getWindowSize(),
-      plc::SubpassContents::Inline);
+      plc::SubpassContents::Inline));
 
   command_buffer.bindPipeline(*m_ptrPipeline);
 
@@ -409,6 +465,8 @@ void Square::setGraphicCommands() {
   command_buffer.endRenderpass();
 
   command_buffer.end();
+
+  return plc::ok();
 }
 
 }  // namespace samples::core

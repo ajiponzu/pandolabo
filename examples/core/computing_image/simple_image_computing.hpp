@@ -39,6 +39,8 @@ class SimpleImageComputing {
 
   MyImage m_image;
 
+  bool m_isInitialized = false;
+
  public:
   SimpleImageComputing();
   ~SimpleImageComputing();
@@ -47,11 +49,12 @@ class SimpleImageComputing {
 
  private:
   void initializeImageResources();
-  void constructShaderResources();
+  plc::VoidResult constructShaderResources();
 
-  void setTransferCommands(std::vector<plc::gpu::Buffer>& staging_buffers);
+  plc::VoidResult setTransferCommands(
+      std::vector<plc::gpu::Buffer>& staging_buffers);
 
-  void setComputeCommands(const plc::gpu::Buffer& staging_buffer);
+  plc::VoidResult setComputeCommands(const plc::gpu::Buffer& staging_buffer);
 };
 
 }  // namespace core
