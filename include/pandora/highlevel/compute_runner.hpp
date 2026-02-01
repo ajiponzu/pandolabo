@@ -22,8 +22,8 @@ class ComputeRunner {
   pandora::core::CommandDriver& ensureDriver();
 
  public:
-  explicit ComputeRunner(const pandora::core::gpu::Context& ptr_context)
-      : m_contextOwner(ptr_context) {}
+  explicit ComputeRunner(const pandora::core::gpu::Context& context)
+      : m_contextOwner(context) {}
 
   /// @brief Begin recording compute commands.
   [[nodiscard]] pandora::core::Result<pandora::core::ComputeCommandBuffer>

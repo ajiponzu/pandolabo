@@ -36,12 +36,12 @@ class Buffer {
   Buffer() = default;
 
   /// @brief Construct buffer with specified properties
-  /// @param ptr_context GPU context pointer
+  /// @param context GPU context reference
   /// @param memory_usage Memory usage pattern
   /// @param transfer_type Transfer operation type
   /// @param buffer_usages Buffer usage types
   /// @param size Buffer size in bytes
-  Buffer(const Context& ptr_context,
+  Buffer(const Context& context,
          const MemoryUsage memory_usage,
          const TransferType transfer_type,
          const std::vector<BufferUsage>& buffer_usages,
@@ -91,13 +91,13 @@ class Buffer {
   /// @brief Get virtual address of mapped GPU buffer memory
   /// @details Writing or reading data at this address is directly reflected in
   /// GPU memory.
-  /// @param ptr_context GPU context pointer
+  /// @param context GPU context reference
   /// @return Virtual GPU buffer memory address
-  void* mapMemory(const Context& ptr_context) const;
+  void* mapMemory(const Context& context) const;
 
   /// @brief Close GPU memory buffer connection
-  /// @param ptr_context GPU context pointer
-  void unmapMemory(const Context& ptr_context) const;
+  /// @param context GPU context reference
+  void unmapMemory(const Context& context) const;
 };
 
 }  // namespace pandora::core::gpu

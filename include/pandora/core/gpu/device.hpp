@@ -42,14 +42,14 @@ class Device {
 
  public:
   /// @brief Construct Device with Vulkan instance and window surface
-  /// @param ptr_instance Vulkan instance
-  /// @param ptr_window_surface Window surface for presentation
-  /// @param ptr_messenger Debug messenger (debug builds only)
-  Device(const vk::UniqueInstance& ptr_instance,
-         const vk::UniqueSurfaceKHR& ptr_window_surface
+  /// @param instance Vulkan instance
+  /// @param window_surface Window surface for presentation
+  /// @param messenger Debug messenger (debug builds only)
+  Device(const vk::UniqueInstance& instance,
+         const vk::UniqueSurfaceKHR& window_surface
 #ifdef GPU_DEBUG
          ,
-         const debug::Messenger& ptr_messenger
+         const debug::Messenger& messenger
 #endif
   );
 
@@ -99,10 +99,10 @@ class Device {
 
  private:
   /// @brief Construct logical device with validation layers (if debug)
-  /// @param ptr_messenger Debug messenger for validation (debug builds only)
+  /// @param messenger Debug messenger for validation (debug builds only)
   void constructLogicalDevice(
 #ifdef GPU_DEBUG
-      const debug::Messenger& ptr_messenger
+      const debug::Messenger& messenger
 #endif
   );
 };

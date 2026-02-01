@@ -49,13 +49,13 @@ vk::BufferUsageFlagBits get_buffer_usage(
 
 namespace pandora::core::gpu {
 
-Buffer::Buffer(const Context& ptr_context,
+Buffer::Buffer(const Context& context,
                MemoryUsage memory_usage,
                TransferType transfer_type,
                const std::vector<BufferUsage>& buffer_usages,
                size_t size)
     : m_size(size) {
-  const auto& ptr_vk_device = ptr_context.getPtrDevice()->getPtrLogicalDevice();
+  const auto& ptr_vk_device = context.getPtrDevice()->getPtrLogicalDevice();
 
   {
     const auto vk_transfer_type = get_transfer_usage_flags(transfer_type);
@@ -77,7 +77,7 @@ Buffer::Buffer(const Context& ptr_context,
     const auto vk_memory_usage =
         vk_helper::getMemoryPropertyFlags(memory_usage);
     const auto memory_props =
-        ptr_context.getPtrDevice()->getPhysicalDevice().getMemoryProperties();
+        context.getPtrDevice()->getPhysicalDevice().getMemoryProperties();
 
     uint32_t memory_type_idx = 0u;
     for (; memory_type_idx < memory_props.memoryTypeCount;
@@ -101,14 +101,13 @@ Buffer::Buffer(const Context& ptr_context,
 
 Buffer::~Buffer() = default;
 
-void* Buffer::mapMemory(const Context& ptr_context) const {
-  return ptr_context.getPtrDevice()->getPtrLogicalDevice()->mapMemory(
+void* Buffer::mapMemory(const Context& context) const {
+  return context.getPtrDevice()->getPtrLogicalDevice()->mapMemory(
       m_ptrMemory.get(), 0u, m_size, {});
 }
 
-void Buffer::unmapMemory(const Context& ptr_context) const {
-  ptr_context.getPtrDevice()->getPtrLogicalDevice()->unmapMemory(
-      m_ptrMemory.get());
+void Buffer::unmapMemory(const Context& context) const {
+  context.getPtrDevice()->getPtrLogicalDevice()->unmapMemory(m_ptrMemory.get());
 }
 
 }  // namespace pandora::core::gpu

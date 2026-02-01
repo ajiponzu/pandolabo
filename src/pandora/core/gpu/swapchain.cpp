@@ -3,10 +3,9 @@
 
 namespace pandora::core::gpu {
 
-Swapchain::Swapchain(
-    const Device& ptr_device,
-    const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface) {
-  constructSwapchain(ptr_device, ptr_surface);
+Swapchain::Swapchain(const Device& device,
+                     const std::shared_ptr<gpu_ui::WindowSurface>& surface) {
+  constructSwapchain(device, surface);
 }
 
 Swapchain::~Swapchain() {
@@ -14,15 +13,15 @@ Swapchain::~Swapchain() {
 }
 
 void Swapchain::resetSwapchain(
-    const Device& ptr_device,
-    const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface) {
+    const Device& device,
+    const std::shared_ptr<gpu_ui::WindowSurface>& surface) {
   clear();
-  constructSwapchain(ptr_device, ptr_surface);
+  constructSwapchain(device, surface);
 }
 
-::pandora::core::VoidResult Swapchain::updateImageIndex(
-    const Device& ptr_device, uint64_t timeout) {
-  const auto& ptr_vk_device = ptr_device.getPtrLogicalDevice();
+::pandora::core::VoidResult Swapchain::updateImageIndex(const Device& device,
+                                                        uint64_t timeout) {
+  const auto& ptr_vk_device = device.getPtrLogicalDevice();
 
   const auto vk_result = ptr_vk_device->waitForFences(
       m_fences.at(m_frameSyncIndex).get(), VK_TRUE, timeout);
@@ -53,20 +52,19 @@ void Swapchain::updateFrameSyncIndex() {
 }
 
 void Swapchain::constructSwapchain(
-    const Device& ptr_device,
-    const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface) {
+    const Device& device,
+    const std::shared_ptr<gpu_ui::WindowSurface>& surface) {
   m_imageFormat = DataFormat::R8G8B8A8Srgb;
 
   {
     static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 3u;
 
-    const auto& vk_surface = ptr_surface->getSurface();
+    const auto& vk_surface = surface->getSurface();
 
     const auto surface_capabilities =
-        ptr_device.getPhysicalDevice().getSurfaceCapabilitiesKHR(
-            vk_surface.get());
-    const auto queue_family_index = ptr_device.getQueueFamilyIndex(
-        pandora::core::QueueFamilyType::Graphics);
+        device.getPhysicalDevice().getSurfaceCapabilitiesKHR(vk_surface.get());
+    const auto queue_family_index =
+        device.getQueueFamilyIndex(pandora::core::QueueFamilyType::Graphics);
 
     const auto swapchain_info =
         vk::SwapchainCreateInfoKHR{}
@@ -79,20 +77,19 @@ void Swapchain::constructSwapchain(
             .setClipped(true)
             .setImageFormat(vk_helper::getFormat(m_imageFormat))
             .setImageColorSpace(vk::ColorSpaceKHR::eSrgbNonlinear)
-            .setImageExtent(
-                vk_helper::getExtent2D(ptr_surface->getWindowSize()))
+            .setImageExtent(vk_helper::getExtent2D(surface->getWindowSize()))
             .setImageArrayLayers(1u)
             .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
             .setPreTransform(surface_capabilities.currentTransform)
             .setOldSwapchain(m_ptrSwapchain.get())
             .setQueueFamilyIndices(queue_family_index);
 
-    m_ptrSwapchain = ptr_device.getPtrLogicalDevice()->createSwapchainKHRUnique(
-        swapchain_info);
+    m_ptrSwapchain =
+        device.getPtrLogicalDevice()->createSwapchainKHRUnique(swapchain_info);
   }
 
-  m_images = ptr_device.getPtrLogicalDevice()->getSwapchainImagesKHR(
-      m_ptrSwapchain.get());
+  m_images =
+      device.getPtrLogicalDevice()->getSwapchainImagesKHR(m_ptrSwapchain.get());
 
   {
     auto image_view_info =
@@ -106,7 +103,7 @@ void Swapchain::constructSwapchain(
             .setSubresourceRange(
                 {vk::ImageAspectFlagBits::eColor, 0u, 1u, 0u, 1u});
 
-    const auto& ptr_vk_device = ptr_device.getPtrLogicalDevice();
+    const auto& ptr_vk_device = device.getPtrLogicalDevice();
     for (const auto& image : m_images) {
       image_view_info.setImage(image);
       m_imageViews.emplace_back(

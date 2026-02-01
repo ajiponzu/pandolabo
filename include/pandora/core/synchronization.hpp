@@ -66,12 +66,12 @@ class WaitedFences {
   WaitedFences& operator=(WaitedFences&&) = default;
 
   /// @brief Wait for multiple fences to be signaled
-  /// @param ptr_context GPU context for device operations
+  /// @param context GPU context for device operations
   /// @param timeout Timeout duration in nanoseconds
   /// @param is_reset If true, reset fences after waiting
   /// @return True if all fences were signaled within the timeout, false
   /// otherwise
-  bool wait(const gpu::Context& ptr_context,
+  bool wait(const gpu::Context& context,
             uint64_t timeout = std::numeric_limits<uint64_t>::max(),
             bool is_reset = true);
 };
@@ -98,16 +98,16 @@ class TimelineSemaphoreDriver {
   TimelineSemaphoreDriver& setValues(const std::vector<uint64_t>& values);
 
   /// @brief Wait for multiple timeline semaphores to reach specified values
-  /// @param ptr_context GPU context for device operations
+  /// @param context GPU context for device operations
   /// @param timeout Timeout duration in nanoseconds
   /// @return True if all semaphores reached the specified values within the
   /// timeout, false otherwise
-  bool wait(const gpu::Context& ptr_context,
+  bool wait(const gpu::Context& context,
             uint64_t timeout = std::numeric_limits<uint64_t>::max());
 
   /// @brief Signal multiple timeline semaphores to reach specified values
-  /// @param ptr_context GPU context for device operations
-  void signal(const gpu::Context& ptr_context);
+  /// @param context GPU context for device operations
+  void signal(const gpu::Context& context);
 };
 
 template <typename T>

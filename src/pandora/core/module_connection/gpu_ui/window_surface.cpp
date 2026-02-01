@@ -10,17 +10,17 @@ WindowSurface::~WindowSurface() {
   m_ptrSurface.release();
 }
 
-void WindowSurface::constructSurface(const vk::UniqueInstance& ptr_instance) {
+void WindowSurface::constructSurface(const vk::UniqueInstance& instance) {
   VkSurfaceKHR surface{};
   if (glfwCreateWindowSurface(
-          VkInstance(ptr_instance.get()), &m_window.get(), nullptr, &surface)
+          VkInstance(instance.get()), &m_window.get(), nullptr, &surface)
       != ::VkResult::VK_SUCCESS) {
     m_ptrSurface = vk::UniqueSurfaceKHR(nullptr);
 
     return;
   }
 
-  m_ptrSurface = vk::UniqueSurfaceKHR(surface, {ptr_instance.get()});
+  m_ptrSurface = vk::UniqueSurfaceKHR(surface, {instance.get()});
 }
 
 void WindowSurface::setWindowSize() {

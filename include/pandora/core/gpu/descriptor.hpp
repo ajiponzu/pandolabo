@@ -132,9 +132,9 @@ class DescriptorSetLayout {
 
  public:
   /// @brief Construct descriptor set layout from description unit
-  /// @param ptr_context Vulkan context for device operations
+  /// @param context Vulkan context for device operations
   /// @param description_unit Description unit containing binding information
-  DescriptorSetLayout(const Context& ptr_context,
+  DescriptorSetLayout(const Context& context,
                       const DescriptionUnit& description_unit);
 
   // Rule of Five
@@ -171,9 +171,9 @@ class DescriptorSet {
 
  public:
   /// @brief Construct descriptor set from layout
-  /// @param ptr_context Vulkan context for device operations
+  /// @param context Vulkan context for device operations
   /// @param description_set_layout Layout template defining resource structure
-  DescriptorSet(const Context& ptr_context,
+  DescriptorSet(const Context& context,
                 const DescriptorSetLayout& description_set_layout);
 
   // Rule of Five
@@ -194,11 +194,11 @@ class DescriptorSet {
   /// GPU memory for shader binding data and registers the resource
   /// descriptions. The bindings must follow the structure defined by the
   /// DescriptorSetLayout.
-  /// @param ptr_context Vulkan context for device operations
+  /// @param context Vulkan context for device operations
   /// @param buffer_descriptions List of buffer descriptors to bind
   /// @param image_descriptions List of image descriptors to bind
   void updateDescriptorSet(
-      const Context& ptr_context,
+      const Context& context,
       const std::vector<BufferDescription>& buffer_descriptions,
       const std::vector<ImageDescription>& image_descriptions);
 
@@ -206,8 +206,8 @@ class DescriptorSet {
   /// Useful for changing image resource data without changing shader modules
   /// or description units. Provides efficient memory management by allowing
   /// reuse of descriptor sets with different resource bindings.
-  /// @param ptr_context Vulkan context for device operations
-  void freeDescriptorSet(const Context& ptr_context);
+  /// @param context Vulkan context for device operations
+  void freeDescriptorSet(const Context& context);
 };
 
 }  // namespace pandora::core::gpu

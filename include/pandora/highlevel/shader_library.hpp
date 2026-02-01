@@ -16,8 +16,8 @@ class ShaderLibrary {
 
  public:
   /// @brief Construct with a context owner.
-  explicit ShaderLibrary(const pandora::core::gpu::Context& ptr_context)
-      : m_contextOwner(ptr_context) {}
+  explicit ShaderLibrary(const pandora::core::gpu::Context& context)
+      : m_contextOwner(context) {}
 
   /// @brief Load shader and create a module.
   [[nodiscard]] pandora::core::Result<pandora::core::gpu::ShaderModule> load(

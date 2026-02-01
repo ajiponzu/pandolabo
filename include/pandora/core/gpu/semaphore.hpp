@@ -50,8 +50,8 @@ class TimelineSemaphore {
 
  public:
   /// @brief Construct timeline semaphore
-  /// @param ptr_context GPU context pointer for device access
-  TimelineSemaphore(const Context& ptr_context);
+  /// @param context GPU context reference for device access
+  TimelineSemaphore(const Context& context);
 
   // Rule of Five
   ~TimelineSemaphore();

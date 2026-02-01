@@ -87,9 +87,9 @@ class AttachmentList {
   }
 
   /// @brief Set backbuffer attachment for presentation
-  /// @param ptr_context GPU context for swapchain access
+  /// @param context GPU context for swapchain access
   /// @param index Swapchain image index to use
-  void setBackbufferAttachment(const gpu::Context& ptr_context, size_t index);
+  void setBackbufferAttachment(const gpu::Context& context, size_t index);
 
  private:
   /// @brief Internal method to add attachment with image view
@@ -261,10 +261,10 @@ class Renderpass {
 
  public:
   /// @brief Construct render pass from attachments and subpass graph
-  /// @param ptr_context GPU context for device access
+  /// @param context GPU context for device access
   /// @param attachment_list Collection of attachments used in the render pass
   /// @param subpass_graph Subpass definitions and dependencies
-  Renderpass(const gpu::Context& ptr_context,
+  Renderpass(const gpu::Context& context,
              const AttachmentList& attachment_list,
              const SubpassGraph& subpass_graph);
 
@@ -291,11 +291,11 @@ class Framebuffer {
 
  public:
   /// @brief Construct framebuffer for a render pass
-  /// @param ptr_context GPU context for device access
+  /// @param context GPU context for device access
   /// @param render_pass Compatible render pass
   /// @param size Framebuffer dimensions
   /// @param attachments Attachment list containing image views
-  Framebuffer(const gpu::Context& ptr_context,
+  Framebuffer(const gpu::Context& context,
               const Renderpass& render_pass,
               const gpu_ui::GraphicalSize<uint32_t>& size,
               const AttachmentList& attachments);
@@ -329,12 +329,12 @@ class RenderKit {
 
  public:
   /// @brief Construct render kit with render pass and framebuffers
-  /// @param ptr_context GPU context for device access
+  /// @param context GPU context for device access
   /// @param attachment_list Attachments for the render pass
   /// @param subpass_graph Subpass configuration
   /// @param size Framebuffer dimensions
   /// @param is_presented Whether this render kit is used for presentation
-  RenderKit(const gpu::Context& ptr_context,
+  RenderKit(const gpu::Context& context,
             AttachmentList& attachment_list,
             const SubpassGraph& subpass_graph,
             const gpu_ui::GraphicalSize<uint32_t>& size,
@@ -373,11 +373,11 @@ class RenderKit {
   }
 
   /// @brief Reset and recreate framebuffers (e.g., after window resize)
-  /// @param ptr_context GPU context for device access
+  /// @param context GPU context for device access
   /// @param attachment_list Updated attachment list
   /// @param size New framebuffer dimensions
   /// @param is_presented Whether this render kit is used for presentation
-  void resetFramebuffer(const gpu::Context& ptr_context,
+  void resetFramebuffer(const gpu::Context& context,
                         AttachmentList& attachment_list,
                         const gpu_ui::GraphicalSize<uint32_t>& size,
                         bool is_presented);

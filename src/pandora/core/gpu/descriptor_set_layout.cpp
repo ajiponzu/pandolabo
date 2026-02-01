@@ -5,7 +5,7 @@
 namespace pandora::core::gpu {
 
 DescriptorSetLayout::DescriptorSetLayout(
-    const Context& ptr_context, const DescriptionUnit& description_unit) {
+    const Context& context, const DescriptionUnit& description_unit) {
   using D = std::ranges::range_value_t<
       decltype(description_unit.getDescriptorInfoMap() | std::views::values)>;
 
@@ -28,7 +28,7 @@ DescriptorSetLayout::DescriptorSetLayout(
           descriptor_set_layout_bindings);
 
   m_ptrDescriptorSetLayout =
-      ptr_context.getPtrDevice()
+      context.getPtrDevice()
           ->getPtrLogicalDevice()
           ->createDescriptorSetLayoutUnique(descriptor_set_layout_info);
 }

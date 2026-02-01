@@ -276,13 +276,13 @@ class Multisample {
   Multisample() = default;
   ~Multisample() = default;
 
-  void setSampleCount(const gpu::Context& ptr_context);
+  void setSampleCount(const gpu::Context& context);
   void setSampleShading(bool is_enabled);
   void setMinSampleShading(float_t min_sample_shading);
 
   // Fluent interface methods
-  Multisample& withSampleCount(const gpu::Context& ptr_context) {
-    setSampleCount(ptr_context);
+  Multisample& withSampleCount(const gpu::Context& context) {
+    setSampleCount(context);
     return *this;
   }
 
@@ -545,7 +545,7 @@ class Pipeline {
       m_bindPoint{};  ///< Pipeline bind point (graphics or compute)
 
  public:
-  Pipeline(const gpu::Context& ptr_context,
+  Pipeline(const gpu::Context& context,
            const gpu::DescriptionUnit& description_unit,
            const gpu::DescriptorSetLayout& descriptor_set_layout,
            PipelineBind bind_point);
@@ -571,24 +571,24 @@ class Pipeline {
   }
 
   /// @brief Construct pipeline for compute shader
-  /// @param ptr_context Vulkan context for device operations
+  /// @param context Vulkan context for device operations
   /// @param shader_module Compute shader module
-  void constructComputePipeline(const gpu::Context& ptr_context,
+  void constructComputePipeline(const gpu::Context& context,
                                 const gpu::ShaderModule& shader_module);
 
   /// @brief Construct pipeline for graphics rendering
-  /// @param ptr_context Vulkan context for device operations
+  /// @param context Vulkan context for device operations
   /// @param shader_module_map Map of shader modules by name
   /// @param module_keys Keys order for shader stages (vertex, fragment, etc.)
-  /// @param ptr_graphic_info Graphics pipeline configuration
+  /// @param graphic_info Graphics pipeline configuration
   /// @param render_pass Render pass for this pipeline
   /// @param subpass_index Subpass index using this pipeline
   void constructGraphicsPipeline(
-      const gpu::Context& ptr_context,
+      const gpu::Context& context,
       const std::unordered_map<std::string, gpu::ShaderModule>&
           shader_module_map,
       const std::vector<std::string>& module_keys,
-      pipeline::GraphicInfo& ptr_graphic_info,
+      pipeline::GraphicInfo& graphic_info,
       const Renderpass& render_pass,
       uint32_t subpass_index);
 };

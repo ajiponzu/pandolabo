@@ -7,14 +7,14 @@
 
 namespace pandora::core {
 
-CommandDriver::CommandDriver(const gpu::Context& ptr_context,
+CommandDriver::CommandDriver(const gpu::Context& context,
                              const QueueFamilyType queue_family) {
-  const auto& ptr_device = ptr_context.getPtrDevice();
+  const auto& ptr_device = context.getPtrDevice();
 
   m_queueFamilyType = queue_family;
   m_queueFamilyIndex = ptr_device->getQueueFamilyIndex(queue_family);
 
-  m_queue = ptr_context.getPtrDevice()->getQueue(m_queueFamilyIndex);
+  m_queue = context.getPtrDevice()->getQueue(m_queueFamilyIndex);
 
   {
     vk::CommandPoolCreateInfo pool_info{{}, m_queueFamilyIndex};
@@ -35,9 +35,9 @@ CommandDriver::CommandDriver(const gpu::Context& ptr_context,
 
 CommandDriver::~CommandDriver() {}
 
-void CommandDriver::constructSecondary(const gpu::Context& ptr_context,
+void CommandDriver::constructSecondary(const gpu::Context& context,
                                        uint32_t required_secondary_num) {
-  const auto& ptr_vk_device = ptr_context.getPtrDevice()->getPtrLogicalDevice();
+  const auto& ptr_vk_device = context.getPtrDevice()->getPtrLogicalDevice();
 
   for (uint32_t idx = 0u; idx < required_secondary_num; idx += 1u) {
     m_ptrSecondaryCommandPools.push_back(ptr_vk_device->createCommandPoolUnique(
@@ -63,9 +63,8 @@ void CommandDriver::resetAllCommands() const {
   m_ptrPrimaryCommandBuffer->reset(vk::CommandBufferResetFlags{});
 }
 
-void CommandDriver::resetAllCommandPools(
-    const gpu::Context& ptr_context) const {
-  const auto& ptr_vk_device = ptr_context.getPtrDevice()->getPtrLogicalDevice();
+void CommandDriver::resetAllCommandPools(const gpu::Context& context) const {
+  const auto& ptr_vk_device = context.getPtrDevice()->getPtrLogicalDevice();
 
   for (const auto& command_pool : m_ptrSecondaryCommandPools) {
     ptr_vk_device->resetCommandPool(command_pool.get());
@@ -100,13 +99,13 @@ void CommandDriver::submit(const SubmitSemaphoreGroup& semaphore_group,
 }
 
 VoidResult CommandDriver::present(
-    const gpu::Context& ptr_context,
+    const gpu::Context& context,
     const gpu::BinarySemaphore& wait_semaphore) const {
   if (m_queueFamilyType != QueueFamilyType::Graphics) {
     return errorGpu("Queue family type is not present.");
   }
 
-  const auto& ptr_swapchain = ptr_context.getPtrSwapchain();
+  const auto& ptr_swapchain = context.getPtrSwapchain();
   const auto& image_index = ptr_swapchain->getImageIndex();
 
   try {

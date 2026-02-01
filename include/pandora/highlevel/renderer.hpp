@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "pandora/core/command_buffer.hpp"
@@ -22,15 +23,15 @@ class Renderer {
   std::reference_wrapper<const pandora::core::ui::Window> m_windowOwner;
   std::reference_wrapper<const pandora::core::gpu::Context> m_contextOwner;
   std::vector<std::unique_ptr<pandora::core::CommandDriver>> m_graphicDrivers;
-  pandora::core::RenderKit* m_ptrRenderKit = nullptr;
+  std::optional<std::reference_wrapper<pandora::core::RenderKit>> m_renderKit;
 
  public:
-  Renderer(const pandora::core::ui::Window& ptr_window,
-           const pandora::core::gpu::Context& ptr_context);
+  Renderer(const pandora::core::ui::Window& window,
+           const pandora::core::gpu::Context& context);
 
   /// @brief Set render kit used for render pass begin/end convenience.
   void setRenderKit(pandora::core::RenderKit& render_kit) {
-    m_ptrRenderKit = &render_kit;
+    m_renderKit = render_kit;
   }
 
   /// @brief Acquire image and build per-frame context.

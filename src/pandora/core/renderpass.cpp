@@ -4,11 +4,11 @@
 
 namespace pandora::core {
 
-Renderpass::Renderpass(const gpu::Context& ptr_context,
+Renderpass::Renderpass(const gpu::Context& context,
                        const AttachmentList& attachment_list,
                        const SubpassGraph& subpass_graph) {
   m_ptrRenderPass =
-      ptr_context.getPtrDevice()->getPtrLogicalDevice()->createRenderPassUnique(
+      context.getPtrDevice()->getPtrLogicalDevice()->createRenderPassUnique(
           vk::RenderPassCreateInfo()
               .setAttachments(attachment_list.getDescriptions())
               .setSubpasses(subpass_graph.getDescriptions())

@@ -5,7 +5,7 @@
 
 namespace pandora::core::gpu {
 
-TimelineSemaphore::TimelineSemaphore(const Context& ptr_context) {
+TimelineSemaphore::TimelineSemaphore(const Context& context) {
   const auto semaphore_type_info =
       vk::SemaphoreTypeCreateInfo{}.setSemaphoreType(
           vk::SemaphoreType::eTimeline);
@@ -13,7 +13,7 @@ TimelineSemaphore::TimelineSemaphore(const Context& ptr_context) {
       vk::SemaphoreCreateInfo{}.setPNext(&semaphore_type_info);
 
   m_ptrSemaphore =
-      ptr_context.getPtrDevice()->getPtrLogicalDevice()->createSemaphoreUnique(
+      context.getPtrDevice()->getPtrLogicalDevice()->createSemaphoreUnique(
           semaphore_info);
 }
 

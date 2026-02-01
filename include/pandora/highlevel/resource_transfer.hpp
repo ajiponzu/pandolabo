@@ -23,10 +23,10 @@ class ResourceTransfer {
   pandora::core::CommandDriver& ensureDriver();
 
  public:
-  explicit ResourceTransfer(const pandora::core::gpu::Context& ptr_context,
+  explicit ResourceTransfer(const pandora::core::gpu::Context& context,
                             pandora::core::QueueFamilyType queue_family_type =
                                 pandora::core::QueueFamilyType::Transfer)
-      : m_contextOwner(ptr_context), m_queueFamilyType(queue_family_type) {}
+      : m_contextOwner(context), m_queueFamilyType(queue_family_type) {}
 
   /// @brief Upload data to a GPU buffer via staging.
   [[nodiscard]] pandora::core::VoidResult uploadBuffer(

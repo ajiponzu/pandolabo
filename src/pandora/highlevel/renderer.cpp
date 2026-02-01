@@ -2,9 +2,9 @@
 
 namespace pandora::highlevel {
 
-Renderer::Renderer(const pandora::core::ui::Window& ptr_window,
-                   const pandora::core::gpu::Context& ptr_context)
-    : m_windowOwner(ptr_window), m_contextOwner(ptr_context) {
+Renderer::Renderer(const pandora::core::ui::Window& window,
+                   const pandora::core::gpu::Context& context)
+    : m_windowOwner(window), m_contextOwner(context) {
   const auto& swapchain = m_contextOwner.get().getPtrSwapchain();
   if (!swapchain) {
     return;
@@ -18,26 +18,26 @@ Renderer::Renderer(const pandora::core::ui::Window& ptr_window,
 }
 
 pandora::core::Result<FrameContext> Renderer::beginFrame() {
-  const auto& ptr_context = m_contextOwner.get();
-  const auto& ptr_swapchain = ptr_context.getPtrSwapchain();
+  const auto& context = m_contextOwner.get();
+  const auto& ptr_swapchain = context.getPtrSwapchain();
   if (!ptr_swapchain) {
     return pandora::core::Error::runtime("Swapchain not initialized");
   }
 
   const auto update_result =
-      ptr_swapchain->updateImageIndex(*ptr_context.getPtrDevice());
+      ptr_swapchain->updateImageIndex(*context.getPtrDevice());
   if (!update_result.isOk()) {
     return update_result.error().withContext("Renderer::beginFrame");
   }
 
-  if (m_ptrRenderKit != nullptr) {
-    m_ptrRenderKit->updateIndex(ptr_swapchain->getImageIndex());
+  if (m_renderKit.has_value()) {
+    m_renderKit->get().updateIndex(ptr_swapchain->getImageIndex());
   }
 
   const auto frame_index = ptr_swapchain->getFrameSyncIndex();
   const auto image_index = ptr_swapchain->getImageIndex();
   auto& driver = *m_graphicDrivers.at(frame_index);
-  driver.resetAllCommandPools(ptr_context);
+  driver.resetAllCommandPools(context);
 
   return FrameContext{image_index, frame_index, driver};
 }
@@ -57,8 +57,8 @@ pandora::core::VoidResult Renderer::record(FrameContext& frame,
 }
 
 pandora::core::VoidResult Renderer::endFrame(FrameContext& frame) {
-  const auto& ptr_context = m_contextOwner.get();
-  const auto& ptr_swapchain = ptr_context.getPtrSwapchain();
+  const auto& context = m_contextOwner.get();
+  const auto& ptr_swapchain = context.getPtrSwapchain();
 
   const auto image_semaphore = ptr_swapchain->getImageAvailableSemaphore();
   const auto finished_semaphore = ptr_swapchain->getFinishedSemaphore();
@@ -82,7 +82,7 @@ pandora::core::VoidResult Renderer::endFrame(FrameContext& frame) {
                             finished_fence);
 
   const auto present_result =
-      frame.driver.get().present(ptr_context, finished_semaphore);
+      frame.driver.get().present(context, finished_semaphore);
   if (!present_result.isOk()) {
     return present_result.error().withContext("Renderer::endFrame");
   }

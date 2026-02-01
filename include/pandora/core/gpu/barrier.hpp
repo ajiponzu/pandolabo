@@ -289,7 +289,7 @@ class ImageBarrier {
                const ImageViewInfo& image_view_info,
                uint32_t src_queue_family = 0u,
                uint32_t dst_queue_family = 0u);
-  ImageBarrier(const Context& ptr_context,
+  ImageBarrier(const Context& context,
                const std::vector<AccessFlag>& src_access_flags,
                const std::vector<AccessFlag>& dst_access_flags,
                const std::vector<PipelineStage>& src_stages,
@@ -439,9 +439,9 @@ class ImageBarrierBuilder {
   }
 
   /// @brief Build and return the final ImageBarrier instance with context
-  /// @param ptr_context GPU context reference (required for backbuffer)
+  /// @param context GPU context reference (required for backbuffer)
   /// @return Result containing ImageBarrier instance or error
-  Result<ImageBarrier> build(const Context& ptr_context) {
+  Result<ImageBarrier> build(const Context& context) {
     if (m_image.has_value() && m_imageViewInfo) {
       return ImageBarrier(m_image->get(),
                           m_srcAccessFlags,
@@ -455,7 +455,7 @@ class ImageBarrierBuilder {
                           m_dstQueueFamily);
     }
 
-    return ImageBarrier(ptr_context,
+    return ImageBarrier(context,
                         m_srcAccessFlags,
                         m_dstAccessFlags,
                         m_srcStages,

@@ -40,12 +40,12 @@ class Image {
   Image() = default;
 
   /// @brief Construct image with specified properties
-  /// @param ptr_context GPU context pointer
+  /// @param context GPU context reference
   /// @param memory_usage Memory usage pattern
   /// @param transfer_type Transfer operation type
   /// @param image_usages Image usage types
   /// @param image_sub_info Image sub-resource information
-  Image(const Context& ptr_context,
+  Image(const Context& context,
         MemoryUsage memory_usage,
         TransferType transfer_type,
         const std::vector<ImageUsage>& image_usages,
@@ -131,10 +131,10 @@ class ImageView {
 
  public:
   /// @brief Construct image view for the given image
-  /// @param ptr_context GPU context pointer
+  /// @param context GPU context reference
   /// @param image Source image
   /// @param image_view_info Image view configuration
-  ImageView(const Context& ptr_context,
+  ImageView(const Context& context,
             const Image& image,
             const ImageViewInfo& image_view_info);
   ~ImageView();
@@ -161,9 +161,9 @@ class Sampler {
 
  public:
   /// @brief Construct sampler with specified configuration
-  /// @param ptr_context GPU context pointer
+  /// @param context GPU context reference
   /// @param sampler_info Sampler configuration
-  Sampler(const Context& ptr_context, const SamplerInfo& sampler_info);
+  Sampler(const Context& context, const SamplerInfo& sampler_info);
   ~Sampler();
 
   /// @brief Get sampler handle

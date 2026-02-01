@@ -55,10 +55,10 @@ WaitedFences::WaitedFences(const std::vector<gpu::Fence>& fences) {
       | std::ranges::to<std::vector>();
 }
 
-bool WaitedFences::wait(const gpu::Context& ptr_context,
+bool WaitedFences::wait(const gpu::Context& context,
                         uint64_t timeout,
                         bool is_reset) {
-  const auto& ptr_vk_device = ptr_context.getPtrDevice()->getPtrLogicalDevice();
+  const auto& ptr_vk_device = context.getPtrDevice()->getPtrLogicalDevice();
 
   const auto vk_result =
       ptr_vk_device->waitForFences(m_fences, VK_TRUE, timeout);
@@ -92,9 +92,9 @@ TimelineSemaphoreDriver& TimelineSemaphoreDriver::setValues(
   return *this;
 }
 
-bool TimelineSemaphoreDriver::wait(const gpu::Context& ptr_context,
+bool TimelineSemaphoreDriver::wait(const gpu::Context& context,
                                    uint64_t timeout) {
-  const auto& ptr_vk_device = ptr_context.getPtrDevice()->getPtrLogicalDevice();
+  const auto& ptr_vk_device = context.getPtrDevice()->getPtrLogicalDevice();
 
   const auto semaphore_wait_info =
       vk::SemaphoreWaitInfo{}.setSemaphores(m_semaphores).setValues(m_values);
@@ -107,8 +107,8 @@ bool TimelineSemaphoreDriver::wait(const gpu::Context& ptr_context,
   return true;
 }
 
-void TimelineSemaphoreDriver::signal(const gpu::Context& ptr_context) {
-  const auto& ptr_vk_device = ptr_context.getPtrDevice()->getPtrLogicalDevice();
+void TimelineSemaphoreDriver::signal(const gpu::Context& context) {
+  const auto& ptr_vk_device = context.getPtrDevice()->getPtrLogicalDevice();
 
   for (const auto& [semaphore, value] :
        std::ranges::views::zip(m_semaphores, m_values)) {

@@ -45,10 +45,10 @@ class Swapchain {
 
  public:
   /// @brief Construct swapchain with device and window surface
-  /// @param ptr_device GPU device wrapper pointer
-  /// @param ptr_surface GPU-window surface wrapper pointer
-  Swapchain(const Device& ptr_device,
-            const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
+  /// @param device GPU device wrapper reference
+  /// @param surface GPU-window surface wrapper
+  Swapchain(const Device& device,
+            const std::shared_ptr<gpu_ui::WindowSurface>& surface);
 
   // Rule of Five
   ~Swapchain();
@@ -59,11 +59,10 @@ class Swapchain {
 
   /// @brief Recreate swapchain
   /// @details Used when window is resized, moved, etc.
-  /// @param ptr_device GPU device wrapper pointer
-  /// @param ptr_surface GPU-window surface wrapper pointer
-  void resetSwapchain(
-      const Device& ptr_device,
-      const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
+  /// @param device GPU device wrapper reference
+  /// @param surface GPU-window surface wrapper
+  void resetSwapchain(const Device& device,
+                      const std::shared_ptr<gpu_ui::WindowSurface>& surface);
 
   /// @brief Get swapchain handle
   /// @return Vulkan swapchain handle
@@ -134,10 +133,10 @@ class Swapchain {
 
   /// @brief Acquire image index for updating
   /// @details You must call this function before rendering in each frame.
-  /// @param ptr_device GPU device wrapper pointer
+  /// @param device GPU device wrapper reference
   /// @param timeout Timeout in nanoseconds for image acquisition
   pandora::core::VoidResult updateImageIndex(
-      const Device& ptr_device,
+      const Device& device,
       uint64_t timeout = std::numeric_limits<uint64_t>::max());
 
   /// @brief Update frame sync image index
@@ -147,11 +146,11 @@ class Swapchain {
 
  private:
   /// @brief Internal swapchain construction
-  /// @param ptr_device GPU device wrapper pointer
-  /// @param ptr_surface GPU-window surface wrapper pointer
+  /// @param device GPU device wrapper reference
+  /// @param surface GPU-window surface wrapper
   void constructSwapchain(
-      const Device& ptr_device,
-      const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
+      const Device& device,
+      const std::shared_ptr<gpu_ui::WindowSurface>& surface);
 
   /// @brief Clear swapchain resources
   void clear();

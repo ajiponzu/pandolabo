@@ -84,15 +84,15 @@ T get_optional_value(const std::optional<T>& option) {
 
 namespace pandora::core::gpu {
 
-Device::Device(const vk::UniqueInstance& ptr_instance,
-               const vk::UniqueSurfaceKHR& ptr_window_surface
+Device::Device(const vk::UniqueInstance& instance,
+               const vk::UniqueSurfaceKHR& window_surface
 #ifdef GPU_DEBUG
                ,
-               const debug::Messenger& ptr_messenger
+               const debug::Messenger& messenger
 #endif
                )
-    : m_hasWindowSurface(ptr_window_surface.get() != nullptr) {
-  const auto physical_devices = ptr_instance->enumeratePhysicalDevices();
+    : m_hasWindowSurface(window_surface.get() != nullptr) {
+  const auto physical_devices = instance->enumeratePhysicalDevices();
   if (physical_devices.empty()) {
     m_physicalDevice = nullptr;
     return;
@@ -111,9 +111,9 @@ Device::Device(const vk::UniqueInstance& ptr_instance,
     m_queueFamilyIndices.compute = queue_family_indices.compute;
     m_queueFamilyIndices.transfer = queue_family_indices.transfer;
 
-    if (ptr_window_surface) {
+    if (window_surface) {
       const auto present_support = physical_device.getSurfaceSupportKHR(
-          m_queueFamilyIndices.graphics.value(), ptr_window_surface.get());
+          m_queueFamilyIndices.graphics.value(), window_surface.get());
 
       if (!present_support) {
         m_queueFamilyIndices.graphics.reset();
@@ -127,20 +127,20 @@ Device::Device(const vk::UniqueInstance& ptr_instance,
     }
 
     const auto required_extensions =
-        getDeviceExtensions(ptr_window_surface.get() != nullptr);
+        getDeviceExtensions(window_surface.get() != nullptr);
     const auto extension_support =
         check_device_extension_support(physical_device, required_extensions);
 
     auto is_suitable = m_queueFamilyIndices.graphics.has_value()
                        && m_queueFamilyIndices.compute.has_value()
                        && extension_support;
-    if (ptr_window_surface) {
+    if (window_surface) {
       bool swap_chain_adequate = false;
       if (extension_support) {
         const auto formats =
-            physical_device.getSurfaceFormatsKHR(ptr_window_surface.get());
+            physical_device.getSurfaceFormatsKHR(window_surface.get());
         const auto present_modes =
-            physical_device.getSurfacePresentModesKHR(ptr_window_surface.get());
+            physical_device.getSurfacePresentModesKHR(window_surface.get());
 
         swap_chain_adequate = !(formats.empty()) && !(present_modes.empty());
       }
@@ -161,7 +161,7 @@ Device::Device(const vk::UniqueInstance& ptr_instance,
     std::println("vulkan_device: {}",
                  m_physicalDevice.getProperties().deviceName.data());
   }
-  constructLogicalDevice(ptr_messenger);
+  constructLogicalDevice(messenger);
 #else
   constructLogicalDevice();
 #endif
@@ -171,7 +171,7 @@ Device::~Device() {}
 
 void Device::constructLogicalDevice(
 #ifdef GPU_DEBUG
-    const debug::Messenger& ptr_messenger
+    const debug::Messenger& messenger
 #endif
 ) {
   const float_t queue_priority = 1.0f;
@@ -218,7 +218,7 @@ void Device::constructLogicalDevice(
       {}, queue_create_infos, {}, required_extensions, nullptr, &features2);
 
 #ifdef GPU_DEBUG
-  create_info.setPEnabledLayerNames(ptr_messenger.getValidationLayers());
+  create_info.setPEnabledLayerNames(messenger.getValidationLayers());
 #endif
 
   m_ptrLogicalDevice = m_physicalDevice.createDeviceUnique(create_info);

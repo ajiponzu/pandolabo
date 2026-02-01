@@ -22,8 +22,8 @@ class PipelineCache {
       m_cache;
 
  public:
-  explicit PipelineCache(const pandora::core::gpu::Context& ptr_context)
-      : m_contextOwner(ptr_context) {}
+  explicit PipelineCache(const pandora::core::gpu::Context& context)
+      : m_contextOwner(context) {}
 
   /// @brief Get cached pipeline or create it using builder.
   pandora::core::Pipeline& getOrCreate(const std::string& key,

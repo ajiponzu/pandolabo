@@ -40,7 +40,7 @@ class ShaderModule {
 
  public:
   ShaderModule() = default;
-  ShaderModule(const Context& ptr_context,
+  ShaderModule(const Context& context,
                const std::vector<uint32_t>& spirv_binary);
 
   // Rule of Five

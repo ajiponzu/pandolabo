@@ -94,12 +94,11 @@ class CommandBuffer {
   bool m_isSecondary = false;  ///< Whether this is a secondary command buffer
 
   /// @brief Protected constructor for derived classes
-  /// @param ptr_command_buffer Unique Vulkan command buffer to wrap
+  /// @param command_buffer Unique Vulkan command buffer to wrap
   /// @param is_secondary Whether this is a secondary command buffer
-  CommandBuffer(const vk::UniqueCommandBuffer& ptr_command_buffer,
+  CommandBuffer(const vk::UniqueCommandBuffer& command_buffer,
                 bool is_secondary = false)
-      : m_commandBuffer(ptr_command_buffer.get()),
-        m_isSecondary(is_secondary) {}
+      : m_commandBuffer(command_buffer.get()), m_isSecondary(is_secondary) {}
 
  public:
   // Rule of Five
@@ -159,9 +158,9 @@ class TransferCommandBuffer : public CommandBuffer {
  protected:
   friend class CommandDriver;
 
-  TransferCommandBuffer(const vk::UniqueCommandBuffer& ptr_command_buffer,
+  TransferCommandBuffer(const vk::UniqueCommandBuffer& command_buffer,
                         bool is_secondary = false)
-      : CommandBuffer(ptr_command_buffer, is_secondary) {}
+      : CommandBuffer(command_buffer, is_secondary) {}
 
  public:
   // Rule of Five
@@ -242,9 +241,9 @@ class ComputeCommandBuffer : public TransferCommandBuffer {
  protected:
   friend class CommandDriver;
 
-  ComputeCommandBuffer(const vk::UniqueCommandBuffer& ptr_command_buffer,
+  ComputeCommandBuffer(const vk::UniqueCommandBuffer& command_buffer,
                        bool is_secondary = false)
-      : TransferCommandBuffer(ptr_command_buffer, is_secondary) {}
+      : TransferCommandBuffer(command_buffer, is_secondary) {}
 
  public:
   // Rule of Five
@@ -268,9 +267,9 @@ class GraphicCommandBuffer : public ComputeCommandBuffer {
  protected:
   friend class CommandDriver;
 
-  GraphicCommandBuffer(const vk::UniqueCommandBuffer& ptr_command_buffer,
+  GraphicCommandBuffer(const vk::UniqueCommandBuffer& command_buffer,
                        bool is_secondary = false)
-      : ComputeCommandBuffer(ptr_command_buffer, is_secondary) {}
+      : ComputeCommandBuffer(command_buffer, is_secondary) {}
 
  public:
   // Rule of Five
@@ -364,9 +363,9 @@ class CommandDriver {
 
  public:
   /// @brief Construct command driver for specified queue family
-  /// @param ptr_context Vulkan context for device operations
+  /// @param context Vulkan context for device operations
   /// @param queue_family Queue family type to use for commands
-  CommandDriver(const gpu::Context& ptr_context, QueueFamilyType queue_family);
+  CommandDriver(const gpu::Context& context, QueueFamilyType queue_family);
 
   // Rule of Five
   ~CommandDriver();
@@ -383,18 +382,18 @@ class CommandDriver {
   /// @brief Allocate secondary command buffers for multi-threading
   /// Secondary command buffers enable parallel command recording across
   /// multiple threads.
-  /// @param ptr_context Vulkan context for device operations
+  /// @param context Vulkan context for device operations
   /// @param required_secondary_num Number of secondary command buffers to
   /// allocate
-  void constructSecondary(const gpu::Context& ptr_context,
+  void constructSecondary(const gpu::Context& context,
                           uint32_t required_secondary_num = 1u);
 
   /// @brief Reset all command buffers to initial state
   void resetAllCommands() const;
 
   /// @brief Reset all command pools
-  /// @param ptr_context Vulkan context for device operations
-  void resetAllCommandPools(const gpu::Context& ptr_context) const;
+  /// @param context Vulkan context for device operations
+  void resetAllCommandPools(const gpu::Context& context) const;
 
   /// @brief Integrate secondary commands into primary command buffer
   /// If secondary command buffers are used, this function must be called
@@ -408,9 +407,9 @@ class CommandDriver {
               const gpu::Fence& fence = {}) const;
 
   /// @brief Present rendered image to display
-  /// @param ptr_context Vulkan context for presentation
+  /// @param context Vulkan context for presentation
   /// @param wait_semaphore Semaphore to wait for before presentation
-  VoidResult present(const gpu::Context& ptr_context,
+  VoidResult present(const gpu::Context& context,
                      const gpu::BinarySemaphore& wait_semaphore) const;
 
   /// @brief Wait for all operations on this queue to complete
