@@ -149,7 +149,7 @@ plc::VoidResult BasicCubeHL::constructShaderResources() {
 
   std::vector<plc::gpu::BufferDescription> buffer_descriptions;
   buffer_descriptions.emplace_back(
-      description_unit.getDescriptorInfoMap().at("UniformPosition"),
+      description_unit.getDescriptorInfoMap().at("CubePosition"),
       *m_ptrUniformBuffer);
 
   m_ptrDescriptorSet->updateDescriptorSet(
@@ -321,19 +321,41 @@ void BasicCubeHL::constructGraphicPipeline() {
 
 plc::VoidResult BasicCubeHL::uploadGeometry() {
   const std::vector<Vertex> vertices = {
-      {{-1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}},
-      {{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}},
-      {{1.0f, 1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}},
-      {{-1.0f, 1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}},
-      {{-1.0f, -1.0f, 1.0f}, {1.0f, 0.0f, 1.0f}},
-      {{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}},
-      {{1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 0.0f}},
-      {{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}},
-  };
+      {{-0.5f, 0.5f, -0.5f}, {1.0f, 0.5f, 0.0f}},
+      {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.5f}},
+      {{-0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f}},
+      {{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},
 
+      {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}},
+      {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}},
+      {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}},
+      {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+
+      {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}},
+      {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}},
+      {{-0.5f, -0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}},
+      {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}},
+
+      {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+      {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+      {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
+      {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
+
+      {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}},
+      {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}},
+      {{-0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}},
+      {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}},
+
+      {{-0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+      {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+      {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+      {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+  };
   const std::vector<uint32_t> indices = {
-      0u, 1u, 2u, 2u, 3u, 0u, 4u, 5u, 6u, 6u, 7u, 4u, 0u, 4u, 7u, 7u, 3u, 0u,
-      1u, 5u, 6u, 6u, 2u, 1u, 3u, 2u, 6u, 6u, 7u, 3u, 0u, 1u, 5u, 5u, 4u, 0u};
+      0u,  1u,  2u,  3u,  2u,  1u,  4u,  5u,  6u,  7u,  6u,  5u,
+      8u,  9u,  10u, 11u, 10u, 9u,  12u, 13u, 14u, 15u, 14u, 13u,
+      16u, 17u, 18u, 19u, 18u, 17u, 20u, 21u, 22u, 23u, 22u, 21u,
+  };
 
   m_ptrVertexBuffer = std::make_unique<plc::gpu::Buffer>(
       plc::createVertexBuffer(*m_ptrContext, vertices.size() * sizeof(Vertex)));
