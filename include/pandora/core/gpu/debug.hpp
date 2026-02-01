@@ -25,8 +25,8 @@ class Messenger {
   vk::UniqueDebugUtilsMessengerEXT m_ptrMessenger;
 
  public:
-  Messenger() {}
-  ~Messenger();
+  Messenger() = default;
+  ~Messenger() = default;
 
   /// @brief Create Vulkan instance with debug validation layers
   /// @param app_info Application information for Vulkan instance

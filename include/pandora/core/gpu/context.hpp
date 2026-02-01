@@ -40,11 +40,11 @@ class Context {
 
  public:
   /// @brief Construct Context with optional window surface
-  /// @param ptr_window_surface Window surface for presentation (optional)
-  Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface = nullptr);
+  /// @param window_surface Window surface for presentation (optional)
+  Context(std::shared_ptr<gpu_ui::WindowSurface> window_surface = nullptr);
 
   // Rule of Five
-  ~Context();
+  ~Context() = default;
   Context(const Context&) = delete;
   Context& operator=(const Context&) = delete;
   Context(Context&&) = default;

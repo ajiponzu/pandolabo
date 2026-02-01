@@ -14,9 +14,14 @@ pandora::core::CommandDriver& ResourceTransfer::ensureDriver() {
 
 pandora::core::VoidResult ResourceTransfer::uploadBuffer(
     pandora::core::gpu::Buffer& dst, std::span<const std::byte> data) {
+  if (!m_contextOwner.get().isInitialized()) {
+    return pandora::core::Error::runtime("Context not initialized")
+        .withContext("ResourceTransfer::uploadBuffer");
+  }
   if (data.size_bytes() > dst.getSize()) {
     return pandora::core::Error::validation(
-        "Upload size exceeds destination buffer size");
+               "Upload size exceeds destination buffer size")
+        .withContext("ResourceTransfer::uploadBuffer");
   }
 
   auto staging = pandora::core::createStagingBufferToGPU(m_contextOwner.get(),
@@ -43,6 +48,10 @@ pandora::core::VoidResult ResourceTransfer::uploadImage(
     pandora::core::gpu::Image& dst,
     const pandora::core::ImageViewInfo& view_info,
     std::span<const std::byte> data) {
+  if (!m_contextOwner.get().isInitialized()) {
+    return pandora::core::Error::runtime("Context not initialized")
+        .withContext("ResourceTransfer::uploadImage");
+  }
   auto staging = pandora::core::createStagingBufferToGPU(m_contextOwner.get(),
                                                          data.size_bytes());
 
@@ -66,9 +75,14 @@ pandora::core::VoidResult ResourceTransfer::uploadImage(
 
 pandora::core::VoidResult ResourceTransfer::readbackBuffer(
     pandora::core::gpu::Buffer& src, std::span<std::byte> out) {
+  if (!m_contextOwner.get().isInitialized()) {
+    return pandora::core::Error::runtime("Context not initialized")
+        .withContext("ResourceTransfer::readbackBuffer");
+  }
   if (out.size_bytes() > src.getSize()) {
     return pandora::core::Error::validation(
-        "Readback size exceeds source buffer size");
+               "Readback size exceeds source buffer size")
+        .withContext("ResourceTransfer::readbackBuffer");
   }
 
   auto staging = pandora::core::createStagingBufferFromGPU(m_contextOwner.get(),

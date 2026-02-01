@@ -53,10 +53,6 @@ bool check_validation_layer_support(
 
 namespace pandora::core::gpu {
 
-debug::Messenger::~Messenger() {
-  m_ptrMessenger.release();
-}
-
 vk::UniqueInstance debug::Messenger::createDebugInstance(
     const vk::ApplicationInfo& app_info,
     const std::vector<const char*>& extensions) {
@@ -74,7 +70,7 @@ vk::UniqueInstance debug::Messenger::createDebugInstance(
       | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
       | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
 
-  // 拡張有無を判定
+  // Check extension availability
   const auto ext_contains = [&](const char* name) {
     for (auto* e : extensions) {
       if (std::strcmp(e, name) == 0)

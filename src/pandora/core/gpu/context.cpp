@@ -7,7 +7,7 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace pandora::core::gpu {
 
-Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
+Context::Context(std::shared_ptr<gpu_ui::WindowSurface> window_surface) {
   // Helpers to manage instance extensions
   auto get_available_instance_extensions = []() {
     std::unordered_set<std::string> names;
@@ -51,19 +51,19 @@ Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
     std::vector<const char*> extensions;
     const auto available_exts = get_available_instance_extensions();
 
-    if (ptr_window_surface) {
+    if (window_surface) {
       // Window mode: add GLFW extensions
       uint32_t extension_count = 0u;
       const auto glfw_extensions =
           glfwGetRequiredInstanceExtensions(&extension_count);
       extensions = std::vector<const char*>(glfw_extensions,
                                             glfw_extensions + extension_count);
-      // VK_KHR_surface は通常 GLFW が返すため明示追加しない
+      // VK_KHR_surface is usually provided by GLFW; do not add explicitly.
     }
     // Headless mode: no GLFW or surface extensions needed
 
 #ifdef GPU_DEBUG
-    // ある場合のみ追加（重複も抑止）
+    // Add only when available (avoid duplicates).
     try_add_ext(extensions, VK_EXT_DEBUG_UTILS_EXTENSION_NAME, available_exts);
     try_add_ext(
         extensions, VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME, available_exts);
@@ -81,9 +81,9 @@ Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
     }
   }
 
-  if (ptr_window_surface) {
+  if (window_surface) {
     // Create window surface
-    m_ptrWindowSurface = ptr_window_surface;
+    m_ptrWindowSurface = window_surface;
     m_ptrWindowSurface->constructSurface(m_ptrInstance);
 
 // Create Vulkan device
@@ -95,9 +95,11 @@ Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
                                            m_ptrWindowSurface->getSurface());
 #endif
 
-    // Create Vulkan swapchain
-    m_ptrSwapchain =
-        std::make_unique<Swapchain>(*m_ptrDevice, m_ptrWindowSurface);
+    if (m_ptrDevice && m_ptrDevice->getPtrLogicalDevice()) {
+      // Create Vulkan swapchain
+      m_ptrSwapchain =
+          std::make_unique<Swapchain>(*m_ptrDevice, m_ptrWindowSurface);
+    }
   } else {
 // Create Vulkan device
 #ifdef GPU_DEBUG
@@ -109,18 +111,13 @@ Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
 #endif
   }
 
-  m_isInitialized = true;
-}
-
-Context::~Context() {
-  m_ptrDevice.release();
-  m_ptrInstance.release();
-#ifdef GPU_DEBUG
-  m_ptrMessenger.release();
-#endif
+  m_isInitialized = m_ptrDevice && m_ptrDevice->getPtrLogicalDevice();
 }
 
 void Context::resetSwapchain() {
+  if (!m_ptrDevice || !m_ptrWindowSurface || !m_ptrSwapchain) {
+    return;
+  }
   m_ptrDevice->waitIdle();
   m_ptrWindowSurface->setWindowSize();
   m_ptrSwapchain->resetSwapchain(*m_ptrDevice, m_ptrWindowSurface);

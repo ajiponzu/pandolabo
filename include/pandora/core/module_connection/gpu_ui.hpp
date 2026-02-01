@@ -36,7 +36,7 @@ class WindowSurface {
 
  public:
   explicit WindowSurface(GLFWwindow& window);
-  ~WindowSurface();
+  ~WindowSurface() = default;
 
   auto getWindow() const {
     return &m_window.get();

@@ -6,10 +6,6 @@ WindowSurface::WindowSurface(GLFWwindow& window) : m_window(window) {
   setWindowSize();
 }
 
-WindowSurface::~WindowSurface() {
-  m_ptrSurface.release();
-}
-
 void WindowSurface::constructSurface(const vk::UniqueInstance& instance) {
   VkSurfaceKHR surface{};
   if (glfwCreateWindowSurface(

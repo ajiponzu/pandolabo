@@ -19,9 +19,23 @@ Renderer::Renderer(const pandora::core::ui::Window& window,
 
 pandora::core::Result<FrameContext> Renderer::beginFrame() {
   const auto& context = m_contextOwner.get();
+  if (!context.isInitialized()) {
+    return pandora::core::Error::runtime("Context not initialized")
+        .withContext("Renderer::beginFrame");
+  }
   const auto& ptr_swapchain = context.getPtrSwapchain();
   if (!ptr_swapchain) {
-    return pandora::core::Error::runtime("Swapchain not initialized");
+    return pandora::core::Error::runtime("Swapchain not initialized")
+        .withContext("Renderer::beginFrame");
+  }
+
+  if (m_graphicDrivers.size() != ptr_swapchain->getImageCount()) {
+    m_graphicDrivers.clear();
+    m_graphicDrivers.reserve(ptr_swapchain->getImageCount());
+    for (size_t idx = 0u; idx < ptr_swapchain->getImageCount(); idx += 1u) {
+      m_graphicDrivers.push_back(std::make_unique<pandora::core::CommandDriver>(
+          m_contextOwner.get(), pandora::core::QueueFamilyType::Graphics));
+    }
   }
 
   const auto update_result =
@@ -49,7 +63,7 @@ pandora::core::VoidResult Renderer::record(FrameContext& frame,
 
   const auto record_result = record_fn(command_buffer);
   if (!record_result.isOk()) {
-    return record_result;
+    return record_result.error().withContext("Renderer::record");
   }
 
   command_buffer.end();
@@ -58,7 +72,15 @@ pandora::core::VoidResult Renderer::record(FrameContext& frame,
 
 pandora::core::VoidResult Renderer::endFrame(FrameContext& frame) {
   const auto& context = m_contextOwner.get();
+  if (!context.isInitialized()) {
+    return pandora::core::Error::runtime("Context not initialized")
+        .withContext("Renderer::endFrame");
+  }
   const auto& ptr_swapchain = context.getPtrSwapchain();
+  if (!ptr_swapchain) {
+    return pandora::core::Error::runtime("Swapchain not initialized")
+        .withContext("Renderer::endFrame");
+  }
 
   const auto image_semaphore = ptr_swapchain->getImageAvailableSemaphore();
   const auto finished_semaphore = ptr_swapchain->getFinishedSemaphore();

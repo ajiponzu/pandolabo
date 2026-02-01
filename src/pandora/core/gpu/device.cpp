@@ -156,6 +156,10 @@ Device::Device(const vk::UniqueInstance& instance,
     m_physicalDevice = nullptr;
   }
 
+  if (!m_physicalDevice) {
+    return;
+  }
+
 #ifdef GPU_DEBUG
   if (m_physicalDevice) {
     std::println("vulkan_device: {}",

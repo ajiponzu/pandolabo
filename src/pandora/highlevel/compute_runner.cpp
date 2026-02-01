@@ -12,6 +12,10 @@ pandora::core::CommandDriver& ComputeRunner::ensureDriver() {
 
 pandora::core::Result<pandora::core::ComputeCommandBuffer>
 ComputeRunner::begin() {
+  if (!m_contextOwner.get().isInitialized()) {
+    return pandora::core::Error::runtime("Context not initialized")
+        .withContext("ComputeRunner::begin");
+  }
   auto& driver = ensureDriver();
   driver.resetAllCommandPools(m_contextOwner.get());
   auto cmd = driver.getCompute();
@@ -24,7 +28,7 @@ pandora::core::VoidResult ComputeRunner::record(
     const RecordFn& record_fn) {
   const auto record_result = record_fn(command_buffer);
   if (!record_result.isOk()) {
-    return record_result;
+    return record_result.error().withContext("ComputeRunner::record");
   }
 
   command_buffer.end();
@@ -33,12 +37,19 @@ pandora::core::VoidResult ComputeRunner::record(
 
 pandora::core::VoidResult ComputeRunner::submit(
     const pandora::core::SubmitSemaphoreGroup& semaphore_group) {
+  if (!m_contextOwner.get().isInitialized()) {
+    return pandora::core::Error::runtime("Context not initialized")
+        .withContext("ComputeRunner::submit");
+  }
   auto& driver = ensureDriver();
   driver.submit(semaphore_group);
   return pandora::core::ok();
 }
 
 void ComputeRunner::queueWaitIdle() {
+  if (!m_contextOwner.get().isInitialized()) {
+    return;
+  }
   auto& driver = ensureDriver();
   driver.queueWaitIdle();
 }
