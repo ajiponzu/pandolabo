@@ -92,7 +92,7 @@ function Show-Menu {
     Write-Host "  5. build     - 全体ビルド ($Configuration)" -ForegroundColor Cyan
     Write-Host "  6. lib       - ライブラリのみビルド ($Configuration)" -ForegroundColor Cyan
     Write-Host "  7. examples  - Exampleをビルドして実行 ($Configuration)" -ForegroundColor Cyan
-    Write-Host "  8. tests     - テストをビルドして実行 ($Configuration)" -ForegroundColor Cyan
+    Write-Host "  8. tests     - テストをビルド ($Configuration)" -ForegroundColor Cyan
     Write-Host "  9. run       - Example実行のみ ($Configuration)" -ForegroundColor Cyan
     Write-Host "  0. all       - setup + build + run ($Configuration)" -ForegroundColor Cyan
     Write-Host "  t. test      - テスト実行 (エイリアス)" -ForegroundColor Green
