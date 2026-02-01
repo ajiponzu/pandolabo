@@ -27,11 +27,10 @@ namespace pandora::core::gpu {
 /// and swapchain. This is the core of the Pandolabo project.
 class Context {
  private:
+  vk::UniqueInstance m_ptrInstance;
 #ifdef GPU_DEBUG
   std::unique_ptr<debug::Messenger> m_ptrMessenger;
 #endif
-
-  vk::UniqueInstance m_ptrInstance;
   std::shared_ptr<gpu_ui::WindowSurface> m_ptrWindowSurface;
   std::unique_ptr<Device> m_ptrDevice;
   std::unique_ptr<Swapchain> m_ptrSwapchain;
@@ -42,9 +41,9 @@ class Context {
   /// @brief Construct Context with optional window surface
   /// @param window_surface Window surface for presentation (optional)
   Context(std::shared_ptr<gpu_ui::WindowSurface> window_surface = nullptr);
+  ~Context();
 
   // Rule of Five
-  ~Context() = default;
   Context(const Context&) = delete;
   Context& operator=(const Context&) = delete;
   Context(Context&&) = default;

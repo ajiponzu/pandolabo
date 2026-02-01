@@ -49,6 +49,7 @@ class WindowSurface {
   }
 
   void constructSurface(const vk::UniqueInstance& instance);
+  void destroySurface();
 
   void setWindowSize();
 };

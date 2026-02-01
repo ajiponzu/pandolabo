@@ -14,15 +14,15 @@ namespace samples::highlevel {
 
 SimpleImageComputingHL::SimpleImageComputingHL() {
   m_ptrContext = std::make_unique<plc::gpu::Context>(nullptr);
-    m_ptrComputeRunner = std::make_unique<plh::ComputeRunner>(*m_ptrContext);
+  m_ptrComputeRunner = std::make_unique<plh::ComputeRunner>(*m_ptrContext);
 
   m_ptrUniformBuffer =
-            plc::createUniqueUniformBuffer(*m_ptrContext, sizeof(float_t));
-    const auto mapped_address = m_ptrUniformBuffer->mapMemory(*m_ptrContext);
+      plc::createUniqueUniformBuffer(*m_ptrContext, sizeof(float_t));
+  const auto mapped_address = m_ptrUniformBuffer->mapMemory(*m_ptrContext);
   std::fill_n(reinterpret_cast<float_t*>(mapped_address),
               m_ptrUniformBuffer->getSize() / sizeof(float_t),
               5.0f);
-    m_ptrUniformBuffer->unmapMemory(*m_ptrContext);
+  m_ptrUniformBuffer->unmapMemory(*m_ptrContext);
 
   initializeImageResources();
   const auto shader_result = constructShaderResources();
@@ -88,7 +88,7 @@ void SimpleImageComputingHL::run() {
   }
   m_ptrComputeRunner->queueWaitIdle();
 
-    const auto result_mapped_address = result_buffer.mapMemory(*m_ptrContext);
+  const auto result_mapped_address = result_buffer.mapMemory(*m_ptrContext);
   const auto& image_size = m_ptrStorageImage->getGraphicalSize();
 
   const size_t image_buf_size = image_size.width * image_size.height * 4;
@@ -96,7 +96,7 @@ void SimpleImageComputingHL::run() {
   std::memcpy(reinterpret_cast<void*>(image_buf.get()),
               result_mapped_address,
               image_buf_size);
-    result_buffer.unmapMemory(*m_ptrContext);
+  result_buffer.unmapMemory(*m_ptrContext);
 
   stbi_write_png("examples/output_hl.png",
                  image_size.width,
@@ -163,7 +163,7 @@ void SimpleImageComputingHL::initializeImageResources() {
 }
 
 plc::VoidResult SimpleImageComputingHL::constructShaderResources() {
-    plh::ShaderLibrary shader_library(*m_ptrContext);
+  plh::ShaderLibrary shader_library(*m_ptrContext);
 
   PANDORA_TRY_ASSIGN(
       spirv_binary,

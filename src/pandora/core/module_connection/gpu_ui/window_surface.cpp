@@ -19,6 +19,10 @@ void WindowSurface::constructSurface(const vk::UniqueInstance& instance) {
   m_ptrSurface = vk::UniqueSurfaceKHR(surface, {instance.get()});
 }
 
+void WindowSurface::destroySurface() {
+  m_ptrSurface.reset();
+}
+
 void WindowSurface::setWindowSize() {
   int window_width = 0, window_height = 0;
   glfwGetWindowSize(&m_window.get(), &window_width, &window_height);

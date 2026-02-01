@@ -114,6 +114,25 @@ Context::Context(std::shared_ptr<gpu_ui::WindowSurface> window_surface) {
   m_isInitialized = m_ptrDevice && m_ptrDevice->getPtrLogicalDevice();
 }
 
+Context::~Context() {
+  // Ensure device is idle before destruction
+  if (m_ptrDevice) {
+    m_ptrDevice->waitIdle();
+  }
+
+  m_ptrSwapchain.reset();
+  m_ptrDevice.reset();
+
+  if (m_ptrWindowSurface) {
+    m_ptrWindowSurface->destroySurface();
+    m_ptrWindowSurface.reset();
+  }
+
+#ifdef GPU_DEBUG
+  m_ptrMessenger.reset();
+#endif
+}
+
 void Context::resetSwapchain() {
   if (!m_ptrDevice || !m_ptrWindowSurface || !m_ptrSwapchain) {
     return;
