@@ -42,12 +42,26 @@ pdl_add_example(example_basic_compute
 )
 add_dependencies(examples_all example_basic_compute)
 
+pdl_add_example(example_hl_basic_compute
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/highlevel/basic_compute/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/highlevel/basic_compute/basic_compute_hl.cpp
+)
+add_dependencies(examples_all example_hl_basic_compute)
+
 pdl_add_example(example_basic_cube
     SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/core/basic_cube/main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/core/basic_cube/basic_cube.cpp
 )
 add_dependencies(examples_all example_basic_cube)
+
+pdl_add_example(example_hl_basic_cube
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/highlevel/basic_cube/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/highlevel/basic_cube/basic_cube_hl.cpp
+)
+add_dependencies(examples_all example_hl_basic_cube)
 
 pdl_add_example(example_simple_image
     SOURCES
@@ -56,6 +70,13 @@ pdl_add_example(example_simple_image
 )
 add_dependencies(examples_all example_simple_image)
 
+pdl_add_example(example_hl_simple_image
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/highlevel/computing_image/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/highlevel/computing_image/simple_image_computing_hl.cpp
+)
+add_dependencies(examples_all example_hl_simple_image)
+
 pdl_add_example(example_square
     SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/core/square/main.cpp
@@ -63,9 +84,23 @@ pdl_add_example(example_square
 )
 add_dependencies(examples_all example_square)
 
+pdl_add_example(example_hl_square
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/highlevel/square/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/highlevel/square/square_hl.cpp
+)
+add_dependencies(examples_all example_hl_square)
+
 pdl_add_example(example_streaming_resources
     SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/core/streaming_resources/main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/core/streaming_resources/streaming_resources.cpp
 )
 add_dependencies(examples_all example_streaming_resources)
+
+pdl_add_example(example_hl_streaming_resources
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/highlevel/streaming_resources/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/highlevel/streaming_resources/streaming_resources_hl.cpp
+)
+add_dependencies(examples_all example_hl_streaming_resources)

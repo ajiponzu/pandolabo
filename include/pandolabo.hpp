@@ -26,6 +26,8 @@
 
 // Include the core Vulkan wrapper functionality
 #include "pandora/core.hpp"
+// Include optional high-level support layer
+#include "pandora/highlevel.hpp"
 
 /// @brief Main namespace for all Pandolabo functionality
 /// Contains nested namespaces for different modules:

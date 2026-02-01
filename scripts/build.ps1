@@ -134,10 +134,15 @@ function Select-Example {
     if (-not $examples -or $examples.Count -eq 0) {
         $examples = @(
             "example_basic_compute",
+            "example_hl_basic_compute",
             "example_basic_cube",
+            "example_hl_basic_cube",
             "example_simple_image",
+            "example_hl_simple_image",
             "example_square",
-            "example_streaming_resources"
+            "example_hl_square",
+            "example_streaming_resources",
+            "example_hl_streaming_resources"
         )
     }
 
