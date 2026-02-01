@@ -8,6 +8,7 @@
 #include "pandora/core/command_buffer.hpp"
 #include "pandora/core/error.hpp"
 #include "pandora/core/renderpass.hpp"
+#include "pandora/core/synchronization.hpp"
 #include "pandora/core/ui.hpp"
 #include "pandora/highlevel/frame_context.hpp"
 
@@ -40,6 +41,12 @@ class Renderer {
   /// @brief Record commands on the frame's command buffer.
   [[nodiscard]] pandora::core::VoidResult record(FrameContext& frame,
                                                  const RecordFn& record_fn);
+
+  /// @brief Record a barrier and commands on the frame's command buffer.
+  [[nodiscard]] pandora::core::VoidResult recordWithBarrier(
+      FrameContext& frame,
+      const pandora::core::BarrierDependency& barrier,
+      const RecordFn& record_fn);
 
   /// @brief Submit recorded commands and present.
   [[nodiscard]] pandora::core::VoidResult endFrame(FrameContext& frame);

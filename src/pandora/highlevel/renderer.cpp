@@ -70,6 +70,23 @@ pandora::core::VoidResult Renderer::record(FrameContext& frame,
   return pandora::core::ok();
 }
 
+pandora::core::VoidResult Renderer::recordWithBarrier(
+    FrameContext& frame,
+    const pandora::core::BarrierDependency& barrier,
+    const RecordFn& record_fn) {
+  auto command_buffer = frame.driver.get().getGraphic();
+  command_buffer.begin();
+  command_buffer.setPipelineBarrier(barrier);
+
+  const auto record_result = record_fn(command_buffer);
+  if (!record_result.isOk()) {
+    return record_result.error().withContext("Renderer::recordWithBarrier");
+  }
+
+  command_buffer.end();
+  return pandora::core::ok();
+}
+
 pandora::core::VoidResult Renderer::endFrame(FrameContext& frame) {
   const auto& context = m_contextOwner.get();
   if (!context.isInitialized()) {

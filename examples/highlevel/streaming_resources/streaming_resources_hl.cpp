@@ -52,14 +52,9 @@ StreamingResourcesHL::StreamingResourcesHL()
     throw;
   }
 
-  for (size_t idx = 0u; idx < m_ptrContext->getPtrSwapchain()->getImageCount();
-       idx += 1u) {
-    m_ptrGraphicCommandDriver.push_back(std::make_unique<plc::CommandDriver>(
-        *m_ptrContext, plc::QueueFamilyType::Graphics));
-    m_ptrTransferCommandDriver.push_back(std::make_unique<plc::CommandDriver>(
-        *m_ptrContext, plc::QueueFamilyType::Transfer));
-  }
-  std::println("Command Drivers created successfully.");
+  m_ptrRenderer = std::make_unique<plh::Renderer>(*m_ptrWindow, *m_ptrContext);
+  m_ptrTransferPlan = std::make_unique<plh::TransferPlan>(
+      *m_ptrContext, plc::QueueFamilyType::Transfer);
 
   m_currentSemaphoreValue = 0u;
 
@@ -214,6 +209,10 @@ void StreamingResourcesHL::constructRenderpass(const bool is_resized) {
         m_ptrWindow->getWindowSurface()->getWindowSize(),
         true);
   }
+
+  if (m_ptrRenderer) {
+    m_ptrRenderer->setRenderKit(*m_ptrRenderKit);
+  }
 }
 
 void StreamingResourcesHL::constructGraphicPipeline() {
@@ -290,7 +289,6 @@ plc::VoidResult StreamingResourcesHL::updateVertexData() {
 
   auto& staging_buffer = m_stagingBuffers[frame_index];
   auto& vertex_buffer = m_ptrVertexBuffers[frame_index];
-  auto& transfer_driver = m_ptrTransferCommandDriver[frame_index];
 
   size_t vertex_data_size = vertices.size() * sizeof(Vertex);
   auto mapped_address = staging_buffer.mapMemory(*m_ptrContext);
@@ -315,31 +313,29 @@ plc::VoidResult StreamingResourcesHL::updateVertexData() {
 
   m_currentSemaphoreValue += 1u;
 
-  const auto command_buffer = transfer_driver->getTransfer();
-  command_buffer.begin();
-  command_buffer.copyBuffer(staging_buffer, *vertex_buffer);
+  const auto queue_family_indices =
+      std::make_pair(m_ptrContext->getPtrDevice()->getQueueFamilyIndex(
+                         plc::QueueFamilyType::Transfer),
+                     m_ptrContext->getPtrDevice()->getQueueFamilyIndex(
+                         plc::QueueFamilyType::Graphics));
 
-  const auto queue_family_indices = std::make_pair(
-      transfer_driver->getQueueFamilyIndex(),
-      m_ptrGraphicCommandDriver.at(frame_index)->getQueueFamilyIndex());
+  if (!m_ptrTransferPlan) {
+    return plc::Error::runtime("Transfer plan not initialized")
+        .withContext("StreamingResourcesHL::updateVertexData");
+  }
 
-  PANDORA_TRY_ASSIGN(buffer_barrier,
-                     plc::gpu::BufferBarrierBuilder::create()
-                         .setBuffer(*vertex_buffer)
-                         .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
-                         .setDstAccessFlags({plc::AccessFlag::TransferRead})
-                         .setSrcStages({plc::PipelineStage::Transfer})
-                         .setDstStages({plc::PipelineStage::Transfer})
-                         .setSrcQueueFamilyIndex(queue_family_indices.first)
-                         .setDstQueueFamilyIndex(queue_family_indices.second)
-                         .build());
-
-  command_buffer.setPipelineBarrier(
-      plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
-
-  command_buffer.end();
-
-  transfer_driver->submit(
+  m_ptrTransferPlan->reset();
+  m_ptrTransferPlan->copyBuffer(staging_buffer, *vertex_buffer);
+  PANDORA_TRY(
+      m_ptrTransferPlan->addBufferBarrier(*vertex_buffer,
+                                          {plc::AccessFlag::TransferWrite},
+                                          {plc::AccessFlag::TransferRead},
+                                          {plc::PipelineStage::Transfer},
+                                          {plc::PipelineStage::Transfer},
+                                          queue_family_indices.first,
+                                          queue_family_indices.second));
+  m_ptrTransferPlan->flushBarriers();
+  PANDORA_TRY(m_ptrTransferPlan->submit(
       plc::SubmitSemaphoreGroup{}
           .setWaitSemaphores({plc::SubmitSemaphore{}
                                   .setSemaphore(*m_currentTimelineSemaphore)
@@ -349,21 +345,19 @@ plc::VoidResult StreamingResourcesHL::updateVertexData() {
               {plc::SubmitSemaphore{}
                    .setSemaphore(*m_currentTimelineSemaphore)
                    .setValue(m_currentSemaphoreValue)
-                   .setStageMask(plc::PipelineStage::Transfer)}));
+                   .setStageMask(plc::PipelineStage::Transfer)})));
 
   return plc::ok();
 }
 
 plc::VoidResult StreamingResourcesHL::setGraphicCommands() {
-  const auto& ptr_swapchain = m_ptrContext->getPtrSwapchain();
-  const auto update_result =
-      ptr_swapchain->updateImageIndex(*m_ptrContext->getPtrDevice());
-  if (!update_result.isOk()) {
-    return update_result.error();
+  if (!m_ptrRenderer) {
+    return plc::Error::runtime("Renderer not initialized")
+        .withContext("StreamingResourcesHL::setGraphicCommands");
   }
-  m_ptrRenderKit->updateIndex(ptr_swapchain->getImageIndex());
 
-  const uint32_t frame_index = ptr_swapchain->getFrameSyncIndex();
+  PANDORA_TRY_ASSIGN(frame, m_ptrRenderer->beginFrame());
+  const uint32_t frame_index = frame.frameIndex;
   auto& frame_vertex_buffer = m_ptrVertexBuffers[frame_index];
 
   auto current_time = std::chrono::high_resolution_clock::now();
@@ -373,14 +367,11 @@ plc::VoidResult StreamingResourcesHL::setGraphicCommands() {
 
   size_t vertex_count = vertices.size();
 
-  const auto command_buffer =
-      m_ptrGraphicCommandDriver.at(frame_index)->getGraphic();
-
-  command_buffer.begin();
-
-  const auto queue_family_indices = std::make_pair(
-      m_ptrTransferCommandDriver.at(frame_index)->getQueueFamilyIndex(),
-      m_ptrGraphicCommandDriver.at(frame_index)->getQueueFamilyIndex());
+  const auto queue_family_indices =
+      std::make_pair(m_ptrContext->getPtrDevice()->getQueueFamilyIndex(
+                         plc::QueueFamilyType::Transfer),
+                     m_ptrContext->getPtrDevice()->getQueueFamilyIndex(
+                         plc::QueueFamilyType::Graphics));
 
   PANDORA_TRY_ASSIGN(
       buffer_barrier,
@@ -394,82 +385,56 @@ plc::VoidResult StreamingResourcesHL::setGraphicCommands() {
           .setDstQueueFamilyIndex(queue_family_indices.second)
           .build());
 
-  command_buffer.setPipelineBarrier(
-      plc::BarrierDependency{}.setBufferBarriers({buffer_barrier}));
+  plc::BarrierDependency barrier_dependency{};
+  barrier_dependency.setBufferBarriers({buffer_barrier});
 
-  PANDORA_TRY(command_buffer.beginRenderpass(
-      *m_ptrRenderKit,
-      m_ptrWindow->getWindowSurface()->getWindowSize(),
-      plc::SubpassContents::Inline));
+  PANDORA_TRY(m_ptrRenderer->recordWithBarrier(
+      frame,
+      barrier_dependency,
+      [&](plc::GraphicCommandBuffer& command_buffer) -> plc::VoidResult {
+        PANDORA_TRY(command_buffer.beginRenderpass(
+            *m_ptrRenderKit,
+            m_ptrWindow->getWindowSurface()->getWindowSize(),
+            plc::SubpassContents::Inline));
 
-  command_buffer.bindPipeline(*m_ptrPipeline);
-  command_buffer.bindDescriptorSet(*m_ptrPipeline, *m_ptrDescriptorSet);
+        command_buffer.bindPipeline(*m_ptrPipeline);
+        command_buffer.bindDescriptorSet(*m_ptrPipeline, *m_ptrDescriptorSet);
 
-  const auto& window_size = m_ptrWindow->getWindowSurface()->getWindowSize();
-  command_buffer.setViewport(plc::gpu_ui::GraphicalSize<float_t>(
-                                 static_cast<float_t>(window_size.width),
-                                 static_cast<float_t>(window_size.height)),
-                             0.0f,
-                             1.0f);
-  command_buffer.setScissor(window_size);
+        const auto& window_size =
+            m_ptrWindow->getWindowSurface()->getWindowSize();
+        command_buffer.setViewport(
+            plc::gpu_ui::GraphicalSize<float_t>(
+                static_cast<float_t>(window_size.width),
+                static_cast<float_t>(window_size.height)),
+            0.0f,
+            1.0f);
+        command_buffer.setScissor(window_size);
 
-  command_buffer.bindVertexBuffer(*frame_vertex_buffer, 0u);
-  command_buffer.draw(static_cast<uint32_t>(vertex_count), 1u, 0u, 0u);
+        command_buffer.bindVertexBuffer(*frame_vertex_buffer, 0u);
+        command_buffer.draw(static_cast<uint32_t>(vertex_count), 1u, 0u, 0u);
 
-  command_buffer.endRenderpass();
-  command_buffer.end();
+        command_buffer.endRenderpass();
+        return plc::ok();
+      }));
 
-  const auto image_semaphore = ptr_swapchain->getImageAvailableSemaphore();
-  const auto finished_semaphore = ptr_swapchain->getFinishedSemaphore();
-  const auto finished_fence = ptr_swapchain->getFence();
+  auto wait_semaphores = frame.extraWaitSemaphores;
+  if (m_currentTimelineSemaphore) {
+    wait_semaphores.push_back(
+        plc::SubmitSemaphore{}
+            .setSemaphore(*m_currentTimelineSemaphore)
+            .setValue(m_currentSemaphoreValue)
+            .setStageMask(plc::PipelineStage::VertexAttributeInput));
+  }
+
+  frame.extraWaitSemaphores = std::move(wait_semaphores);
+  PANDORA_TRY(m_ptrRenderer->endFrame(frame));
 
   if (m_currentTimelineSemaphore) {
-    m_ptrGraphicCommandDriver.at(frame_index)
-        ->submit(plc::SubmitSemaphoreGroup{}
-                     .setWaitSemaphores(
-                         {plc::SubmitSemaphore{}
-                              .setSemaphore(*m_currentTimelineSemaphore)
-                              .setValue(m_currentSemaphoreValue)
-                              .setStageMask(
-                                  plc::PipelineStage::VertexAttributeInput),
-                          plc::SubmitSemaphore{}
-                              .setSemaphore(image_semaphore)
-                              .setStageMask(
-                                  plc::PipelineStage::ColorAttachmentOutput)})
-                     .setSignalSemaphores(
-                         {plc::SubmitSemaphore{}
-                              .setSemaphore(finished_semaphore)
-                              .setStageMask(plc::PipelineStage::AllGraphics)}),
-                 finished_fence);
-
     plc::TimelineSemaphoreDriver{}
         .setSemaphores({*m_currentTimelineSemaphore})
         .setValues({m_currentSemaphoreValue})
         .wait(*m_ptrContext);
-  } else {
-    m_ptrGraphicCommandDriver.at(frame_index)
-        ->submit(plc::SubmitSemaphoreGroup{}
-                     .setWaitSemaphores(
-                         {plc::SubmitSemaphore{}
-                              .setSemaphore(image_semaphore)
-                              .setValue(0u)
-                              .setStageMask(
-                                  plc::PipelineStage::ColorAttachmentOutput)})
-                     .setSignalSemaphores(
-                         {plc::SubmitSemaphore{}
-                              .setSemaphore(finished_semaphore)
-                              .setValue(0u)
-                              .setStageMask(plc::PipelineStage::AllGraphics)}),
-                 finished_fence);
   }
-
-  const auto present_result = m_ptrGraphicCommandDriver.at(frame_index)
-                                  ->present(*m_ptrContext, finished_semaphore);
-  if (!present_result.isOk()) {
-    return present_result.error();
-  }
-
-  ptr_swapchain->updateFrameSyncIndex();
 
   return plc::ok();
 }

@@ -28,10 +28,8 @@ class StreamingResourcesHL {
   std::unique_ptr<plc::ui::Window> m_ptrWindow;
   std::unique_ptr<plc::gpu::Context> m_ptrContext;
   std::unique_ptr<plc::RenderKit> m_ptrRenderKit;
+  std::unique_ptr<plh::Renderer> m_ptrRenderer;
   std::unordered_map<std::string, uint32_t> m_subpassIndexMap;
-
-  std::vector<std::unique_ptr<plc::CommandDriver>> m_ptrGraphicCommandDriver;
-  std::vector<std::unique_ptr<plc::CommandDriver>> m_ptrTransferCommandDriver;
 
   std::vector<std::unique_ptr<plc::gpu::Buffer>> m_ptrVertexBuffers;
   std::vector<plc::gpu::Buffer> m_stagingBuffers;
@@ -43,6 +41,7 @@ class StreamingResourcesHL {
 
   std::unique_ptr<plc::gpu::TimelineSemaphore> m_currentTimelineSemaphore;
   uint64_t m_currentSemaphoreValue;
+  std::unique_ptr<plh::TransferPlan> m_ptrTransferPlan;
 
   std::vector<Vertex> m_activeTriangles;
   std::vector<TriangleInfo> m_triangleInfos;
