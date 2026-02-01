@@ -3,7 +3,7 @@
 
 namespace pandora::core {
 
-RenderKit::RenderKit(const std::unique_ptr<gpu::Context>& ptr_context,
+RenderKit::RenderKit(const gpu::Context& ptr_context,
                      AttachmentList& attachment_list,
                      const SubpassGraph& subpass_graph,
                      const gpu_ui::GraphicalSize<uint32_t>& size,
@@ -14,16 +14,15 @@ RenderKit::RenderKit(const std::unique_ptr<gpu::Context>& ptr_context,
   resetFramebuffer(ptr_context, attachment_list, size, is_presented);
 }
 
-void RenderKit::resetFramebuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    AttachmentList& attachment_list,
-    const gpu_ui::GraphicalSize<uint32_t>& size,
-    bool is_presented) {
+void RenderKit::resetFramebuffer(const gpu::Context& ptr_context,
+                                 AttachmentList& attachment_list,
+                                 const gpu_ui::GraphicalSize<uint32_t>& size,
+                                 bool is_presented) {
   m_framebuffers.clear();
 
   if (is_presented) {
     const auto backbuffer_count =
-        ptr_context->getPtrSwapchain()->getImageCount();
+        ptr_context.getPtrSwapchain()->getImageCount();
     for (size_t index = 0u; index < backbuffer_count; index += 1u) {
       attachment_list.setBackbufferAttachment(ptr_context, index);
 

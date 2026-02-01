@@ -3,8 +3,7 @@
 
 namespace pandora::core::gpu {
 
-Sampler::Sampler(const std::unique_ptr<Context>& ptr_context,
-                 const SamplerInfo& sampler_info) {
+Sampler::Sampler(const Context& ptr_context, const SamplerInfo& sampler_info) {
   using namespace vk_helper;
 
   const auto sampler_create_info =
@@ -26,7 +25,7 @@ Sampler::Sampler(const std::unique_ptr<Context>& ptr_context,
           .setUnnormalizedCoordinates(sampler_info.unnormalized_coordinates);
 
   m_ptrSampler =
-      ptr_context->getPtrDevice()->getPtrLogicalDevice()->createSamplerUnique(
+      ptr_context.getPtrDevice()->getPtrLogicalDevice()->createSamplerUnique(
           sampler_create_info);
 }
 

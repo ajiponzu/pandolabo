@@ -11,23 +11,23 @@ namespace samples::highlevel {
 BasicComputeHL::BasicComputeHL() {
   m_ptrContext = std::make_unique<plc::gpu::Context>(nullptr);
 
-  m_ptrComputeRunner = std::make_unique<plh::ComputeRunner>(m_ptrContext);
+  m_ptrComputeRunner = std::make_unique<plh::ComputeRunner>(*m_ptrContext);
   m_ptrTransfer = std::make_unique<plh::ResourceTransfer>(
-      m_ptrContext, plc::QueueFamilyType::Compute);
+      *m_ptrContext, plc::QueueFamilyType::Compute);
 
   m_ptrUniformBuffer =
-      plc::createUniqueUniformBuffer(m_ptrContext, sizeof(float_t));
+      plc::createUniqueUniformBuffer(*m_ptrContext, sizeof(float_t));
   const auto uniform_mapped_address =
-      m_ptrUniformBuffer->mapMemory(m_ptrContext);
+      m_ptrUniformBuffer->mapMemory(*m_ptrContext);
   std::fill_n(reinterpret_cast<float_t*>(uniform_mapped_address),
               m_ptrUniformBuffer->getSize() / sizeof(float_t),
               3.14f);
-  m_ptrUniformBuffer->unmapMemory(m_ptrContext);
+  m_ptrUniformBuffer->unmapMemory(*m_ptrContext);
 
   m_ptrInputStorageBuffer = plc::createUniqueStorageBuffer(
-      m_ptrContext, plc::TransferType::TransferDst, sizeof(uint32_t) * 1024u);
+      *m_ptrContext, plc::TransferType::TransferDst, sizeof(uint32_t) * 1024u);
   m_ptrOutputStorageBuffer =
-      plc::createUniqueStorageBuffer(m_ptrContext,
+      plc::createUniqueStorageBuffer(*m_ptrContext,
                                      plc::TransferType::TransferSrcDst,
                                      sizeof(uint32_t) * 1024u);
 
@@ -113,7 +113,7 @@ void BasicComputeHL::run() {
 }
 
 plc::VoidResult BasicComputeHL::constructShaderResources() {
-  plh::ShaderLibrary shader_library(m_ptrContext);
+  plh::ShaderLibrary shader_library(*m_ptrContext);
 
   PANDORA_TRY_ASSIGN(
       spirv_binary,
@@ -125,9 +125,9 @@ plc::VoidResult BasicComputeHL::constructShaderResources() {
       plc::gpu::DescriptionUnit(m_shaderModuleMap, {"compute"});
 
   m_ptrDescriptorSetLayout = std::make_unique<plc::gpu::DescriptorSetLayout>(
-      m_ptrContext, description_unit);
+      *m_ptrContext, description_unit);
   m_ptrDescriptorSet = std::make_unique<plc::gpu::DescriptorSet>(
-      m_ptrContext, *m_ptrDescriptorSetLayout);
+      *m_ptrContext, *m_ptrDescriptorSetLayout);
 
   std::vector<plc::gpu::BufferDescription> buffer_descriptions;
   buffer_descriptions.emplace_back(
@@ -141,15 +141,15 @@ plc::VoidResult BasicComputeHL::constructShaderResources() {
       *m_ptrInputStorageBuffer);
 
   m_ptrDescriptorSet->updateDescriptorSet(
-      m_ptrContext, buffer_descriptions, {});
+      *m_ptrContext, buffer_descriptions, {});
 
   m_ptrComputePipeline =
-      std::make_unique<plc::Pipeline>(m_ptrContext,
+      std::make_unique<plc::Pipeline>(*m_ptrContext,
                                       description_unit,
                                       *m_ptrDescriptorSetLayout,
                                       plc::PipelineBind::Compute);
   m_ptrComputePipeline->constructComputePipeline(
-      m_ptrContext, m_shaderModuleMap.at("compute"));
+      *m_ptrContext, m_shaderModuleMap.at("compute"));
 
   return plc::ok();
 }

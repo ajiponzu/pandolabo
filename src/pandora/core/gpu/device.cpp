@@ -88,7 +88,7 @@ Device::Device(const vk::UniqueInstance& ptr_instance,
                const vk::UniqueSurfaceKHR& ptr_window_surface
 #ifdef GPU_DEBUG
                ,
-               const std::unique_ptr<debug::Messenger>& ptr_messenger
+               const debug::Messenger& ptr_messenger
 #endif
                )
     : m_hasWindowSurface(ptr_window_surface.get() != nullptr) {
@@ -171,7 +171,7 @@ Device::~Device() {}
 
 void Device::constructLogicalDevice(
 #ifdef GPU_DEBUG
-    const std::unique_ptr<debug::Messenger>& ptr_messenger
+    const debug::Messenger& ptr_messenger
 #endif
 ) {
   const float_t queue_priority = 1.0f;
@@ -218,7 +218,7 @@ void Device::constructLogicalDevice(
       {}, queue_create_infos, {}, required_extensions, nullptr, &features2);
 
 #ifdef GPU_DEBUG
-  create_info.setPEnabledLayerNames(ptr_messenger->getValidationLayers());
+  create_info.setPEnabledLayerNames(ptr_messenger.getValidationLayers());
 #endif
 
   m_ptrLogicalDevice = m_physicalDevice.createDeviceUnique(create_info);

@@ -16,15 +16,13 @@ class ComputeRunner {
       pandora::core::ComputeCommandBuffer&)>;
 
  private:
-  std::reference_wrapper<const std::unique_ptr<pandora::core::gpu::Context>>
-      m_contextOwner;
+  std::reference_wrapper<const pandora::core::gpu::Context> m_contextOwner;
   std::unique_ptr<pandora::core::CommandDriver> m_computeDriver;
 
   pandora::core::CommandDriver& ensureDriver();
 
  public:
-  explicit ComputeRunner(
-      const std::unique_ptr<pandora::core::gpu::Context>& ptr_context)
+  explicit ComputeRunner(const pandora::core::gpu::Context& ptr_context)
       : m_contextOwner(ptr_context) {}
 
   /// @brief Begin recording compute commands.

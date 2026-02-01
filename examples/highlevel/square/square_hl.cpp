@@ -27,9 +27,9 @@ SquareHL::SquareHL() {
     constructRenderpass(true);
   });
 
-  m_ptrRenderer = std::make_unique<plh::Renderer>(m_ptrWindow, m_ptrContext);
+  m_ptrRenderer = std::make_unique<plh::Renderer>(*m_ptrWindow, *m_ptrContext);
   m_ptrTransfer = std::make_unique<plh::ResourceTransfer>(
-      m_ptrContext, plc::QueueFamilyType::Graphics);
+      *m_ptrContext, plc::QueueFamilyType::Graphics);
 
   const auto shader_result = constructShaderResources();
   if (!shader_result.isOk()) {
@@ -96,7 +96,7 @@ void SquareHL::run() {
 }
 
 plc::VoidResult SquareHL::constructShaderResources() {
-  plh::ShaderLibrary shader_library(m_ptrContext);
+  plh::ShaderLibrary shader_library(*m_ptrContext);
 
   PANDORA_TRY_ASSIGN(vertex_shader,
                      shader_library.load("examples/core/square/square.vert"));
@@ -110,13 +110,13 @@ plc::VoidResult SquareHL::constructShaderResources() {
       plc::gpu::DescriptionUnit(m_shaderModuleMap, {"vertex", "fragment"});
 
   m_ptrDescriptorSetLayout = std::make_unique<plc::gpu::DescriptorSetLayout>(
-      m_ptrContext, description_unit);
+      *m_ptrContext, description_unit);
   m_ptrDescriptorSet = std::make_unique<plc::gpu::DescriptorSet>(
-      m_ptrContext, *m_ptrDescriptorSetLayout);
+      *m_ptrContext, *m_ptrDescriptorSetLayout);
 
-  m_ptrDescriptorSet->updateDescriptorSet(m_ptrContext, {}, {});
+  m_ptrDescriptorSet->updateDescriptorSet(*m_ptrContext, {}, {});
 
-  m_ptrPipeline = std::make_unique<plc::Pipeline>(m_ptrContext,
+  m_ptrPipeline = std::make_unique<plc::Pipeline>(*m_ptrContext,
                                                   description_unit,
                                                   *m_ptrDescriptorSetLayout,
                                                   plc::PipelineBind::Graphics);
@@ -165,13 +165,13 @@ void SquareHL::constructRenderpass(bool is_resized) {
 
   if (is_resized) {
     m_ptrRenderKit->resetFramebuffer(
-        m_ptrContext,
+        *m_ptrContext,
         attachment_list,
         m_ptrWindow->getWindowSurface()->getWindowSize(),
         true);
   } else {
     m_ptrRenderKit = std::make_unique<plc::RenderKit>(
-        m_ptrContext,
+        *m_ptrContext,
         attachment_list,
         subpass_graph,
         m_ptrWindow->getWindowSurface()->getWindowSize(),
@@ -218,10 +218,10 @@ void SquareHL::constructGraphicPipeline() {
                                .addState(plc::DynamicOption::Scissor))
           .build();
 
-  m_ptrPipeline->constructGraphicsPipeline(m_ptrContext,
+  m_ptrPipeline->constructGraphicsPipeline(*m_ptrContext,
                                            m_shaderModuleMap,
                                            {"vertex", "fragment"},
-                                           ptr_graphic_info,
+                                           *ptr_graphic_info,
                                            m_ptrRenderKit->getRenderpass(),
                                            m_subpassIndexMap.at("draw"));
 }
@@ -237,9 +237,9 @@ plc::VoidResult SquareHL::uploadGeometry() {
   const std::vector<uint32_t> indices = {0u, 1u, 2u, 2u, 3u, 0u};
 
   m_ptrVertexBuffer = std::make_unique<plc::gpu::Buffer>(
-      plc::createVertexBuffer(m_ptrContext, vertices.size() * sizeof(Vertex)));
+      plc::createVertexBuffer(*m_ptrContext, vertices.size() * sizeof(Vertex)));
   m_ptrIndexBuffer = std::make_unique<plc::gpu::Buffer>(
-      plc::createIndexBuffer(m_ptrContext, indices.size() * sizeof(uint32_t)));
+      plc::createIndexBuffer(*m_ptrContext, indices.size() * sizeof(uint32_t)));
 
   PANDORA_TRY(m_ptrTransfer->uploadBuffer(
       *m_ptrVertexBuffer,

@@ -45,7 +45,7 @@ class Image {
   /// @param transfer_type Transfer operation type
   /// @param image_usages Image usage types
   /// @param image_sub_info Image sub-resource information
-  Image(const std::unique_ptr<Context>& ptr_context,
+  Image(const Context& ptr_context,
         MemoryUsage memory_usage,
         TransferType transfer_type,
         const std::vector<ImageUsage>& image_usages,
@@ -134,7 +134,7 @@ class ImageView {
   /// @param ptr_context GPU context pointer
   /// @param image Source image
   /// @param image_view_info Image view configuration
-  ImageView(const std::unique_ptr<Context>& ptr_context,
+  ImageView(const Context& ptr_context,
             const Image& image,
             const ImageViewInfo& image_view_info);
   ~ImageView();
@@ -163,8 +163,7 @@ class Sampler {
   /// @brief Construct sampler with specified configuration
   /// @param ptr_context GPU context pointer
   /// @param sampler_info Sampler configuration
-  Sampler(const std::unique_ptr<Context>& ptr_context,
-          const SamplerInfo& sampler_info);
+  Sampler(const Context& ptr_context, const SamplerInfo& sampler_info);
   ~Sampler();
 
   /// @brief Get sampler handle

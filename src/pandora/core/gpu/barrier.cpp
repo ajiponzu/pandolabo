@@ -108,7 +108,7 @@ ImageBarrier::ImageBarrier(const Image& image,
       .setDstQueueFamilyIndex(dst_queue_family);
 }
 
-ImageBarrier::ImageBarrier(const std::unique_ptr<Context>& ptr_context,
+ImageBarrier::ImageBarrier(const Context& ptr_context,
                            const std::vector<AccessFlag>& src_access_flags,
                            const std::vector<AccessFlag>& dst_access_flags,
                            const std::vector<PipelineStage>& src_stages,
@@ -117,7 +117,7 @@ ImageBarrier::ImageBarrier(const std::unique_ptr<Context>& ptr_context,
                            ImageLayout new_layout,
                            uint32_t src_queue_family,
                            uint32_t dst_queue_family) {
-  m_imageMemoryBarrier.setImage(ptr_context->getPtrSwapchain()->getImage())
+  m_imageMemoryBarrier.setImage(ptr_context.getPtrSwapchain()->getImage())
       .setSrcAccessMask(g_lamda_convert_access_flags(src_access_flags))
       .setDstAccessMask(g_lamda_convert_access_flags(dst_access_flags))
       .setSrcStageMask(g_lamda_convert_stage_flags(src_stages))

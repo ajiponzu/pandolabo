@@ -2,8 +2,8 @@
 
 namespace pandora::core {
 
-gpu::Buffer createStagingBufferToGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
+gpu::Buffer createStagingBufferToGPU(const gpu::Context& ptr_context,
+                                     size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::CpuToGpu,
                      TransferType::TransferSrc,
@@ -12,7 +12,7 @@ gpu::Buffer createStagingBufferToGPU(
 }
 
 std::unique_ptr<gpu::Buffer> createUniqueStagingBufferToGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
+    const gpu::Context& ptr_context, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::CpuToGpu,
@@ -21,8 +21,8 @@ std::unique_ptr<gpu::Buffer> createUniqueStagingBufferToGPU(
       size);
 }
 
-gpu::Buffer createStagingBufferFromGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
+gpu::Buffer createStagingBufferFromGPU(const gpu::Context& ptr_context,
+                                       size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::GpuToCpu,
                      TransferType::TransferDst,
@@ -31,7 +31,7 @@ gpu::Buffer createStagingBufferFromGPU(
 }
 
 std::unique_ptr<gpu::Buffer> createUniqueStagingBufferFromGPU(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
+    const gpu::Context& ptr_context, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::GpuToCpu,
@@ -40,10 +40,9 @@ std::unique_ptr<gpu::Buffer> createUniqueStagingBufferFromGPU(
       size);
 }
 
-gpu::Buffer createStorageBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    TransferType transfer_type,
-    size_t size) {
+gpu::Buffer createStorageBuffer(const gpu::Context& ptr_context,
+                                TransferType transfer_type,
+                                size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::GpuOnly,
                      transfer_type,
@@ -52,9 +51,7 @@ gpu::Buffer createStorageBuffer(
 }
 
 std::unique_ptr<gpu::Buffer> createUniqueStorageBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    TransferType transfer_type,
-    size_t size) {
+    const gpu::Context& ptr_context, TransferType transfer_type, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::GpuOnly,
@@ -63,8 +60,7 @@ std::unique_ptr<gpu::Buffer> createUniqueStorageBuffer(
       size);
 }
 
-gpu::Buffer createUniformBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
+gpu::Buffer createUniformBuffer(const gpu::Context& ptr_context, size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::CpuToGpu,
                      TransferType::TransferDst,
@@ -73,7 +69,7 @@ gpu::Buffer createUniformBuffer(
 }
 
 std::unique_ptr<gpu::Buffer> createUniqueUniformBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
+    const gpu::Context& ptr_context, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::CpuToGpu,
@@ -82,8 +78,7 @@ std::unique_ptr<gpu::Buffer> createUniqueUniformBuffer(
       size);
 }
 
-gpu::Buffer createVertexBuffer(const std::unique_ptr<gpu::Context>& ptr_context,
-                               size_t size) {
+gpu::Buffer createVertexBuffer(const gpu::Context& ptr_context, size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::GpuOnly,
                      TransferType::TransferDst,
@@ -92,7 +87,7 @@ gpu::Buffer createVertexBuffer(const std::unique_ptr<gpu::Context>& ptr_context,
 }
 
 std::unique_ptr<gpu::Buffer> createUniqueVertexBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
+    const gpu::Context& ptr_context, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::GpuOnly,
@@ -101,8 +96,7 @@ std::unique_ptr<gpu::Buffer> createUniqueVertexBuffer(
       size);
 }
 
-gpu::Buffer createIndexBuffer(const std::unique_ptr<gpu::Context>& ptr_context,
-                              size_t size) {
+gpu::Buffer createIndexBuffer(const gpu::Context& ptr_context, size_t size) {
   return gpu::Buffer(ptr_context,
                      MemoryUsage::GpuOnly,
                      TransferType::TransferDst,
@@ -111,7 +105,7 @@ gpu::Buffer createIndexBuffer(const std::unique_ptr<gpu::Context>& ptr_context,
 }
 
 std::unique_ptr<gpu::Buffer> createUniqueIndexBuffer(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t size) {
+    const gpu::Context& ptr_context, size_t size) {
   return std::make_unique<gpu::Buffer>(
       ptr_context,
       MemoryUsage::GpuOnly,

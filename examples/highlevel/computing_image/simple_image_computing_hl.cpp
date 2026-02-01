@@ -14,15 +14,15 @@ namespace samples::highlevel {
 
 SimpleImageComputingHL::SimpleImageComputingHL() {
   m_ptrContext = std::make_unique<plc::gpu::Context>(nullptr);
-  m_ptrComputeRunner = std::make_unique<plh::ComputeRunner>(m_ptrContext);
+    m_ptrComputeRunner = std::make_unique<plh::ComputeRunner>(*m_ptrContext);
 
   m_ptrUniformBuffer =
-      plc::createUniqueUniformBuffer(m_ptrContext, sizeof(float_t));
-  const auto mapped_address = m_ptrUniformBuffer->mapMemory(m_ptrContext);
+            plc::createUniqueUniformBuffer(*m_ptrContext, sizeof(float_t));
+    const auto mapped_address = m_ptrUniformBuffer->mapMemory(*m_ptrContext);
   std::fill_n(reinterpret_cast<float_t*>(mapped_address),
               m_ptrUniformBuffer->getSize() / sizeof(float_t),
               5.0f);
-  m_ptrUniformBuffer->unmapMemory(m_ptrContext);
+    m_ptrUniformBuffer->unmapMemory(*m_ptrContext);
 
   initializeImageResources();
   const auto shader_result = constructShaderResources();
@@ -51,13 +51,13 @@ void SimpleImageComputingHL::run() {
   }
 
   auto staging_buffer = plc::createStagingBufferToGPU(
-      m_ptrContext, m_image.width * m_image.height * m_image.channels);
-  auto* mapped_address = staging_buffer.mapMemory(m_ptrContext);
+      *m_ptrContext, m_image.width * m_image.height * m_image.channels);
+  auto* mapped_address = staging_buffer.mapMemory(*m_ptrContext);
   std::memcpy(mapped_address, m_image.data, staging_buffer.getSize());
-  staging_buffer.unmapMemory(m_ptrContext);
+  staging_buffer.unmapMemory(*m_ptrContext);
 
   auto result_buffer = plc::createStagingBufferFromGPU(
-      m_ptrContext, m_image.width * m_image.height * 4);
+      *m_ptrContext, m_image.width * m_image.height * 4);
 
   auto cmd_result = m_ptrComputeRunner->begin();
   if (!cmd_result.isOk()) {
@@ -88,7 +88,7 @@ void SimpleImageComputingHL::run() {
   }
   m_ptrComputeRunner->queueWaitIdle();
 
-  const auto result_mapped_address = result_buffer.mapMemory(m_ptrContext);
+    const auto result_mapped_address = result_buffer.mapMemory(*m_ptrContext);
   const auto& image_size = m_ptrStorageImage->getGraphicalSize();
 
   const size_t image_buf_size = image_size.width * image_size.height * 4;
@@ -96,7 +96,7 @@ void SimpleImageComputingHL::run() {
   std::memcpy(reinterpret_cast<void*>(image_buf.get()),
               result_mapped_address,
               image_buf_size);
-  result_buffer.unmapMemory(m_ptrContext);
+    result_buffer.unmapMemory(*m_ptrContext);
 
   stbi_write_png("examples/output_hl.png",
                  image_size.width,
@@ -125,14 +125,14 @@ void SimpleImageComputingHL::initializeImageResources() {
           .setDimension(plc::ImageDimension::v2D);
 
   m_ptrImage = std::make_unique<plc::gpu::Image>(
-      m_ptrContext,
+      *m_ptrContext,
       plc::MemoryUsage::GpuOnly,
       plc::TransferType::TransferSrcDst,
       std::vector<plc::ImageUsage>{plc::ImageUsage::Sampled},
       image_sub_info);
 
   m_ptrStorageImage = std::make_unique<plc::gpu::Image>(
-      m_ptrContext,
+      *m_ptrContext,
       plc::MemoryUsage::GpuOnly,
       plc::TransferType::TransferSrcDst,
       std::vector<plc::ImageUsage>{plc::ImageUsage::Storage},
@@ -145,9 +145,9 @@ void SimpleImageComputingHL::initializeImageResources() {
           .setMipRange(0u, image_sub_info.mip_levels);
 
   m_ptrImageView = std::make_unique<plc::gpu::ImageView>(
-      m_ptrContext, *m_ptrImage, image_view_info);
+      *m_ptrContext, *m_ptrImage, image_view_info);
   m_ptrStorageImageView = std::make_unique<plc::gpu::ImageView>(
-      m_ptrContext, *m_ptrStorageImage, image_view_info);
+      *m_ptrContext, *m_ptrStorageImage, image_view_info);
 
   const auto sampler_info =
       plc::SamplerInfo{}
@@ -159,11 +159,11 @@ void SimpleImageComputingHL::initializeImageResources() {
           .setUnnormalizedCoordinates(false);
 
   m_ptrImageSampler =
-      std::make_unique<plc::gpu::Sampler>(m_ptrContext, sampler_info);
+      std::make_unique<plc::gpu::Sampler>(*m_ptrContext, sampler_info);
 }
 
 plc::VoidResult SimpleImageComputingHL::constructShaderResources() {
-  plh::ShaderLibrary shader_library(m_ptrContext);
+    plh::ShaderLibrary shader_library(*m_ptrContext);
 
   PANDORA_TRY_ASSIGN(
       spirv_binary,
@@ -175,9 +175,9 @@ plc::VoidResult SimpleImageComputingHL::constructShaderResources() {
       plc::gpu::DescriptionUnit(m_shaderModuleMap, {"compute"});
 
   m_ptrDescriptorSetLayout = std::make_unique<plc::gpu::DescriptorSetLayout>(
-      m_ptrContext, description_unit);
+      *m_ptrContext, description_unit);
   m_ptrDescriptorSet = std::make_unique<plc::gpu::DescriptorSet>(
-      m_ptrContext, *m_ptrDescriptorSetLayout);
+      *m_ptrContext, *m_ptrDescriptorSetLayout);
 
   std::vector<plc::gpu::BufferDescription> buffer_descriptions;
   buffer_descriptions.emplace_back(
@@ -196,15 +196,15 @@ plc::VoidResult SimpleImageComputingHL::constructShaderResources() {
       plc::ImageLayout::General);
 
   m_ptrDescriptorSet->updateDescriptorSet(
-      m_ptrContext, buffer_descriptions, image_descriptions);
+      *m_ptrContext, buffer_descriptions, image_descriptions);
 
   m_ptrComputePipeline =
-      std::make_unique<plc::Pipeline>(m_ptrContext,
+      std::make_unique<plc::Pipeline>(*m_ptrContext,
                                       description_unit,
                                       *m_ptrDescriptorSetLayout,
                                       plc::PipelineBind::Compute);
   m_ptrComputePipeline->constructComputePipeline(
-      m_ptrContext, m_shaderModuleMap.at("compute"));
+      *m_ptrContext, m_shaderModuleMap.at("compute"));
 
   return plc::ok();
 }

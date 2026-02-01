@@ -89,7 +89,7 @@ Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
 // Create Vulkan device
 #ifdef GPU_DEBUG
     m_ptrDevice = std::make_unique<Device>(
-        m_ptrInstance, m_ptrWindowSurface->getSurface(), m_ptrMessenger);
+        m_ptrInstance, m_ptrWindowSurface->getSurface(), *m_ptrMessenger);
 #else
     m_ptrDevice = std::make_unique<Device>(m_ptrInstance,
                                            m_ptrWindowSurface->getSurface());
@@ -97,12 +97,12 @@ Context::Context(std::shared_ptr<gpu_ui::WindowSurface> ptr_window_surface) {
 
     // Create Vulkan swapchain
     m_ptrSwapchain =
-        std::make_unique<Swapchain>(m_ptrDevice, m_ptrWindowSurface);
+        std::make_unique<Swapchain>(*m_ptrDevice, m_ptrWindowSurface);
   } else {
 // Create Vulkan device
 #ifdef GPU_DEBUG
     m_ptrDevice = std::make_unique<Device>(
-        m_ptrInstance, vk::UniqueSurfaceKHR(nullptr), m_ptrMessenger);
+        m_ptrInstance, vk::UniqueSurfaceKHR(nullptr), *m_ptrMessenger);
 #else
     m_ptrDevice =
         std::make_unique<Device>(m_ptrInstance, vk::UniqueSurfaceKHR(nullptr));
@@ -123,7 +123,7 @@ Context::~Context() {
 void Context::resetSwapchain() {
   m_ptrDevice->waitIdle();
   m_ptrWindowSurface->setWindowSize();
-  m_ptrSwapchain->resetSwapchain(m_ptrDevice, m_ptrWindowSurface);
+  m_ptrSwapchain->resetSwapchain(*m_ptrDevice, m_ptrWindowSurface);
 }
 
 }  // namespace pandora::core::gpu

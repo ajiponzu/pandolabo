@@ -276,13 +276,12 @@ class Multisample {
   Multisample() = default;
   ~Multisample() = default;
 
-  void setSampleCount(const std::unique_ptr<gpu::Context>& ptr_context);
+  void setSampleCount(const gpu::Context& ptr_context);
   void setSampleShading(bool is_enabled);
   void setMinSampleShading(float_t min_sample_shading);
 
   // Fluent interface methods
-  Multisample& withSampleCount(
-      const std::unique_ptr<gpu::Context>& ptr_context) {
+  Multisample& withSampleCount(const gpu::Context& ptr_context) {
     setSampleCount(ptr_context);
     return *this;
   }
@@ -546,7 +545,7 @@ class Pipeline {
       m_bindPoint{};  ///< Pipeline bind point (graphics or compute)
 
  public:
-  Pipeline(const std::unique_ptr<gpu::Context>& ptr_context,
+  Pipeline(const gpu::Context& ptr_context,
            const gpu::DescriptionUnit& description_unit,
            const gpu::DescriptorSetLayout& descriptor_set_layout,
            PipelineBind bind_point);
@@ -574,9 +573,8 @@ class Pipeline {
   /// @brief Construct pipeline for compute shader
   /// @param ptr_context Vulkan context for device operations
   /// @param shader_module Compute shader module
-  void constructComputePipeline(
-      const std::unique_ptr<gpu::Context>& ptr_context,
-      const gpu::ShaderModule& shader_module);
+  void constructComputePipeline(const gpu::Context& ptr_context,
+                                const gpu::ShaderModule& shader_module);
 
   /// @brief Construct pipeline for graphics rendering
   /// @param ptr_context Vulkan context for device operations
@@ -586,11 +584,11 @@ class Pipeline {
   /// @param render_pass Render pass for this pipeline
   /// @param subpass_index Subpass index using this pipeline
   void constructGraphicsPipeline(
-      const std::unique_ptr<gpu::Context>& ptr_context,
+      const gpu::Context& ptr_context,
       const std::unordered_map<std::string, gpu::ShaderModule>&
           shader_module_map,
       const std::vector<std::string>& module_keys,
-      const std::unique_ptr<pipeline::GraphicInfo>& ptr_graphic_info,
+      pipeline::GraphicInfo& ptr_graphic_info,
       const Renderpass& render_pass,
       uint32_t subpass_index);
 };

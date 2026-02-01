@@ -168,7 +168,7 @@ ShaderCompiler::getPushConstantRanges() const {
 
 namespace pandora::core::gpu {
 
-ShaderModule::ShaderModule(const std::unique_ptr<Context>& ptr_context,
+ShaderModule::ShaderModule(const Context& ptr_context,
                            const std::vector<uint32_t>& spirv_binary) {
   {
     ShaderCompiler compiler(spirv_binary);
@@ -184,7 +184,7 @@ ShaderModule::ShaderModule(const std::unique_ptr<Context>& ptr_context,
     shader_module_info.codeSize = spirv_binary.size() * sizeof(uint32_t);
     shader_module_info.pCode = spirv_binary.data();
 
-    m_ptrShaderModule = ptr_context->getPtrDevice()
+    m_ptrShaderModule = ptr_context.getPtrDevice()
                             ->getPtrLogicalDevice()
                             ->createShaderModuleUnique(shader_module_info);
   }

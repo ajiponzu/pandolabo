@@ -15,8 +15,7 @@ namespace pandora::highlevel {
 /// @brief Template transfer utility for upload/readback.
 class ResourceTransfer {
  private:
-  std::reference_wrapper<const std::unique_ptr<pandora::core::gpu::Context>>
-      m_contextOwner;
+  std::reference_wrapper<const pandora::core::gpu::Context> m_contextOwner;
   std::unique_ptr<pandora::core::CommandDriver> m_transferDriver;
   pandora::core::QueueFamilyType m_queueFamilyType =
       pandora::core::QueueFamilyType::Transfer;
@@ -24,10 +23,9 @@ class ResourceTransfer {
   pandora::core::CommandDriver& ensureDriver();
 
  public:
-  explicit ResourceTransfer(
-      const std::unique_ptr<pandora::core::gpu::Context>& ptr_context,
-      pandora::core::QueueFamilyType queue_family_type =
-          pandora::core::QueueFamilyType::Transfer)
+  explicit ResourceTransfer(const pandora::core::gpu::Context& ptr_context,
+                            pandora::core::QueueFamilyType queue_family_type =
+                                pandora::core::QueueFamilyType::Transfer)
       : m_contextOwner(ptr_context), m_queueFamilyType(queue_family_type) {}
 
   /// @brief Upload data to a GPU buffer via staging.

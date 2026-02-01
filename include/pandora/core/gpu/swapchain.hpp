@@ -47,7 +47,7 @@ class Swapchain {
   /// @brief Construct swapchain with device and window surface
   /// @param ptr_device GPU device wrapper pointer
   /// @param ptr_surface GPU-window surface wrapper pointer
-  Swapchain(const std::unique_ptr<Device>& ptr_device,
+  Swapchain(const Device& ptr_device,
             const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
 
   // Rule of Five
@@ -62,7 +62,7 @@ class Swapchain {
   /// @param ptr_device GPU device wrapper pointer
   /// @param ptr_surface GPU-window surface wrapper pointer
   void resetSwapchain(
-      const std::unique_ptr<Device>& ptr_device,
+      const Device& ptr_device,
       const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
 
   /// @brief Get swapchain handle
@@ -137,7 +137,7 @@ class Swapchain {
   /// @param ptr_device GPU device wrapper pointer
   /// @param timeout Timeout in nanoseconds for image acquisition
   pandora::core::VoidResult updateImageIndex(
-      const std::unique_ptr<Device>& ptr_device,
+      const Device& ptr_device,
       uint64_t timeout = std::numeric_limits<uint64_t>::max());
 
   /// @brief Update frame sync image index
@@ -150,7 +150,7 @@ class Swapchain {
   /// @param ptr_device GPU device wrapper pointer
   /// @param ptr_surface GPU-window surface wrapper pointer
   void constructSwapchain(
-      const std::unique_ptr<Device>& ptr_device,
+      const Device& ptr_device,
       const std::shared_ptr<gpu_ui::WindowSurface>& ptr_surface);
 
   /// @brief Clear swapchain resources

@@ -134,7 +134,7 @@ class DescriptorSetLayout {
   /// @brief Construct descriptor set layout from description unit
   /// @param ptr_context Vulkan context for device operations
   /// @param description_unit Description unit containing binding information
-  DescriptorSetLayout(const std::unique_ptr<Context>& ptr_context,
+  DescriptorSetLayout(const Context& ptr_context,
                       const DescriptionUnit& description_unit);
 
   // Rule of Five
@@ -173,7 +173,7 @@ class DescriptorSet {
   /// @brief Construct descriptor set from layout
   /// @param ptr_context Vulkan context for device operations
   /// @param description_set_layout Layout template defining resource structure
-  DescriptorSet(const std::unique_ptr<Context>& ptr_context,
+  DescriptorSet(const Context& ptr_context,
                 const DescriptorSetLayout& description_set_layout);
 
   // Rule of Five
@@ -198,7 +198,7 @@ class DescriptorSet {
   /// @param buffer_descriptions List of buffer descriptors to bind
   /// @param image_descriptions List of image descriptors to bind
   void updateDescriptorSet(
-      const std::unique_ptr<Context>& ptr_context,
+      const Context& ptr_context,
       const std::vector<BufferDescription>& buffer_descriptions,
       const std::vector<ImageDescription>& image_descriptions);
 
@@ -207,7 +207,7 @@ class DescriptorSet {
   /// or description units. Provides efficient memory management by allowing
   /// reuse of descriptor sets with different resource bindings.
   /// @param ptr_context Vulkan context for device operations
-  void freeDescriptorSet(const std::unique_ptr<Context>& ptr_context);
+  void freeDescriptorSet(const Context& ptr_context);
 };
 
 }  // namespace pandora::core::gpu

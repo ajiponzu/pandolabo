@@ -96,10 +96,9 @@ void Rasterization::setLineWidth(float_t line_width) {
   m_info.setLineWidth(line_width);
 }
 
-void Multisample::setSampleCount(
-    const std::unique_ptr<gpu::Context>& ptr_context) {
+void Multisample::setSampleCount(const gpu::Context& ptr_context) {
   m_info.setRasterizationSamples(
-      ptr_context->getPtrDevice()->getMaxUsableSampleCount());
+      ptr_context.getPtrDevice()->getMaxUsableSampleCount());
 }
 
 void Multisample::setSampleShading(bool is_enabled) {
@@ -165,7 +164,7 @@ void DynamicState::appendState(DynamicOption option) {
 
 }  // namespace pipeline
 
-Pipeline::Pipeline(const std::unique_ptr<gpu::Context>& ptr_context,
+Pipeline::Pipeline(const gpu::Context& ptr_context,
                    const gpu::DescriptionUnit& description_unit,
                    const gpu::DescriptorSetLayout& descriptor_set_layout,
                    PipelineBind bind_point) {
@@ -183,7 +182,7 @@ Pipeline::Pipeline(const std::unique_ptr<gpu::Context>& ptr_context,
       | std::ranges::to<std::vector<vk::PushConstantRange>>();
 
   m_ptrPipelineLayout =
-      ptr_context->getPtrDevice()
+      ptr_context.getPtrDevice()
           ->getPtrLogicalDevice()
           ->createPipelineLayoutUnique(
               vk::PipelineLayoutCreateInfo{}
@@ -196,8 +195,7 @@ Pipeline::Pipeline(const std::unique_ptr<gpu::Context>& ptr_context,
 Pipeline::~Pipeline() {}
 
 void Pipeline::constructComputePipeline(
-    const std::unique_ptr<gpu::Context>& ptr_context,
-    const gpu::ShaderModule& shader_module) {
+    const gpu::Context& ptr_context, const gpu::ShaderModule& shader_module) {
   m_queueFamilyType = QueueFamilyType::Compute;
 
   const auto compute_pipeline_info =
@@ -209,17 +207,17 @@ void Pipeline::constructComputePipeline(
                         .setPName(shader_module.getEntryPointName().c_str()));
 
   m_ptrPipeline =
-      ptr_context->getPtrDevice()
+      ptr_context.getPtrDevice()
           ->getPtrLogicalDevice()
           ->createComputePipelineUnique(nullptr, compute_pipeline_info)
           .value;
 }
 
 void Pipeline::constructGraphicsPipeline(
-    const std::unique_ptr<gpu::Context>& ptr_context,
+    const gpu::Context& ptr_context,
     const std::unordered_map<std::string, gpu::ShaderModule>& shader_module_map,
     const std::vector<std::string>& module_keys,
-    const std::unique_ptr<pipeline::GraphicInfo>& ptr_graphic_info,
+    pipeline::GraphicInfo& ptr_graphic_info,
     const Renderpass& render_pass,
     uint32_t subpass_index) {
   m_queueFamilyType = QueueFamilyType::Graphics;
@@ -238,7 +236,7 @@ void Pipeline::constructGraphicsPipeline(
       | std::ranges::to<std::vector<vk::PipelineShaderStageCreateInfo>>();
 
   {
-    auto& vertex_input = ptr_graphic_info->vertex_input;
+    auto& vertex_input = ptr_graphic_info.vertex_input;
     vertex_input.m_info.setVertexBindingDescriptions(vertex_input.m_bindings)
         .setVertexAttributeDescriptions(vertex_input.m_attributes);
 
@@ -246,31 +244,31 @@ void Pipeline::constructGraphicsPipeline(
   }
 
   {
-    auto& color_blend = ptr_graphic_info->color_blend;
+    auto& color_blend = ptr_graphic_info.color_blend;
     color_blend.m_info.setAttachments(color_blend.m_attachments);
 
     pipeline_info.setPColorBlendState(&(color_blend.m_info));
   }
 
   {
-    auto& dynamic_state = ptr_graphic_info->dynamic_state;
+    auto& dynamic_state = ptr_graphic_info.dynamic_state;
     dynamic_state.m_info.setDynamicStates(dynamic_state.m_states);
 
     pipeline_info.setPDynamicState(&(dynamic_state.m_info));
   }
 
   pipeline_info.setStages(shader_stage_infos)
-      .setPInputAssemblyState(&(ptr_graphic_info->input_assembly.m_info))
-      .setPTessellationState(&(ptr_graphic_info->tessellation.m_info))
-      .setPViewportState(&(ptr_graphic_info->viewport_state.m_info))
-      .setPRasterizationState(&(ptr_graphic_info->rasterization.m_info))
-      .setPMultisampleState(&(ptr_graphic_info->multisample.m_info))
-      .setPDepthStencilState(&(ptr_graphic_info->depth_stencil.m_info))
+      .setPInputAssemblyState(&(ptr_graphic_info.input_assembly.m_info))
+      .setPTessellationState(&(ptr_graphic_info.tessellation.m_info))
+      .setPViewportState(&(ptr_graphic_info.viewport_state.m_info))
+      .setPRasterizationState(&(ptr_graphic_info.rasterization.m_info))
+      .setPMultisampleState(&(ptr_graphic_info.multisample.m_info))
+      .setPDepthStencilState(&(ptr_graphic_info.depth_stencil.m_info))
       .setLayout(m_ptrPipelineLayout.get())
       .setRenderPass(render_pass.getRenderPass())
       .setSubpass(subpass_index);
 
-  m_ptrPipeline = ptr_context->getPtrDevice()
+  m_ptrPipeline = ptr_context.getPtrDevice()
                       ->getPtrLogicalDevice()
                       ->createGraphicsPipelineUnique(nullptr, pipeline_info)
                       .value;

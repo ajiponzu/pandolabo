@@ -29,10 +29,10 @@ BasicCube::BasicCube() {
   for (size_t idx = 0u; idx < m_ptrContext->getPtrSwapchain()->getImageCount();
        idx += 1u) {
     m_ptrGraphicCommandDriver.push_back(std::make_unique<plc::CommandDriver>(
-        m_ptrContext, plc::QueueFamilyType::Graphics));
+        *m_ptrContext, plc::QueueFamilyType::Graphics));
   }
   m_ptrTransferCommandDriver.reset(
-      new plc::CommandDriver(m_ptrContext, plc::QueueFamilyType::Transfer));
+      new plc::CommandDriver(*m_ptrContext, plc::QueueFamilyType::Transfer));
 
   m_ptrCubePosition = std::make_unique<CubePosition>();
   m_ptrCubePosition->model = glm::mat4(1.0f);
@@ -43,8 +43,8 @@ BasicCube::BasicCube() {
       glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
 
   m_ptrUniformBuffer = std::make_unique<plc::gpu::Buffer>(
-      plc::createUniformBuffer(m_ptrContext, sizeof(CubePosition)));
-  m_ptrCubePositionMapping = m_ptrUniformBuffer->mapMemory(m_ptrContext);
+      plc::createUniformBuffer(*m_ptrContext, sizeof(CubePosition)));
+  m_ptrCubePositionMapping = m_ptrUniformBuffer->mapMemory(*m_ptrContext);
 
   const auto shader_result = constructShaderResources();
   if (!shader_result.isOk()) {
@@ -79,7 +79,7 @@ void BasicCube::run() {
       return;
     }
 
-    plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
+    plc::gpu::TimelineSemaphore semaphore(*m_ptrContext);
     m_ptrTransferCommandDriver->submit(
         plc::SubmitSemaphoreGroup{}
             .setWaitSemaphores(
@@ -109,13 +109,13 @@ void BasicCube::run() {
     plc::TimelineSemaphoreDriver{}
         .setSemaphores({semaphore})
         .setValues({2u})
-        .wait(m_ptrContext);
+        .wait(*m_ptrContext);
 
     m_ptrTransferCommandDriver->queueWaitIdle();
     m_ptrGraphicCommandDriver.at(0u)->queueWaitIdle();
 
-    m_ptrTransferCommandDriver->resetAllCommandPools(m_ptrContext);
-    m_ptrGraphicCommandDriver.at(0u)->resetAllCommandPools(m_ptrContext);
+    m_ptrTransferCommandDriver->resetAllCommandPools(*m_ptrContext);
+    m_ptrGraphicCommandDriver.at(0u)->resetAllCommandPools(*m_ptrContext);
   }
 
   while (m_ptrWindow->update()) {
@@ -132,7 +132,7 @@ void BasicCube::run() {
 
     const auto& ptr_swapchain = m_ptrContext->getPtrSwapchain();
     const auto update_result =
-        ptr_swapchain->updateImageIndex(m_ptrContext->getPtrDevice());
+        ptr_swapchain->updateImageIndex(*m_ptrContext->getPtrDevice());
     if (!update_result.isOk()) {
       std::println(stderr,
                    "Swapchain update failed: {}",
@@ -142,7 +142,7 @@ void BasicCube::run() {
     m_ptrRenderKit->updateIndex(ptr_swapchain->getImageIndex());
 
     m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
-        ->resetAllCommandPools(m_ptrContext);
+        ->resetAllCommandPools(*m_ptrContext);
     const auto graphic_result = setGraphicCommands();
     if (!graphic_result.isOk()) {
       std::println(stderr,
@@ -171,7 +171,7 @@ void BasicCube::run() {
                  finished_fence);
     const auto present_result =
         m_ptrGraphicCommandDriver.at(ptr_swapchain->getFrameSyncIndex())
-            ->present(m_ptrContext, finished_semaphore);
+            ->present(*m_ptrContext, finished_semaphore);
     if (!present_result.isOk()) {
       std::println(
           stderr, "Present failed: {}", present_result.error().toString());
@@ -182,7 +182,7 @@ void BasicCube::run() {
   }
 
   m_ptrCubePositionMapping = nullptr;
-  m_ptrUniformBuffer->unmapMemory(m_ptrContext);
+  m_ptrUniformBuffer->unmapMemory(*m_ptrContext);
 }
 
 plc::VoidResult BasicCube::constructShaderResources() {
@@ -192,7 +192,7 @@ plc::VoidResult BasicCube::constructShaderResources() {
         plc::io::shader::read("examples/core/basic_cube/cube.vert"));
 
     m_shaderModuleMap["vertex"] =
-        plc::gpu::ShaderModule(m_ptrContext, spirv_binary);
+        plc::gpu::ShaderModule(*m_ptrContext, spirv_binary);
   }
   {
     PANDORA_TRY_ASSIGN(
@@ -200,25 +200,25 @@ plc::VoidResult BasicCube::constructShaderResources() {
         plc::io::shader::read("examples/core/basic_cube/cube.frag"));
 
     m_shaderModuleMap["fragment"] =
-        plc::gpu::ShaderModule(m_ptrContext, spirv_binary);
+        plc::gpu::ShaderModule(*m_ptrContext, spirv_binary);
   }
 
   const auto description_unit =
       plc::gpu::DescriptionUnit(m_shaderModuleMap, {"vertex", "fragment"});
 
   m_ptrDescriptorSetLayout.reset(
-      new plc::gpu::DescriptorSetLayout(m_ptrContext, description_unit));
+      new plc::gpu::DescriptorSetLayout(*m_ptrContext, description_unit));
   m_ptrDescriptorSet.reset(
-      new plc::gpu::DescriptorSet(m_ptrContext, *m_ptrDescriptorSetLayout));
+      new plc::gpu::DescriptorSet(*m_ptrContext, *m_ptrDescriptorSetLayout));
 
   const auto buffer_descriptions = std::vector<plc::gpu::BufferDescription>{
       {description_unit.getDescriptorInfoMap().at("CubePosition"),
        *m_ptrUniformBuffer}};
 
   m_ptrDescriptorSet->updateDescriptorSet(
-      m_ptrContext, buffer_descriptions, {});
+      *m_ptrContext, buffer_descriptions, {});
 
-  m_ptrPipeline.reset(new plc::Pipeline(m_ptrContext,
+  m_ptrPipeline.reset(new plc::Pipeline(*m_ptrContext,
                                         description_unit,
                                         *m_ptrDescriptorSetLayout,
                                         plc::PipelineBind::Graphics));
@@ -240,7 +240,7 @@ void BasicCube::constructRenderpass(const bool is_resized) {
             .setDimension(plc::ImageDimension::v2D);
 
     m_ptrDepthImage.reset(
-        new plc::gpu::Image(m_ptrContext,
+        new plc::gpu::Image(*m_ptrContext,
                             plc::MemoryUsage::GpuOnly,
                             plc::TransferType::Unknown,
                             {plc::ImageUsage::DepthStencilAttachment},
@@ -253,7 +253,7 @@ void BasicCube::constructRenderpass(const bool is_resized) {
             .setMipRange(0u, image_sub_info.mip_levels);
 
     m_ptrDepthImageView.reset(new plc::gpu::ImageView(
-        m_ptrContext, *m_ptrDepthImage, image_view_info));
+        *m_ptrContext, *m_ptrDepthImage, image_view_info));
   }
 
   plc::AttachmentList attachment_list;
@@ -319,13 +319,13 @@ void BasicCube::constructRenderpass(const bool is_resized) {
 
   if (is_resized) {
     m_ptrRenderKit->resetFramebuffer(
-        m_ptrContext,
+        *m_ptrContext,
         attachment_list,
         m_ptrWindow->getWindowSurface()->getWindowSize(),
         true);
   } else {
     m_ptrRenderKit.reset(
-        new plc::RenderKit(m_ptrContext,
+        new plc::RenderKit(*m_ptrContext,
                            attachment_list,
                            subpass_graph,
                            m_ptrWindow->getWindowSurface()->getWindowSize(),
@@ -373,10 +373,10 @@ void BasicCube::constructGraphicPipeline() {
                                .addState(plc::DynamicOption::Scissor))
           .build();
 
-  m_ptrPipeline->constructGraphicsPipeline(m_ptrContext,
+  m_ptrPipeline->constructGraphicsPipeline(*m_ptrContext,
                                            m_shaderModuleMap,
                                            {"vertex", "fragment"},
-                                           ptr_graphic_info,
+                                           *ptr_graphic_info,
                                            m_ptrRenderKit->getRenderpass(),
                                            m_supassIndexMap.at("draw"));
 }
@@ -426,13 +426,13 @@ plc::VoidResult BasicCube::setTransferCommands(
 
       m_ptrVertexBuffer =
           std::make_unique<plc::gpu::Buffer>(plc::createVertexBuffer(
-              m_ptrContext, vertices.size() * sizeof(Vertex)));
+              *m_ptrContext, vertices.size() * sizeof(Vertex)));
 
       auto staging_buffer = plc::createStagingBufferToGPU(
-          m_ptrContext, vertices.size() * sizeof(Vertex));
-      auto mapped_address = staging_buffer.mapMemory(m_ptrContext);
+          *m_ptrContext, vertices.size() * sizeof(Vertex));
+      auto mapped_address = staging_buffer.mapMemory(*m_ptrContext);
       std::memcpy(mapped_address, vertices.data(), staging_buffer.getSize());
-      staging_buffer.unmapMemory(m_ptrContext);
+      staging_buffer.unmapMemory(*m_ptrContext);
 
       staging_buffers.push_back(std::move(staging_buffer));
 
@@ -464,13 +464,13 @@ plc::VoidResult BasicCube::setTransferCommands(
 
       m_ptrIndexBuffer =
           std::make_unique<plc::gpu::Buffer>(plc::createIndexBuffer(
-              m_ptrContext, indices.size() * sizeof(uint32_t)));
+              *m_ptrContext, indices.size() * sizeof(uint32_t)));
 
       auto staging_buffer = plc::createStagingBufferToGPU(
-          m_ptrContext, indices.size() * sizeof(uint32_t));
-      auto mapped_address = staging_buffer.mapMemory(m_ptrContext);
+          *m_ptrContext, indices.size() * sizeof(uint32_t));
+      auto mapped_address = staging_buffer.mapMemory(*m_ptrContext);
       std::memcpy(mapped_address, indices.data(), staging_buffer.getSize());
-      staging_buffer.unmapMemory(m_ptrContext);
+      staging_buffer.unmapMemory(*m_ptrContext);
 
       staging_buffers.push_back(std::move(staging_buffer));
 

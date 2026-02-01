@@ -12,13 +12,11 @@ namespace pandora::highlevel {
 /// @brief Thin wrapper around shader I/O and module creation.
 class ShaderLibrary {
  private:
-  std::reference_wrapper<const std::unique_ptr<pandora::core::gpu::Context>>
-      m_contextOwner;
+  std::reference_wrapper<const pandora::core::gpu::Context> m_contextOwner;
 
  public:
   /// @brief Construct with a context owner.
-  explicit ShaderLibrary(
-      const std::unique_ptr<pandora::core::gpu::Context>& ptr_context)
+  explicit ShaderLibrary(const pandora::core::gpu::Context& ptr_context)
       : m_contextOwner(ptr_context) {}
 
   /// @brief Load shader and create a module.

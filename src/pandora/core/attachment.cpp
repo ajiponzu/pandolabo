@@ -35,10 +35,10 @@ uint32_t AttachmentList::append(const AttachmentDescription& description,
   return static_cast<uint32_t>(m_attachments.size()) - 1u;
 }
 
-void AttachmentList::setBackbufferAttachment(
-    const std::unique_ptr<gpu::Context>& ptr_context, size_t index) {
+void AttachmentList::setBackbufferAttachment(const gpu::Context& ptr_context,
+                                             size_t index) {
   m_attachments[m_backbufferIndex] =
-      ptr_context->getPtrSwapchain()->getImageViews().at(index).get();
+      ptr_context.getPtrSwapchain()->getImageViews().at(index).get();
 }
 
 uint32_t AttachmentList::append(const AttachmentDescription& description,

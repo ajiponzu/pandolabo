@@ -89,8 +89,7 @@ class AttachmentList {
   /// @brief Set backbuffer attachment for presentation
   /// @param ptr_context GPU context for swapchain access
   /// @param index Swapchain image index to use
-  void setBackbufferAttachment(const std::unique_ptr<gpu::Context>& ptr_context,
-                               size_t index);
+  void setBackbufferAttachment(const gpu::Context& ptr_context, size_t index);
 
  private:
   /// @brief Internal method to add attachment with image view
@@ -265,7 +264,7 @@ class Renderpass {
   /// @param ptr_context GPU context for device access
   /// @param attachment_list Collection of attachments used in the render pass
   /// @param subpass_graph Subpass definitions and dependencies
-  Renderpass(const std::unique_ptr<gpu::Context>& ptr_context,
+  Renderpass(const gpu::Context& ptr_context,
              const AttachmentList& attachment_list,
              const SubpassGraph& subpass_graph);
 
@@ -296,7 +295,7 @@ class Framebuffer {
   /// @param render_pass Compatible render pass
   /// @param size Framebuffer dimensions
   /// @param attachments Attachment list containing image views
-  Framebuffer(const std::unique_ptr<gpu::Context>& ptr_context,
+  Framebuffer(const gpu::Context& ptr_context,
               const Renderpass& render_pass,
               const gpu_ui::GraphicalSize<uint32_t>& size,
               const AttachmentList& attachments);
@@ -335,7 +334,7 @@ class RenderKit {
   /// @param subpass_graph Subpass configuration
   /// @param size Framebuffer dimensions
   /// @param is_presented Whether this render kit is used for presentation
-  RenderKit(const std::unique_ptr<gpu::Context>& ptr_context,
+  RenderKit(const gpu::Context& ptr_context,
             AttachmentList& attachment_list,
             const SubpassGraph& subpass_graph,
             const gpu_ui::GraphicalSize<uint32_t>& size,
@@ -378,7 +377,7 @@ class RenderKit {
   /// @param attachment_list Updated attachment list
   /// @param size New framebuffer dimensions
   /// @param is_presented Whether this render kit is used for presentation
-  void resetFramebuffer(const std::unique_ptr<gpu::Context>& ptr_context,
+  void resetFramebuffer(const gpu::Context& ptr_context,
                         AttachmentList& attachment_list,
                         const gpu_ui::GraphicalSize<uint32_t>& size,
                         bool is_presented);

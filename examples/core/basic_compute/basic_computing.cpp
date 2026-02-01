@@ -14,17 +14,17 @@ namespace {
 
 plc::VoidResult set_transfer_secondary_command(
     const plc::TransferCommandBuffer& command_buffer,
-    const std::unique_ptr<plc::gpu::Buffer>& transfered_buffer,
+    plc::gpu::Buffer& transfered_buffer,
     const std::pair<uint32_t, uint32_t> queue_family_indices,
     plc::gpu::Buffer& staging_buffer) {
   command_buffer.begin();
 
-  command_buffer.copyBuffer(staging_buffer, *transfered_buffer);
+  command_buffer.copyBuffer(staging_buffer, transfered_buffer);
 
   // release the ownership of the gpu storage buffer
   PANDORA_TRY_ASSIGN(buffer_barrier,
                      plc::gpu::BufferBarrierBuilder::create()
-                         .setBuffer(*transfered_buffer)
+                         .setBuffer(transfered_buffer)
                          .setSrcAccessFlags({plc::AccessFlag::TransferWrite})
                          .setDstAccessFlags({plc::AccessFlag::ShaderRead,
                                              plc::AccessFlag::ShaderWrite})
@@ -50,25 +50,25 @@ BasicComputing::BasicComputing() {
   m_ptrContext = std::make_unique<plc::gpu::Context>(nullptr);
 
   m_ptrComputeCommandDriver = std::make_unique<plc::CommandDriver>(
-      m_ptrContext, plc::QueueFamilyType::Compute);
+      *m_ptrContext, plc::QueueFamilyType::Compute);
 
   m_ptrTransferCommandDriver = std::make_unique<plc::CommandDriver>(
-      m_ptrContext, plc::QueueFamilyType::Transfer);
+      *m_ptrContext, plc::QueueFamilyType::Transfer);
 
   m_ptrUniformBuffer =
-      plc::createUniqueUniformBuffer(m_ptrContext, sizeof(float_t));
+      plc::createUniqueUniformBuffer(*m_ptrContext, sizeof(float_t));
   const auto uniform_mapped_address =
-      m_ptrUniformBuffer->mapMemory(m_ptrContext);
+      m_ptrUniformBuffer->mapMemory(*m_ptrContext);
   std::fill_n(reinterpret_cast<float_t*>(uniform_mapped_address),
               m_ptrUniformBuffer->getSize() / sizeof(float_t),
               3.14f);
-  m_ptrUniformBuffer->unmapMemory(m_ptrContext);
+  m_ptrUniformBuffer->unmapMemory(*m_ptrContext);
 
   m_ptrInputStorageBuffer = plc::createUniqueStorageBuffer(
-      m_ptrContext, plc::TransferType::TransferDst, sizeof(uint32_t) * 1024u);
+      *m_ptrContext, plc::TransferType::TransferDst, sizeof(uint32_t) * 1024u);
 
   m_ptrOutputStorageBuffer =
-      plc::createUniqueStorageBuffer(m_ptrContext,
+      plc::createUniqueStorageBuffer(*m_ptrContext,
                                      plc::TransferType::TransferSrcDst,
                                      sizeof(uint32_t) * 1024u);
 }
@@ -80,7 +80,7 @@ BasicComputing::~BasicComputing() {
 void BasicComputing::run() {
   try {
     auto result_buffer = plc::createStagingBufferFromGPU(
-        m_ptrContext, m_ptrOutputStorageBuffer->getSize());
+        *m_ptrContext, m_ptrOutputStorageBuffer->getSize());
 
     {
       std::vector<plc::gpu::Buffer> staging_buffers;
@@ -107,7 +107,7 @@ void BasicComputing::run() {
         return;
       }
 
-      plc::gpu::TimelineSemaphore semaphore(m_ptrContext);
+      plc::gpu::TimelineSemaphore semaphore(*m_ptrContext);
 
       m_ptrTransferCommandDriver->submit(
           plc::SubmitSemaphoreGroup{}
@@ -141,24 +141,24 @@ void BasicComputing::run() {
       plc::TimelineSemaphoreDriver{}
           .setSemaphores({semaphore})
           .setValues({2u})
-          .wait(m_ptrContext);
+          .wait(*m_ptrContext);
     }
 
     {
       std::vector<uint32_t> result(result_buffer.getSize() / sizeof(uint32_t));
-      const auto result_mapped_address = result_buffer.mapMemory(m_ptrContext);
+      const auto result_mapped_address = result_buffer.mapMemory(*m_ptrContext);
       std::memcpy(reinterpret_cast<void*>(result.data()),
                   result_mapped_address,
                   result_buffer.getSize());
-      result_buffer.unmapMemory(m_ptrContext);
+      result_buffer.unmapMemory(*m_ptrContext);
 
       for (size_t idx = 0u; const auto& item : result) {
         std::println(stdout, "idx[{}]: {}", idx, item);
       }
     }
 
-    m_ptrComputeCommandDriver->resetAllCommandPools(m_ptrContext);
-    m_ptrTransferCommandDriver->resetAllCommandPools(m_ptrContext);
+    m_ptrComputeCommandDriver->resetAllCommandPools(*m_ptrContext);
+    m_ptrTransferCommandDriver->resetAllCommandPools(*m_ptrContext);
   } catch (const std::exception& e) {
     std::println(stderr, "Exception caught: {}", e.what());
     throw;
@@ -174,12 +174,12 @@ plc::VoidResult BasicComputing::setTransferCommands(
   std::mutex error_mutex;
   std::optional<plc::Error> thread_error;
 
-  m_ptrTransferCommandDriver->constructSecondary(m_ptrContext, 2);
+  m_ptrTransferCommandDriver->constructSecondary(*m_ptrContext, 2);
 
   staging_buffers.push_back(plc::createStagingBufferToGPU(
-      m_ptrContext, m_ptrInputStorageBuffer->getSize()));
+      *m_ptrContext, m_ptrInputStorageBuffer->getSize()));
   staging_buffers.push_back(plc::createStagingBufferToGPU(
-      m_ptrContext, m_ptrOutputStorageBuffer->getSize()));
+      *m_ptrContext, m_ptrOutputStorageBuffer->getSize()));
 
   const auto src_queue_family_index =
       m_ptrContext->getPtrDevice()->getQueueFamilyIndex(
@@ -199,7 +199,7 @@ plc::VoidResult BasicComputing::setTransferCommands(
 
     buffer_lock.lock();
     auto& staging_buffer = staging_buffers[thread_index];
-    const auto mapped_address = staging_buffer.mapMemory(m_ptrContext);
+    const auto mapped_address = staging_buffer.mapMemory(*m_ptrContext);
     buffer_lock.unlock();
 
     std::fill_n(reinterpret_cast<uint32_t*>(mapped_address),
@@ -207,12 +207,12 @@ plc::VoidResult BasicComputing::setTransferCommands(
                 5U);
 
     buffer_lock.lock();
-    staging_buffer.unmapMemory(m_ptrContext);
+    staging_buffer.unmapMemory(*m_ptrContext);
     buffer_lock.unlock();
 
     const auto result = set_transfer_secondary_command(
         command_buffer,
-        m_ptrInputStorageBuffer,
+        *m_ptrInputStorageBuffer,
         {src_queue_family_index, dst_queue_family_index},
         staging_buffer);
     if (!result.isOk()) {
@@ -233,7 +233,7 @@ plc::VoidResult BasicComputing::setTransferCommands(
 
     buffer_lock.lock();
     auto& staging_buffer = staging_buffers[thread_index];
-    const auto mapped_address = staging_buffer.mapMemory(m_ptrContext);
+    const auto mapped_address = staging_buffer.mapMemory(*m_ptrContext);
     buffer_lock.unlock();
 
     std::fill_n(reinterpret_cast<uint32_t*>(mapped_address),
@@ -241,12 +241,12 @@ plc::VoidResult BasicComputing::setTransferCommands(
                 5U);
 
     buffer_lock.lock();
-    staging_buffer.unmapMemory(m_ptrContext);
+    staging_buffer.unmapMemory(*m_ptrContext);
     buffer_lock.unlock();
 
     const auto result = set_transfer_secondary_command(
         command_buffer,
-        m_ptrOutputStorageBuffer,
+        *m_ptrOutputStorageBuffer,
         {src_queue_family_index, dst_queue_family_index},
         staging_buffer);
     if (!result.isOk()) {
@@ -283,16 +283,16 @@ plc::VoidResult BasicComputing::constructShaderResources() {
       plc::io::shader::read("examples/core/basic_compute/basic.comp"));
 
   m_shaderModuleMap["compute"] =
-      plc::gpu::ShaderModule(m_ptrContext, spirv_binary);
+      plc::gpu::ShaderModule(*m_ptrContext, spirv_binary);
 
   const auto description_unit =
       plc::gpu::DescriptionUnit(m_shaderModuleMap, {"compute"});
 
   m_ptrDescriptorSetLayout = std::make_unique<plc::gpu::DescriptorSetLayout>(
-      m_ptrContext, description_unit);
+      *m_ptrContext, description_unit);
 
   m_ptrDescriptorSet = std::make_unique<plc::gpu::DescriptorSet>(
-      m_ptrContext, *m_ptrDescriptorSetLayout);
+      *m_ptrContext, *m_ptrDescriptorSetLayout);
 
   std::vector<plc::gpu::BufferDescription> buffer_descriptions;
   buffer_descriptions.emplace_back(
@@ -306,15 +306,15 @@ plc::VoidResult BasicComputing::constructShaderResources() {
       *m_ptrInputStorageBuffer);
 
   m_ptrDescriptorSet->updateDescriptorSet(
-      m_ptrContext, buffer_descriptions, {});
+      *m_ptrContext, buffer_descriptions, {});
 
   m_ptrComputePipeline =
-      std::make_unique<plc::Pipeline>(m_ptrContext,
+      std::make_unique<plc::Pipeline>(*m_ptrContext,
                                       description_unit,
                                       *m_ptrDescriptorSetLayout,
                                       plc::PipelineBind::Compute);
   m_ptrComputePipeline->constructComputePipeline(
-      m_ptrContext, m_shaderModuleMap.at("compute"));
+      *m_ptrContext, m_shaderModuleMap.at("compute"));
 
   return plc::ok();
 }

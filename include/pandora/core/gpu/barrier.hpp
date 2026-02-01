@@ -289,7 +289,7 @@ class ImageBarrier {
                const ImageViewInfo& image_view_info,
                uint32_t src_queue_family = 0u,
                uint32_t dst_queue_family = 0u);
-  ImageBarrier(const std::unique_ptr<Context>& ptr_context,
+  ImageBarrier(const Context& ptr_context,
                const std::vector<AccessFlag>& src_access_flags,
                const std::vector<AccessFlag>& dst_access_flags,
                const std::vector<PipelineStage>& src_stages,
@@ -418,13 +418,10 @@ class ImageBarrierBuilder {
   }
 
   /// @brief Build and return the final ImageBarrier instance
-  /// @param ptr_context GPU context pointer (required for context-based
-  /// construction)
+  /// @details Requires image + ImageViewInfo to be set
   /// @return Result containing ImageBarrier instance or error
-  Result<ImageBarrier> build(
-      const std::unique_ptr<Context>& ptr_context = nullptr) {
+  Result<ImageBarrier> build() {
     if (m_image.has_value() && m_imageViewInfo) {
-      // Build with image and image view info
       return ImageBarrier(m_image->get(),
                           m_srcAccessFlags,
                           m_dstAccessFlags,
@@ -436,22 +433,37 @@ class ImageBarrierBuilder {
                           m_srcQueueFamily,
                           m_dstQueueFamily);
     }
-    if (ptr_context) {
-      // Build with context
-      return ImageBarrier(ptr_context,
+
+    return errorValidation(
+        "Image and ImageViewInfo must be provided for building ImageBarrier");
+  }
+
+  /// @brief Build and return the final ImageBarrier instance with context
+  /// @param ptr_context GPU context reference (required for backbuffer)
+  /// @return Result containing ImageBarrier instance or error
+  Result<ImageBarrier> build(const Context& ptr_context) {
+    if (m_image.has_value() && m_imageViewInfo) {
+      return ImageBarrier(m_image->get(),
                           m_srcAccessFlags,
                           m_dstAccessFlags,
                           m_srcStages,
                           m_dstStages,
                           m_oldLayout,
                           m_newLayout,
+                          *m_imageViewInfo,
                           m_srcQueueFamily,
                           m_dstQueueFamily);
     }
 
-    return errorValidation(
-        "Either image with ImageViewInfo or context parameter must be "
-        "provided for building ImageBarrier");
+    return ImageBarrier(ptr_context,
+                        m_srcAccessFlags,
+                        m_dstAccessFlags,
+                        m_srcStages,
+                        m_dstStages,
+                        m_oldLayout,
+                        m_newLayout,
+                        m_srcQueueFamily,
+                        m_dstQueueFamily);
   }
 };
 

@@ -29,9 +29,9 @@ BasicCubeHL::BasicCubeHL() {
     constructRenderpass(true);
   });
 
-  m_ptrRenderer = std::make_unique<plh::Renderer>(m_ptrWindow, m_ptrContext);
+  m_ptrRenderer = std::make_unique<plh::Renderer>(*m_ptrWindow, *m_ptrContext);
   m_ptrTransfer = std::make_unique<plh::ResourceTransfer>(
-      m_ptrContext, plc::QueueFamilyType::Graphics);
+      *m_ptrContext, plc::QueueFamilyType::Graphics);
 
   m_ptrCubePosition = std::make_unique<CubePosition>();
   m_ptrCubePosition->model = glm::mat4(1.0f);
@@ -42,8 +42,8 @@ BasicCubeHL::BasicCubeHL() {
       glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
 
   m_ptrUniformBuffer = std::make_unique<plc::gpu::Buffer>(
-      plc::createUniformBuffer(m_ptrContext, sizeof(CubePosition)));
-  m_ptrCubePositionMapping = m_ptrUniformBuffer->mapMemory(m_ptrContext);
+      plc::createUniformBuffer(*m_ptrContext, sizeof(CubePosition)));
+  m_ptrCubePositionMapping = m_ptrUniformBuffer->mapMemory(*m_ptrContext);
 
   const auto shader_result = constructShaderResources();
   if (!shader_result.isOk()) {
@@ -73,7 +73,7 @@ BasicCubeHL::~BasicCubeHL() {
     m_ptrContext->getPtrDevice()->waitIdle();
   }
   if (m_ptrUniformBuffer && m_ptrCubePositionMapping) {
-    m_ptrUniformBuffer->unmapMemory(m_ptrContext);
+    m_ptrUniformBuffer->unmapMemory(*m_ptrContext);
   }
 }
 
@@ -129,7 +129,7 @@ void BasicCubeHL::updateUniforms() {
 }
 
 plc::VoidResult BasicCubeHL::constructShaderResources() {
-  plh::ShaderLibrary shader_library(m_ptrContext);
+  plh::ShaderLibrary shader_library(*m_ptrContext);
 
   PANDORA_TRY_ASSIGN(vertex_shader,
                      shader_library.load("examples/core/basic_cube/cube.vert"));
@@ -143,9 +143,9 @@ plc::VoidResult BasicCubeHL::constructShaderResources() {
       plc::gpu::DescriptionUnit(m_shaderModuleMap, {"vertex", "fragment"});
 
   m_ptrDescriptorSetLayout = std::make_unique<plc::gpu::DescriptorSetLayout>(
-      m_ptrContext, description_unit);
+      *m_ptrContext, description_unit);
   m_ptrDescriptorSet = std::make_unique<plc::gpu::DescriptorSet>(
-      m_ptrContext, *m_ptrDescriptorSetLayout);
+      *m_ptrContext, *m_ptrDescriptorSetLayout);
 
   std::vector<plc::gpu::BufferDescription> buffer_descriptions;
   buffer_descriptions.emplace_back(
@@ -153,9 +153,9 @@ plc::VoidResult BasicCubeHL::constructShaderResources() {
       *m_ptrUniformBuffer);
 
   m_ptrDescriptorSet->updateDescriptorSet(
-      m_ptrContext, buffer_descriptions, {});
+      *m_ptrContext, buffer_descriptions, {});
 
-  m_ptrPipeline = std::make_unique<plc::Pipeline>(m_ptrContext,
+  m_ptrPipeline = std::make_unique<plc::Pipeline>(*m_ptrContext,
                                                   description_unit,
                                                   *m_ptrDescriptorSetLayout,
                                                   plc::PipelineBind::Graphics);
@@ -177,7 +177,7 @@ void BasicCubeHL::constructRenderpass(bool is_resized) {
             .setDimension(plc::ImageDimension::v2D);
 
     m_ptrDepthImage = std::make_unique<plc::gpu::Image>(
-        m_ptrContext,
+        *m_ptrContext,
         plc::MemoryUsage::GpuOnly,
         plc::TransferType::Unknown,
         std::vector<plc::ImageUsage>{plc::ImageUsage::DepthStencilAttachment},
@@ -190,7 +190,7 @@ void BasicCubeHL::constructRenderpass(bool is_resized) {
             .setMipRange(0u, image_sub_info.mip_levels);
 
     m_ptrDepthImageView = std::make_unique<plc::gpu::ImageView>(
-        m_ptrContext, *m_ptrDepthImage, image_view_info);
+        *m_ptrContext, *m_ptrDepthImage, image_view_info);
   }
 
   plc::AttachmentList attachment_list;
@@ -254,13 +254,13 @@ void BasicCubeHL::constructRenderpass(bool is_resized) {
 
   if (is_resized) {
     m_ptrRenderKit->resetFramebuffer(
-        m_ptrContext,
+        *m_ptrContext,
         attachment_list,
         m_ptrWindow->getWindowSurface()->getWindowSize(),
         true);
   } else {
     m_ptrRenderKit = std::make_unique<plc::RenderKit>(
-        m_ptrContext,
+        *m_ptrContext,
         attachment_list,
         subpass_graph,
         m_ptrWindow->getWindowSurface()->getWindowSize(),
@@ -311,10 +311,10 @@ void BasicCubeHL::constructGraphicPipeline() {
                                .addState(plc::DynamicOption::Scissor))
           .build();
 
-  m_ptrPipeline->constructGraphicsPipeline(m_ptrContext,
+  m_ptrPipeline->constructGraphicsPipeline(*m_ptrContext,
                                            m_shaderModuleMap,
                                            {"vertex", "fragment"},
-                                           ptr_graphic_info,
+                                           *ptr_graphic_info,
                                            m_ptrRenderKit->getRenderpass(),
                                            m_subpassIndexMap.at("draw"));
 }
@@ -336,9 +336,9 @@ plc::VoidResult BasicCubeHL::uploadGeometry() {
       1u, 5u, 6u, 6u, 2u, 1u, 3u, 2u, 6u, 6u, 7u, 3u, 0u, 1u, 5u, 5u, 4u, 0u};
 
   m_ptrVertexBuffer = std::make_unique<plc::gpu::Buffer>(
-      plc::createVertexBuffer(m_ptrContext, vertices.size() * sizeof(Vertex)));
+      plc::createVertexBuffer(*m_ptrContext, vertices.size() * sizeof(Vertex)));
   m_ptrIndexBuffer = std::make_unique<plc::gpu::Buffer>(
-      plc::createIndexBuffer(m_ptrContext, indices.size() * sizeof(uint32_t)));
+      plc::createIndexBuffer(*m_ptrContext, indices.size() * sizeof(uint32_t)));
 
   PANDORA_TRY(m_ptrTransfer->uploadBuffer(
       *m_ptrVertexBuffer,

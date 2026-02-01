@@ -49,7 +49,7 @@ class Device {
          const vk::UniqueSurfaceKHR& ptr_window_surface
 #ifdef GPU_DEBUG
          ,
-         const std::unique_ptr<debug::Messenger>& ptr_messenger
+         const debug::Messenger& ptr_messenger
 #endif
   );
 
@@ -102,7 +102,7 @@ class Device {
   /// @param ptr_messenger Debug messenger for validation (debug builds only)
   void constructLogicalDevice(
 #ifdef GPU_DEBUG
-      const std::unique_ptr<debug::Messenger>& ptr_messenger
+      const debug::Messenger& ptr_messenger
 #endif
   );
 };

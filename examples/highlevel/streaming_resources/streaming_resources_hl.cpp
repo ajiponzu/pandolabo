@@ -55,9 +55,9 @@ StreamingResourcesHL::StreamingResourcesHL()
   for (size_t idx = 0u; idx < m_ptrContext->getPtrSwapchain()->getImageCount();
        idx += 1u) {
     m_ptrGraphicCommandDriver.push_back(std::make_unique<plc::CommandDriver>(
-        m_ptrContext, plc::QueueFamilyType::Graphics));
+        *m_ptrContext, plc::QueueFamilyType::Graphics));
     m_ptrTransferCommandDriver.push_back(std::make_unique<plc::CommandDriver>(
-        m_ptrContext, plc::QueueFamilyType::Transfer));
+        *m_ptrContext, plc::QueueFamilyType::Transfer));
   }
   std::println("Command Drivers created successfully.");
 
@@ -68,9 +68,9 @@ StreamingResourcesHL::StreamingResourcesHL()
   const size_t buffer_size = sizeof(Vertex) * MAX_TRIANGLES * 3u;
   for (size_t idx = 0u; idx < frame_count; idx += 1u) {
     m_ptrVertexBuffers.push_back(
-        plc::createUniqueVertexBuffer(m_ptrContext, buffer_size));
+        plc::createUniqueVertexBuffer(*m_ptrContext, buffer_size));
     m_stagingBuffers.push_back(
-        plc::createStagingBufferToGPU(m_ptrContext, buffer_size));
+        plc::createStagingBufferToGPU(*m_ptrContext, buffer_size));
   }
   std::println("Buffers created successfully.");
 
@@ -134,7 +134,7 @@ void StreamingResourcesHL::run() {
 }
 
 plc::VoidResult StreamingResourcesHL::constructShaderResources() {
-  plh::ShaderLibrary shader_library(m_ptrContext);
+  plh::ShaderLibrary shader_library(*m_ptrContext);
 
   PANDORA_TRY_ASSIGN(
       vertex_shader,
@@ -150,11 +150,11 @@ plc::VoidResult StreamingResourcesHL::constructShaderResources() {
       plc::gpu::DescriptionUnit(m_shaderModuleMap, {"vertex", "fragment"});
 
   m_ptrDescriptorSetLayout = std::make_unique<plc::gpu::DescriptorSetLayout>(
-      m_ptrContext, description_unit);
+      *m_ptrContext, description_unit);
   m_ptrDescriptorSet = std::make_unique<plc::gpu::DescriptorSet>(
-      m_ptrContext, *m_ptrDescriptorSetLayout);
+      *m_ptrContext, *m_ptrDescriptorSetLayout);
 
-  m_ptrPipeline = std::make_unique<plc::Pipeline>(m_ptrContext,
+  m_ptrPipeline = std::make_unique<plc::Pipeline>(*m_ptrContext,
                                                   description_unit,
                                                   *m_ptrDescriptorSetLayout,
                                                   plc::PipelineBind::Graphics);
@@ -202,13 +202,13 @@ void StreamingResourcesHL::constructRenderpass(const bool is_resized) {
 
   if (is_resized) {
     m_ptrRenderKit->resetFramebuffer(
-        m_ptrContext,
+        *m_ptrContext,
         attachment_list,
         m_ptrWindow->getWindowSurface()->getWindowSize(),
         true);
   } else {
     m_ptrRenderKit = std::make_unique<plc::RenderKit>(
-        m_ptrContext,
+        *m_ptrContext,
         attachment_list,
         subpass_graph,
         m_ptrWindow->getWindowSurface()->getWindowSize(),
@@ -255,10 +255,10 @@ void StreamingResourcesHL::constructGraphicPipeline() {
                                .addState(plc::DynamicOption::Scissor))
           .build();
 
-  m_ptrPipeline->constructGraphicsPipeline(m_ptrContext,
+  m_ptrPipeline->constructGraphicsPipeline(*m_ptrContext,
                                            m_shaderModuleMap,
                                            {"vertex", "fragment"},
-                                           ptr_graphic_info,
+                                           *ptr_graphic_info,
                                            m_ptrRenderKit->getRenderpass(),
                                            m_subpassIndexMap.at("main"));
 }
@@ -293,13 +293,13 @@ plc::VoidResult StreamingResourcesHL::updateVertexData() {
   auto& transfer_driver = m_ptrTransferCommandDriver[frame_index];
 
   size_t vertex_data_size = vertices.size() * sizeof(Vertex);
-  auto mapped_address = staging_buffer.mapMemory(m_ptrContext);
+  auto mapped_address = staging_buffer.mapMemory(*m_ptrContext);
   std::memcpy(mapped_address, vertices.data(), vertex_data_size);
-  staging_buffer.unmapMemory(m_ptrContext);
+  staging_buffer.unmapMemory(*m_ptrContext);
 
   if (!m_currentTimelineSemaphore) {
     m_currentTimelineSemaphore =
-        std::make_unique<plc::gpu::TimelineSemaphore>(m_ptrContext);
+        std::make_unique<plc::gpu::TimelineSemaphore>(*m_ptrContext);
     m_currentSemaphoreValue = 0u;
   }
 
@@ -309,7 +309,7 @@ plc::VoidResult StreamingResourcesHL::updateVertexData() {
         "Timeline Semaphore value ({}) exceeded threshold, recreating...",
         m_currentSemaphoreValue);
     m_currentTimelineSemaphore =
-        std::make_unique<plc::gpu::TimelineSemaphore>(m_ptrContext);
+        std::make_unique<plc::gpu::TimelineSemaphore>(*m_ptrContext);
     m_currentSemaphoreValue = 0u;
   }
 
@@ -357,7 +357,7 @@ plc::VoidResult StreamingResourcesHL::updateVertexData() {
 plc::VoidResult StreamingResourcesHL::setGraphicCommands() {
   const auto& ptr_swapchain = m_ptrContext->getPtrSwapchain();
   const auto update_result =
-      ptr_swapchain->updateImageIndex(m_ptrContext->getPtrDevice());
+      ptr_swapchain->updateImageIndex(*m_ptrContext->getPtrDevice());
   if (!update_result.isOk()) {
     return update_result.error();
   }
@@ -445,7 +445,7 @@ plc::VoidResult StreamingResourcesHL::setGraphicCommands() {
     plc::TimelineSemaphoreDriver{}
         .setSemaphores({*m_currentTimelineSemaphore})
         .setValues({m_currentSemaphoreValue})
-        .wait(m_ptrContext);
+        .wait(*m_ptrContext);
   } else {
     m_ptrGraphicCommandDriver.at(frame_index)
         ->submit(plc::SubmitSemaphoreGroup{}
@@ -464,7 +464,7 @@ plc::VoidResult StreamingResourcesHL::setGraphicCommands() {
   }
 
   const auto present_result = m_ptrGraphicCommandDriver.at(frame_index)
-                                  ->present(m_ptrContext, finished_semaphore);
+                                  ->present(*m_ptrContext, finished_semaphore);
   if (!present_result.isOk()) {
     return present_result.error();
   }

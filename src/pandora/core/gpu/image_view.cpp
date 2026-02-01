@@ -24,7 +24,7 @@ vk::ImageViewType get_image_view_type(
 
 namespace pandora::core::gpu {
 
-ImageView::ImageView(const std::unique_ptr<Context>& ptr_context,
+ImageView::ImageView(const Context& ptr_context,
                      const Image& image,
                      const ImageViewInfo& image_view_info) {
   const auto create_info =
@@ -47,7 +47,7 @@ ImageView::ImageView(const std::unique_ptr<Context>& ptr_context,
           .setImage(image.getImage());
 
   m_ptrImageView =
-      ptr_context->getPtrDevice()->getPtrLogicalDevice()->createImageViewUnique(
+      ptr_context.getPtrDevice()->getPtrLogicalDevice()->createImageViewUnique(
           create_info);
   m_ptrImageViewInfo = std::make_unique<ImageViewInfo>(image_view_info);
 }

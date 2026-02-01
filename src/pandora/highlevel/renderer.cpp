@@ -2,11 +2,10 @@
 
 namespace pandora::highlevel {
 
-Renderer::Renderer(
-    const std::unique_ptr<pandora::core::ui::Window>& ptr_window,
-    const std::unique_ptr<pandora::core::gpu::Context>& ptr_context)
+Renderer::Renderer(const pandora::core::ui::Window& ptr_window,
+                   const pandora::core::gpu::Context& ptr_context)
     : m_windowOwner(ptr_window), m_contextOwner(ptr_context) {
-  const auto& swapchain = m_contextOwner.get()->getPtrSwapchain();
+  const auto& swapchain = m_contextOwner.get().getPtrSwapchain();
   if (!swapchain) {
     return;
   }
@@ -20,13 +19,13 @@ Renderer::Renderer(
 
 pandora::core::Result<FrameContext> Renderer::beginFrame() {
   const auto& ptr_context = m_contextOwner.get();
-  const auto& ptr_swapchain = ptr_context->getPtrSwapchain();
+  const auto& ptr_swapchain = ptr_context.getPtrSwapchain();
   if (!ptr_swapchain) {
     return pandora::core::Error::runtime("Swapchain not initialized");
   }
 
   const auto update_result =
-      ptr_swapchain->updateImageIndex(ptr_context->getPtrDevice());
+      ptr_swapchain->updateImageIndex(*ptr_context.getPtrDevice());
   if (!update_result.isOk()) {
     return update_result.error().withContext("Renderer::beginFrame");
   }
@@ -59,7 +58,7 @@ pandora::core::VoidResult Renderer::record(FrameContext& frame,
 
 pandora::core::VoidResult Renderer::endFrame(FrameContext& frame) {
   const auto& ptr_context = m_contextOwner.get();
-  const auto& ptr_swapchain = ptr_context->getPtrSwapchain();
+  const auto& ptr_swapchain = ptr_context.getPtrSwapchain();
 
   const auto image_semaphore = ptr_swapchain->getImageAvailableSemaphore();
   const auto finished_semaphore = ptr_swapchain->getFinishedSemaphore();

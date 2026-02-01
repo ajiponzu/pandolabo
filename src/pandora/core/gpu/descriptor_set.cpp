@@ -5,10 +5,9 @@
 namespace pandora::core::gpu {
 
 DescriptorSet::DescriptorSet(
-    const std::unique_ptr<Context>& ptr_context,
+    const Context& ptr_context,
     const DescriptorSetLayout& description_set_layout) {
-  const auto& ptr_vk_device =
-      ptr_context->getPtrDevice()->getPtrLogicalDevice();
+  const auto& ptr_vk_device = ptr_context.getPtrDevice()->getPtrLogicalDevice();
 
   m_ptrDescriptorPool = ptr_vk_device->createDescriptorPoolUnique(
       description_set_layout.getDescriptorPoolInfo());
@@ -25,7 +24,7 @@ DescriptorSet::DescriptorSet(
 DescriptorSet::~DescriptorSet() {}
 
 void DescriptorSet::updateDescriptorSet(
-    const std::unique_ptr<Context>& ptr_context,
+    const Context& ptr_context,
     const std::vector<BufferDescription>& buffer_descriptions,
     const std::vector<ImageDescription>& image_descriptions) {
   std::vector<vk::WriteDescriptorSet> write_descriptor_sets;
@@ -55,13 +54,12 @@ void DescriptorSet::updateDescriptorSet(
             .setDstSet(m_ptrDescriptorSet.get()));
   }
 
-  ptr_context->getPtrDevice()->getPtrLogicalDevice()->updateDescriptorSets(
+  ptr_context.getPtrDevice()->getPtrLogicalDevice()->updateDescriptorSets(
       write_descriptor_sets, nullptr);
 }
 
-void DescriptorSet::freeDescriptorSet(
-    const std::unique_ptr<Context>& ptr_context) {
-  ptr_context->getPtrDevice()->getPtrLogicalDevice()->freeDescriptorSets(
+void DescriptorSet::freeDescriptorSet(const Context& ptr_context) {
+  ptr_context.getPtrDevice()->getPtrLogicalDevice()->freeDescriptorSets(
       m_ptrDescriptorPool.get(), m_ptrDescriptorSet.get());
 }
 

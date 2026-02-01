@@ -366,8 +366,7 @@ class CommandDriver {
   /// @brief Construct command driver for specified queue family
   /// @param ptr_context Vulkan context for device operations
   /// @param queue_family Queue family type to use for commands
-  CommandDriver(const std::unique_ptr<gpu::Context>& ptr_context,
-                QueueFamilyType queue_family);
+  CommandDriver(const gpu::Context& ptr_context, QueueFamilyType queue_family);
 
   // Rule of Five
   ~CommandDriver();
@@ -387,7 +386,7 @@ class CommandDriver {
   /// @param ptr_context Vulkan context for device operations
   /// @param required_secondary_num Number of secondary command buffers to
   /// allocate
-  void constructSecondary(const std::unique_ptr<gpu::Context>& ptr_context,
+  void constructSecondary(const gpu::Context& ptr_context,
                           uint32_t required_secondary_num = 1u);
 
   /// @brief Reset all command buffers to initial state
@@ -395,8 +394,7 @@ class CommandDriver {
 
   /// @brief Reset all command pools
   /// @param ptr_context Vulkan context for device operations
-  void resetAllCommandPools(
-      const std::unique_ptr<gpu::Context>& ptr_context) const;
+  void resetAllCommandPools(const gpu::Context& ptr_context) const;
 
   /// @brief Integrate secondary commands into primary command buffer
   /// If secondary command buffers are used, this function must be called
@@ -412,7 +410,7 @@ class CommandDriver {
   /// @brief Present rendered image to display
   /// @param ptr_context Vulkan context for presentation
   /// @param wait_semaphore Semaphore to wait for before presentation
-  VoidResult present(const std::unique_ptr<gpu::Context>& ptr_context,
+  VoidResult present(const gpu::Context& ptr_context,
                      const gpu::BinarySemaphore& wait_semaphore) const;
 
   /// @brief Wait for all operations on this queue to complete

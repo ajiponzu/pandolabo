@@ -19,16 +19,14 @@ class Renderer {
       pandora::core::GraphicCommandBuffer&)>;
 
  private:
-  std::reference_wrapper<const std::unique_ptr<pandora::core::ui::Window>>
-      m_windowOwner;
-  std::reference_wrapper<const std::unique_ptr<pandora::core::gpu::Context>>
-      m_contextOwner;
+  std::reference_wrapper<const pandora::core::ui::Window> m_windowOwner;
+  std::reference_wrapper<const pandora::core::gpu::Context> m_contextOwner;
   std::vector<std::unique_ptr<pandora::core::CommandDriver>> m_graphicDrivers;
   pandora::core::RenderKit* m_ptrRenderKit = nullptr;
 
  public:
-  Renderer(const std::unique_ptr<pandora::core::ui::Window>& ptr_window,
-           const std::unique_ptr<pandora::core::gpu::Context>& ptr_context);
+  Renderer(const pandora::core::ui::Window& ptr_window,
+           const pandora::core::gpu::Context& ptr_context);
 
   /// @brief Set render kit used for render pass begin/end convenience.
   void setRenderKit(pandora::core::RenderKit& render_kit) {
