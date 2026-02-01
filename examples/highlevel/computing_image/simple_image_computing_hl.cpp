@@ -267,8 +267,8 @@ plc::VoidResult SimpleImageComputingHL::recordCompute(
   command_buffer.bindDescriptorSet(*m_ptrComputePipeline, *m_ptrDescriptorSet);
 
   const auto& image_size = m_ptrStorageImage->getGraphicalSize();
-  const auto x_groups = (image_size.width + 15u) / 16u;
-  const auto y_groups = (image_size.height + 15u) / 16u;
+  const auto x_groups = image_size.width / 4u;
+  const auto y_groups = image_size.height / 4u;
   command_buffer.compute(plc::ComputeWorkGroupSize{x_groups, y_groups, 1u});
 
   PANDORA_TRY_ASSIGN(read_barrier,

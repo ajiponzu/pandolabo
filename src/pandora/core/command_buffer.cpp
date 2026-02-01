@@ -99,8 +99,6 @@ void TransferCommandBuffer::copyBufferToImage(
                   .setBaseArrayLayer(image_view_info.base_array_layer)
                   .setLayerCount(image_view_info.array_layers))
           .setImageOffset({0u, 0u, 0u})
-          .setBufferRowLength(graphical_size.width)
-          .setBufferImageHeight(graphical_size.height)
           .setImageExtent(vk_helper::getExtent3D(graphical_size));
 
   vk::ImageLayout vk_image_layout = vk_helper::getImageLayout(image_layout);
@@ -131,8 +129,6 @@ void TransferCommandBuffer::copyImageToBuffer(
                   .setBaseArrayLayer(image_view_info.base_array_layer)
                   .setLayerCount(image_view_info.array_layers))
           .setImageOffset({0u, 0u, 0u})
-          .setBufferRowLength(graphical_size.width)
-          .setBufferImageHeight(graphical_size.height)
           .setImageExtent(vk_helper::getExtent3D(graphical_size));
 
   vk::ImageLayout vk_image_layout = vk_helper::getImageLayout(image_layout);
